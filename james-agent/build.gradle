@@ -1,0 +1,57 @@
+/*
+ * Copyright 2017 TomTom International B.V.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'jacoco'
+
+sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes 'Premain-Class': 'com.tomtom.james.agent.Agent',
+                'Can-Redefine-Classes': true,
+                'Can-Retransform-Classes': true
+    }
+}
+
+shadowJar {
+    relocate 'com.google', 'com.tomtom.james.repackaged.com.google'
+    relocate 'com.fasterxml.jackson', 'com.tomtom.james.repackaged.com.fasterxml.jackson'
+    relocate 'net.bytebuddy', 'com.tomtom.james.repackaged.net.bytebuddy'
+    relocate 'org.yaml.snakeyaml', 'com.tomtom.james.repackaged.org.yaml.snakeyaml'
+}
+
+dependencies {
+    compile project(':james-agent-common')
+
+    compile(group: 'com.google.guava', name: 'guava', version: versions.guava) {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
+        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
+    }
+    compile group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
+    compile group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
+    compile group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddy
+
+    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+    testRuntime group: 'org.objenesis',  name: 'objenesis', version: versions.objenesis
+}

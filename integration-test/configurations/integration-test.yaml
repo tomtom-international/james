@@ -1,0 +1,18 @@
+logLevel: trace
+
+plugins:
+  includeFiles:
+    - ../james-controller-consul/build/libs/james-controller-consul-all.jar
+    - ../james-controller-webservice/build/libs/james-controller-webservice-all.jar
+    - ../james-publisher-aws-kinesis/build/libs/james-publisher-aws-kinesis-all.jar
+
+controllers:
+  - id: james.controller.webservice
+    properties:
+      port: 7007
+
+publishers:
+  - id: james.publisher.console
+    properties:
+      prettifyJSON: true
+  - id: integrationTest.publisher

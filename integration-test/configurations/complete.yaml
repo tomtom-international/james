@@ -1,0 +1,73 @@
+quiet: false
+logLevel: trace
+
+plugins:
+  includeDirectories:
+#    - ./plugins
+  includeFiles:
+    - ../james-controller-consul/build/libs/james-controller-consul-all.jar
+    - ../james-controller-webservice/build/libs/james-controller-webservice-all.jar
+    - ../james-publisher-aws-kinesis/build/libs/james-publisher-aws-kinesis-all.jar
+
+controllers:
+  - id: james.controller.webservice
+    properties:
+      port: 7007
+      minThreads: 1
+      maxThreads: 8
+#  - id: james.controller.consul
+#    properties:
+#      host: 192.168.99.100
+#      port: 8500
+#      folderPath: james/test/information-points
+
+publishers:
+  - id: james.publisher.console
+    properties:
+      prettifyJSON: true
+#  - id: james.publisher.file
+#    properties:
+#      path: ./filepublisher.out
+#  - id: james.publisher.kinesis
+#    asyncWorkers: 4
+#    maxAsyncJobQueueCapacity: 20000
+#    properties:
+#      stream: stream
+#      partitionKey: partitionkey
+#      elasticSearch:
+#        eventType: james
+#        environment: test-env
+#      producer:
+#        aggregationEnabled: true
+#        aggregationMaxCount: 4294967295
+#        aggregationMaxSize: 51200
+#        #cloudwatchEndpoint: cloudwatch-endpoint
+#        cloudwatchPort: 443
+#        collectionMaxCount: 500
+#        collectionMaxSize: 5242880
+#        connectTimeout: 6000
+#        enableCoreDumps: false
+#        failIfThrottled: false
+#        #kinesisEndpoint: kinesis-endpoint
+#        kinesisPort: 443
+#        logLevel: info
+#        maxConnections: 10
+#        minConnections: 1
+#        #nativeExecutable: native-exec
+#        rateLimit: 150
+#        recordMaxBufferedTime: 100
+#        recordTtl: 30000
+#        #region: region
+#        requestTimeout: 6000
+#        #tempDirectory: /tmp
+#        verifyCertificate: true
+
+toolkits:
+
+scriptEngine:
+  asyncWorkers: 4
+  maxAsyncJobQueueCapacity: 10000
+
+informationPointStore:
+  persistenceEnabled: false
+  storeFilePath: /tmp/file/informationpoints.json
