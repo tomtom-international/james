@@ -32,7 +32,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 class GroovyScriptEngine implements ScriptEngine {
 
@@ -73,7 +72,8 @@ class GroovyScriptEngine implements ScriptEngine {
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, returnValue);
             handler.invokeMethod(SUCCESS_HANDLER_FUNCTION, new Object[]{handlerContext});
-            LOG.trace(() -> "Success handler invocation took " + Duration.ofNanos(stopwatch.elapsed(TimeUnit.NANOSECONDS)));
+            stopwatch.stop();
+            LOG.trace(() -> "Success handler invocation took " + stopwatch.elapsed());
         } catch (CompilationFailedException e) {
             LOG.error(() -> "Script compilation failed when calling success handler for "
                     + informationPointClassName + "#" + informationPointMethodName, e);
@@ -105,7 +105,8 @@ class GroovyScriptEngine implements ScriptEngine {
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, errorCause);
             handler.invokeMethod(ERROR_HANDLER_FUNCTION, new Object[]{handlerContext});
-            LOG.trace(() -> "Error handler invocation took " + Duration.ofNanos(stopwatch.elapsed(TimeUnit.NANOSECONDS)));
+            stopwatch.stop();
+            LOG.trace(() -> "Error handler invocation took " + stopwatch.elapsed());
         } catch (CompilationFailedException cfe) {
             LOG.error(() -> "Script compilation failed when calling error handler for "
                     + informationPointClassName + "#" + informationPointMethodName, cfe);

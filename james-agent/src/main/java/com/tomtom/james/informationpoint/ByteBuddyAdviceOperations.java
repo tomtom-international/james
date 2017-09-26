@@ -16,6 +16,7 @@
 
 package com.tomtom.james.informationpoint;
 
+import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.informationpoint.advice.ContextAwareAdvice;
@@ -29,8 +30,11 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 
 import java.lang.instrument.Instrumentation;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -51,6 +55,7 @@ class ByteBuddyAdviceOperations implements AdviceOperations {
     @Override
     public void installAdvice(InformationPoint informationPoint) {
         installedInformationPoints.computeIfAbsent(new Key(informationPoint), key -> {
+            Stopwatch stopwatch = Stopwatch.createStarted();
             ResettableClassFileTransformer transformer = agentBuilder
                     .type(named(key.getClassName()).or(hasSuperType(named(key.getClassName()))))
                     .transform((builder, typeDescription, classLoader, module) -> {
@@ -66,7 +71,8 @@ class ByteBuddyAdviceOperations implements AdviceOperations {
                         return builder.visit(visitorWrapper);
                     })
                     .installOn(instrumentation);
-            LOG.trace(() -> "Advice installed at " + key);
+            stopwatch.stop();
+            LOG.trace(() -> "Advice installed at " + key + " in " + stopwatch.elapsed());
             return transformer;
         });
     }
@@ -76,9 +82,11 @@ class ByteBuddyAdviceOperations implements AdviceOperations {
         Key key = new Key(informationPoint);
         ResettableClassFileTransformer transformer = installedInformationPoints.remove(key);
         if (transformer != null) {
+            Stopwatch stopwatch = Stopwatch.createStarted();
             boolean wasApplied = transformer.reset(instrumentation, AgentBuilder.RedefinitionStrategy.RETRANSFORMATION);
+            stopwatch.stop();
             if (wasApplied) {
-                LOG.trace(() -> "Advice uninstalled at " + key);
+                LOG.trace(() -> "Advice uninstalled at " + key + " in " + stopwatch.elapsed());
             } else {
                 LOG.warn(() -> "Attempt to uninstall advice at " + key + " failed (transformer reset was not applied");
             }

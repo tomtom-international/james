@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import static net.bytebuddy.asm.Advice.*;
 
@@ -76,7 +75,9 @@ public class ContextAwareAdvice {
                        @Return(typing = Assigner.Typing.DYNAMIC) Object returned,
                        @Thrown Throwable thrown) {
 
-        long elapsedNanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+        stopwatch.stop();
+        Duration executionTime = stopwatch.elapsed();
+
         try {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("onExit: START "
@@ -109,7 +110,7 @@ public class ContextAwareAdvice {
                         createParameterList(origin, arguments),
                         instance,
                         Thread.currentThread(),
-                        Duration.ofNanos(elapsedNanos),
+                        executionTime,
                         getCallStack(),
                         returned
                 );
@@ -123,7 +124,7 @@ public class ContextAwareAdvice {
                         createParameterList(origin, arguments),
                         instance,
                         Thread.currentThread(),
-                        Duration.ofNanos(elapsedNanos),
+                        executionTime,
                         getCallStack(),
                         thrown
                 );
