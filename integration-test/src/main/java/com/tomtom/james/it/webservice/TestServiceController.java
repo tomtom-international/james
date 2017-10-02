@@ -39,6 +39,11 @@ public class TestServiceController {
         return testService.methodOfSubclass("methodOfSubclass-arg0");
     }
 
+    @RequestMapping("/otherMethodOfSubclass")
+    public String otherMethodOfSubclass() {
+        return testService.otherMethodOfSubclass("otherMethodOfSubclass-arg0");
+    }
+
     @RequestMapping("/methodOfSuperclass")
     public String methodOfSuperclass() {
         return testService.methodOfSuperclass("methodOfSuperclass-arg0");

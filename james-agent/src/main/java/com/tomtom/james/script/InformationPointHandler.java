@@ -22,10 +22,19 @@ import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.toolkit.Toolkit;
 import groovy.lang.Script;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public abstract class InformationPointHandler extends Script {
 
+    private final ConcurrentHashMap<Object, Object> localStore = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<Object, Object> globalStore;
     private EventPublisher publisher;
     private ToolkitManager toolkitManager;
+
+    void setGlobalStore(ConcurrentHashMap<Object, Object> globalStore) {
+        this.globalStore = globalStore;
+    }
 
     void setEventPublisher(EventPublisher publisher) {
         this.publisher = publisher;
@@ -33,6 +42,26 @@ public abstract class InformationPointHandler extends Script {
 
     void setToolkitManager(ToolkitManager toolkitManager) {
         this.toolkitManager = toolkitManager;
+    }
+
+    @SuppressWarnings("unused")
+    public void persistInLocalStore(Object key, Object val) {
+        localStore.put(key, val);
+    }
+
+    @SuppressWarnings("unused")
+    public Object retrieveFromLocalStore(Object key) {
+        return localStore.get(key);
+    }
+
+    @SuppressWarnings("unused")
+    public void persistInGlobalStore(Object key, Object val) {
+        globalStore.put(key, val);
+    }
+
+    @SuppressWarnings("unused")
+    public Object retrieveFromGlobalStore(Object key) {
+        return globalStore.get(key);
     }
 
     @SuppressWarnings("unused")
