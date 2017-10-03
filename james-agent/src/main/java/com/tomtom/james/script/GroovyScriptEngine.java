@@ -16,6 +16,7 @@
 
 package com.tomtom.james.script;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.agent.ToolkitManager;
 import com.tomtom.james.common.api.publisher.EventPublisher;
@@ -39,11 +40,13 @@ class GroovyScriptEngine implements ScriptEngine {
 
     private static final String SUCCESS_HANDLER_FUNCTION = "onSuccess";
     private static final String ERROR_HANDLER_FUNCTION = "onError";
+    private static final String INIT_FUNCTION = "init";
 
     private final EventPublisher publisher;
     private final ToolkitManager toolkitManager;
     private final GroovyShell groovyShell;
-    private final ConcurrentHashMap<String, InformationPointHandler> handlersCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ScriptParams, InformationPointHandler> handlersCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Object, Object> globalStore = new ConcurrentHashMap<>();
 
     GroovyScriptEngine(EventPublisher publisher, ToolkitManager toolkitManager) {
         this.publisher = Objects.requireNonNull(publisher);
@@ -67,7 +70,8 @@ class GroovyScriptEngine implements ScriptEngine {
         LOG.trace(() -> "Invoking success handler for " + informationPointClassName + "#" + informationPointMethodName);
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            InformationPointHandler handler = createOrGetCachedHandler(script);
+            ScriptParams scriptParams = new ScriptParams(informationPointClassName, informationPointMethodName, script);
+            InformationPointHandler handler = createOrGetCachedHandler(scriptParams);
             SuccessHandlerContext handlerContext = new SuccessHandlerContext(
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, returnValue);
@@ -100,7 +104,8 @@ class GroovyScriptEngine implements ScriptEngine {
         LOG.trace(() -> "Invoking error handler for " + informationPointClassName + "#" + informationPointMethodName);
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            InformationPointHandler handler = createOrGetCachedHandler(script);
+            ScriptParams scriptParams = new ScriptParams(informationPointClassName, informationPointMethodName, script);
+            InformationPointHandler handler = createOrGetCachedHandler(scriptParams);
             ErrorHandlerContext handlerContext = new ErrorHandlerContext(
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, errorCause);
@@ -124,14 +129,57 @@ class GroovyScriptEngine implements ScriptEngine {
         // Do nothing
     }
 
-    private InformationPointHandler createOrGetCachedHandler(String script)
+    private InformationPointHandler createOrGetCachedHandler(ScriptParams scriptParams)
             throws CompilationFailedException {
-        return handlersCache.computeIfAbsent(script, scriptTextKey -> {
-            InformationPointHandler handler = (InformationPointHandler) groovyShell.parse(scriptTextKey);
+        return handlersCache.computeIfAbsent(scriptParams, params -> {
+            InformationPointHandler handler = (InformationPointHandler) groovyShell.parse(params.scriptName);
+            handler.setGlobalStore(globalStore);
             handler.setEventPublisher(publisher);
             handler.setToolkitManager(toolkitManager);
+            invokeInitIfImpl(handler);
             return handler;
         });
     }
 
+    private void invokeInitIfImpl(InformationPointHandler handler) {
+        if (!handler.getMetaClass().respondsTo(handler, INIT_FUNCTION).isEmpty()) {
+            handler.invokeMethod(INIT_FUNCTION, null);
+        }
+    }
+
+    private static class ScriptParams {
+        private final String className;
+        private final String methodName;
+        private final String scriptName;
+
+        private ScriptParams(String className, String methodName, String scriptName) {
+            this.className = className;
+            this.methodName = methodName;
+            this.scriptName = scriptName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ScriptParams params = (ScriptParams) o;
+            return Objects.equals(className, params.className) &&
+                    Objects.equals(methodName, params.methodName) &&
+                    Objects.equals(scriptName, params.scriptName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(className, methodName, scriptName);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("className", className)
+                    .add("methodName", methodName)
+                    .add("scriptName", scriptName)
+                    .toString();
+        }
+    }
 }

@@ -28,6 +28,10 @@ public class TestService extends AbstractTestService implements IService {
         return "methodOfSubclass-value";
     }
 
+    public String otherMethodOfSubclass(String arg0) {
+        return "otherMethodOfSubclass-value";
+    }
+
     public String overloadedMethodOfSubclass(String arg0) {
         return "overloadedMethodOfSubclass-valueFor(String)";
     }

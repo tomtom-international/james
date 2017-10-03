@@ -27,6 +27,10 @@ class AppClient {
         return restTemplate.getForObject(baseURL + "/methodOfSubclass", String)
     }
 
+    static def otherMethodOfSubclass() {
+        return restTemplate.getForObject(baseURL + "/otherMethodOfSubclass", String)
+    }
+
     static def methodOfSuperclass() {
         return restTemplate.getForObject(baseURL + "/methodOfSuperclass", String)
     }

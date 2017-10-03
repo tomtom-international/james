@@ -563,4 +563,46 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "from doThrow"
     }
 
+    def "Two methods with information points, modifying shared mutable state"() {
+        given:
+        def ipA = new InformationPointDTO(
+                className: TestService.name,
+                methodName: "methodOfSubclass",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "store")
+        )
+        def ipB = new InformationPointDTO(
+                className: TestService.name,
+                methodName: "otherMethodOfSubclass",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "store")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        jamesController.createInformationPoint(ipA)
+        AppClient.methodOfSubclass()
+        AppClient.methodOfSubclass()
+        AppClient.methodOfSubclass()
+        def eventsAfterA = readPublishedEventsWithWait(3)
+
+        TestUtils.cleanUpEventsFile()
+
+        jamesController.createInformationPoint(ipB)
+        AppClient.otherMethodOfSubclass()
+        AppClient.otherMethodOfSubclass()
+        def eventsAfterB = readPublishedEventsWithWait(2)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfterA[2] == [
+                usGdp: 60,
+                euGdp: 75,
+                unGdp: 135
+        ]
+        eventsAfterB[1] == [
+                usGdp: 40,
+                euGdp: 50,
+                unGdp: 225
+        ]
+    }
+
 }
