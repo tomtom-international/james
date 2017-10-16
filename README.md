@@ -1,4 +1,4 @@
-# Project James
+[![Project James](assets/james-logo.png "Project James")]()
 
 [![License](http://img.shields.io/badge/license-APACHE2-blue.svg)]()
 
