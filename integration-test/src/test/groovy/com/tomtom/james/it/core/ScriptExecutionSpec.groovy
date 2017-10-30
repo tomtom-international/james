@@ -563,4 +563,59 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "from doThrow"
     }
 
+    def "Public static method of subclass, information point on subclass"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestService.name,
+                methodName: "publicStaticMethod",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        jamesController.createInformationPoint(ip)
+        def result = AppClient.publicStaticMethod()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter == [
+                [
+                        result     : "success",
+                        className  : TestService.name,
+                        methodName : "publicStaticMethod",
+                        "arg(arg0)": "publicStaticMethod-arg0",
+                        returnValue: "publicStaticMethod-value"
+                ]
+        ]
+        result == "publicStaticMethod-value"
+    }
+
+    def "Private static method of subclass, information point on subclass"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestService.name,
+                methodName: "privateStaticMethod",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        jamesController.createInformationPoint(ip)
+        def result = AppClient.privateStaticMethod()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter == [
+                [
+                        result     : "success",
+                        className  : TestService.name,
+                        methodName : "privateStaticMethod",
+                        "arg(arg0)": "privateStaticMethod-arg0",
+                        returnValue: "privateStaticMethod-value"
+                ]
+        ]
+        result == "privateStaticMethod-value"
+    }
 }

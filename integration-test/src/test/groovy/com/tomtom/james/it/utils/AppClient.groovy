@@ -75,4 +75,12 @@ class AppClient {
         return restTemplate.getForObject(baseURL + "/methodThrowingAnException", String)
     }
 
+    static def publicStaticMethod() {
+        return restTemplate.getForObject(baseURL + "/publicStaticMethod", String)
+    }
+
+    static def privateStaticMethod() {
+        return restTemplate.getForObject(baseURL + "/privateStaticMethod", String)
+    }
+
 }

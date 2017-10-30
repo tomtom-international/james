@@ -61,6 +61,18 @@ public class TestService extends AbstractTestService implements IService {
         return "methodOfInterface-value";
     }
 
+    public static String publicStaticMethod(String arg0) {
+        return "publicStaticMethod-value";
+    }
+
+    public static String privateStaticMethodWrapper(String arg0) {
+        return privateStaticMethod(arg0);
+    }
+
+    private static String privateStaticMethod(String arg0) {
+        return "privateStaticMethod-value";
+    }
+
     public InternalClass getInternalClass() {
         return ic;
     }

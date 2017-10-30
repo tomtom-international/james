@@ -20,7 +20,7 @@ import java.util.Random;
 
 class Service {
 
-    private final Random rnd = new Random();
+    private static final Random rnd = new Random();
     private int fieldValue = 10;
 
     int doSomething(String arg) {
@@ -30,14 +30,21 @@ class Service {
         return 7;
     }
 
-    private void throwAtRandom(double probability) {
+    static int doSomethingStatic(String arg) {
+        System.out.println("doSomething static called with arg = " + arg);
+        sleep();
+        throwAtRandom(0.5);
+        return 7;
+    }
+
+    private static void throwAtRandom(double probability) {
         double v = rnd.nextDouble();
         if (v < probability) {
             throw new RuntimeException(v + " < " + probability);
         }
     }
 
-    private void sleep() {
+    private static void sleep() {
         try {
             Thread.sleep(rnd.nextInt(500));
         } catch (InterruptedException e) {

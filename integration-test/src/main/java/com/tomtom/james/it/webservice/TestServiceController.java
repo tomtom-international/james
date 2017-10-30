@@ -106,4 +106,13 @@ public class TestServiceController {
         }
     }
 
+    @RequestMapping("/publicStaticMethod")
+    public String publicStaticMethod() {
+        return TestService.publicStaticMethod("publicStaticMethod-arg0");
+    }
+
+    @RequestMapping("/privateStaticMethod")
+    public String privateStaticMethod() {
+        return TestService.privateStaticMethodWrapper("privateStaticMethod-arg0");
+    }
 }
