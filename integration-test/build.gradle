@@ -48,10 +48,16 @@ test {
     exclude '**/*'
 }
 
+task prepareConfiguration(type: Copy) {
+    from 'configurations/integration-test.yaml'
+    into 'build/configurations'
+    filter { it.replaceAll('@@projectVersion@@', project.version)}
+}
+
 task runAppWithJames(type: JvmRunWithJames, dependsOn: compileJava) {
     appMain = 'com.tomtom.james.it.webservice.App'
-    jamesAgentJarPath = '../james-agent/build/libs/james-agent-all.jar'
-    jamesConfigurationPath = '../integration-test/configurations/integration-test.yaml'
+    jamesAgentJarPath = "../james-agent/build/libs/james-agent-${project.version}-all.jar"
+    jamesConfigurationPath = '../integration-test/build/configurations/integration-test.yaml'
 }
 
 task shutdownApp(type: ShutdownApp) {
@@ -59,7 +65,7 @@ task shutdownApp(type: ShutdownApp) {
 }
 
 task integrationTest(type: Test) {
-    dependsOn runAppWithJames
+    dependsOn prepareConfiguration, runAppWithJames
     finalizedBy shutdownApp
     doFirst {
         waitForWebservice(8008)

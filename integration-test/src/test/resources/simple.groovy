@@ -25,6 +25,7 @@ def onSuccess(SuccessHandlerContext context) {
             methodName         : context.origin.name,
             callDuration       : context.executionTime.toString(),
             methodExecutionTime: context.executionTime.toMillis(),
+            instance           : context.instance,
     ]
     putParameters(context, eventMap)
     publishEvent(new Event(eventMap))
@@ -37,6 +38,7 @@ def onError(ErrorHandlerContext context) {
             callDuration       : context.executionTime.toString(),
             methodExecutionTime: context.executionTime.toMillis(),
             callStack          : context.callStack,
+            instance           : context.instance,
             errorCause         : context.errorCause.message
     ]
     putParameters(context, eventMap)

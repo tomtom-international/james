@@ -2,9 +2,9 @@ logLevel: trace
 
 plugins:
   includeFiles:
-    - ../james-controller-consul/build/libs/james-controller-consul-all.jar
-    - ../james-controller-webservice/build/libs/james-controller-webservice-all.jar
-    - ../james-publisher-aws-kinesis/build/libs/james-publisher-aws-kinesis-all.jar
+    - ../james-controller-consul/build/libs/james-controller-consul-@@projectVersion@@-all.jar
+    - ../james-controller-webservice/build/libs/james-controller-webservice-@@projectVersion@@-all.jar
+    - ../james-publisher-aws-kinesis/build/libs/james-publisher-aws-kinesis-@@projectVersion@@-all.jar
 
 controllers:
   - id: james.controller.webservice

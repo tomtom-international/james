@@ -90,7 +90,7 @@ public class InformationPointServiceImpl implements InformationPointService {
         return builder;
     }
 
-    private static class LoggingTransformationListener implements AgentBuilder.Listener {
+    private static class LoggingTransformationListener extends AgentBuilder.Listener.Adapter {
         @Override
         public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module,
                                      boolean loaded, DynamicType dynamicType) {
@@ -105,14 +105,6 @@ public class InformationPointServiceImpl implements InformationPointService {
             } else {
                 LOG.warn(() -> "Class transformation of " + typeName + " failed", throwable);
             }
-        }
-
-        @Override
-        public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-        }
-
-        @Override
-        public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
         }
     }
 }

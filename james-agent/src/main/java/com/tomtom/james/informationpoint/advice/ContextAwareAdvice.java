@@ -70,7 +70,7 @@ public class ContextAwareAdvice {
                        @InformationPointScript String script,
                        @InformationPointSampleRate int sampleRate,
                        @Origin Method origin,
-                       @This Object instance,
+                       @This(optional = true) Object instance,
                        @AllArguments Object[] arguments,
                        @Return(typing = Assigner.Typing.DYNAMIC) Object returned,
                        @Thrown Throwable thrown) {

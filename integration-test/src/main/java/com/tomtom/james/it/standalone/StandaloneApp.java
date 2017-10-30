@@ -45,6 +45,14 @@ class StandaloneApp {
                 } finally {
                     Thread.sleep(2000);
                 }
+
+                try {
+                    Service.doSomethingStatic(UUID.randomUUID().toString());
+                } catch (Throwable t) {
+                    // do nothing
+                } finally {
+                    Thread.sleep(2000);
+                }
             }
         }
     }
