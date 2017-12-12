@@ -24,7 +24,11 @@ buildscript {
 }
 
 allprojects {
-    version = '1.0-SNAPSHOT'
+    if(project.hasProperty('releaseVersion')) {
+        version = project.releaseVersion
+    } else {
+        version = '1.0-SNAPSHOT'
+    }
     group = 'com.tomtom.james'
 }
 
