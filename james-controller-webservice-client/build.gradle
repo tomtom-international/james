@@ -15,6 +15,8 @@
  */
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 
@@ -22,4 +24,67 @@ dependencies {
     compile project(':james-controller-webservice-api')
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
     compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
+}
+
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'james-controller-webservice-client'
+        packaging 'jar'
+        description 'Client for REST controller of James'
+        url 'https://github.com/tomtom-international/james'
+
+        scm {
+          connection 'scm:git:https://github.com/tomtom-international/james.git'
+          developerConnection 'scm:git:https://github.com/tomtom-international/james.git'
+          url 'https://github.com/tomtom-international/james'
+        }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0'
+          }
+        }
+
+        developers {
+          developer {
+            id 'pdebicki'
+            name 'Piotr Dębicki'
+            email 'piotr.debicki@tomtom.com'
+          }
+          developer {
+            id 'alibich'
+            name 'Artur Libich'
+            email 'artur.libich@tomtom.com'
+          }
+        }
+      }
+    }
+  }
 }

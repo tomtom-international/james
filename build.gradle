@@ -29,7 +29,7 @@ allprojects {
     } else {
         version = '1.0-SNAPSHOT'
     }
-    group = 'com.tomtom.james'
+    group = 'com.github.tomtom-international.james'
 }
 
 subprojects {
