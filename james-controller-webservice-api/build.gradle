@@ -16,66 +16,69 @@
 
 apply plugin: 'java'
 apply plugin: 'maven'
-apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 
-task javadocJar(type: Jar) {
-  classifier = 'javadoc'
-  from javadoc
-}
+if(project.hasProperty('releaseVersion')) {
+  apply plugin: 'signing'
+  
+  signing {
+      sign configurations.archives
+  }
 
-task sourcesJar(type: Jar) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
+  task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+  }
 
-artifacts {
-  archives javadocJar, sourcesJar
-}
+  task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
 
-signing {
-    sign configurations.archives
-}
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
 
-      pom.project {
-        name 'james-controller-webservice-api'
-        packaging 'jar'
-        description 'API for REST controller of James'
-        url 'https://github.com/tomtom-international/james'
-
-        scm {
-          connection 'scm:git:https://github.com/tomtom-international/james.git'
-          developerConnection 'scm:git:https://github.com/tomtom-international/james.git'
+        pom.project {
+          name 'james-controller-webservice-api'
+          packaging 'jar'
+          description 'API for REST controller of James'
           url 'https://github.com/tomtom-international/james'
-        }
 
-        licenses {
-          license {
-            name 'The Apache License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0'
+          scm {
+            connection 'scm:git:https://github.com/tomtom-international/james.git'
+            developerConnection 'scm:git:https://github.com/tomtom-international/james.git'
+            url 'https://github.com/tomtom-international/james'
           }
-        }
 
-        developers {
-          developer {
-            id 'pdebicki'
-            name 'Piotr Dębicki'
-            email 'piotr.debicki@tomtom.com'
+          licenses {
+            license {
+              name 'The Apache License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0'
+            }
           }
-          developer {
-            id 'alibich'
-            name 'Artur Libich'
-            email 'artur.libich@tomtom.com'
+
+          developers {
+            developer {
+              id 'pdebicki'
+              name 'Piotr Dębicki'
+              email 'piotr.debicki@tomtom.com'
+            }
+            developer {
+              id 'alibich'
+              name 'Artur Libich'
+              email 'artur.libich@tomtom.com'
+            }
           }
         }
       }
