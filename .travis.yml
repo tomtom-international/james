@@ -1,0 +1,5 @@
+language: java
+sudo: true
+script:
+  - chmod +x ./gradlew
+install: gradle clean build shadowJar
