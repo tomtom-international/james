@@ -54,3 +54,82 @@ subprojects {
 wrapper {
     gradleVersion = '4.2'
 }
+
+def projectDescriptions = [
+  'james-agent-common': 'A package that lets you write your own toolkits for James',
+  'james-controller-webservice-api': 'API for REST controller of James',
+  'james-controller-webservice-client': 'Client for REST controller of James'
+]
+
+def projectList = subprojects.findAll { projectDescriptions.keySet().contains(it.name) }
+
+configure(projectList) { confPrj ->
+  apply plugin: 'java'
+  apply plugin: 'maven'
+
+  if(project.hasProperty('releaseVersion')) {
+    apply plugin: 'signing'
+    signing {
+        sign configurations.archives
+    }
+
+    task javadocJar(type: Jar) {
+      classifier = 'javadoc'
+      from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+    }
+
+    artifacts {
+      archives javadocJar, sourcesJar
+    }
+
+    uploadArchives {
+      repositories {
+        mavenDeployer {
+          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+          }
+
+          pom.project {
+            name confPrj.name
+            packaging 'jar'
+            description projectDescriptions[confPrj.name]
+            url 'https://github.com/tomtom-international/james'
+
+            scm {
+              connection 'scm:git:https://github.com/tomtom-international/james.git'
+              developerConnection 'scm:git:https://github.com/tomtom-international/james.git'
+              url 'https://github.com/tomtom-international/james'
+            }
+
+            licenses {
+              license {
+                name 'The Apache License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0'
+              }
+            }
+
+            developers {
+              developer {
+                id 'pdebicki'
+                name 'Piotr Dębicki'
+                email 'piotr.debicki@tomtom.com'
+              }
+              developer {
+                id 'alibich'
+                name 'Artur Libich'
+                email 'artur.libich@tomtom.com'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
