@@ -47,7 +47,8 @@ subprojects {
             snakeyaml : '1.18',
             spock     : '1.1-groovy-2.4',
             objenesis : '2.5.1',
-            awaitility: '3.0.0'
+            awaitility: '3.0.0',
+            cglib     : '3.2.6'
     ]
 }
 
