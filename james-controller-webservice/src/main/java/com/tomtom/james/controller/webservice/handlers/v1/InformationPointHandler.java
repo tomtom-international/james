@@ -124,7 +124,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
                 .withMethodName(dto.getMethodName())
                 .withScript(joinedScriptLines(dto.getScript()))
                 .withSampleRate(dto.getSampleRate())
-                .withUseFroSuccessors(dto.getUseForSuccessors())
+                .withUseForSuccessors(dto.getUseForSuccessors())
                 .build();
     }
 
