@@ -52,6 +52,7 @@ class InformationPointDTOParser {
                 .withMethodReference(methodReference)
                 .withScript(dto.getScript() != null ? String.join("\n", dto.getScript()) : null)
                 .withSampleRate(dto.getSampleRate())
+                .withUseForSuccessors(dto.getUseForSuccessors())
                 .build();
     }
 }
