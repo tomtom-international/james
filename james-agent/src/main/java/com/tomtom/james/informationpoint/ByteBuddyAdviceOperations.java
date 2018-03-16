@@ -30,11 +30,8 @@ import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 
 import java.lang.instrument.Instrumentation;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -52,27 +49,38 @@ class ByteBuddyAdviceOperations implements AdviceOperations {
         this.instrumentation = Objects.requireNonNull(instrumentation);
     }
 
+    private AsmVisitorWrapper prepareVisitorWrapper(InformationPoint informationPoint) {
+        return Advice
+                .withCustomMapping()
+                .bind(InformationPointClassName.class, informationPoint.getClassName())
+                .bind(InformationPointMethodName.class, informationPoint.getMethodName())
+                .bind(InformationPointSampleRate.class, informationPoint.getSampleRate())
+                .bind(InformationPointScript.class, informationPoint.getScript().orElseThrow(() ->
+                        new IllegalStateException("Script is not defined for " + informationPoint)))
+                .to(ContextAwareAdvice.class)
+                .on(named(new Key(informationPoint).getMethodName()));
+    }
+
     @Override
     public void installAdvice(InformationPoint informationPoint) {
         installedInformationPoints.computeIfAbsent(new Key(informationPoint), key -> {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            ResettableClassFileTransformer transformer = agentBuilder
-                    .type(named(key.getClassName()).or(hasSuperType(named(key.getClassName()))))
-                    .transform((builder, typeDescription, classLoader, module) -> {
-                        AsmVisitorWrapper visitorWrapper = Advice
-                                .withCustomMapping()
-                                .bind(InformationPointClassName.class, informationPoint.getClassName())
-                                .bind(InformationPointMethodName.class, informationPoint.getMethodName())
-                                .bind(InformationPointSampleRate.class, informationPoint.getSampleRate())
-                                .bind(InformationPointScript.class, informationPoint.getScript().orElseThrow(() ->
-                                        new IllegalStateException("Script is not defined for " + informationPoint)))
-                                .to(ContextAwareAdvice.class)
-                                .on(named(key.getMethodName()));
-                        return builder.visit(visitorWrapper);
-                    })
-                    .installOn(instrumentation);
-            stopwatch.stop();
-            LOG.trace(() -> "Advice installed at " + key + " in " + stopwatch.elapsed());
+            ResettableClassFileTransformer transformer = null;
+            if (informationPoint.getUseForSuccessors()) {
+                transformer = agentBuilder
+                        .type(named(key.getClassName()).or(hasSuperType(named(key.getClassName()))))
+                        .transform((builder, typeDescription, classLoader, module) -> builder.visit(prepareVisitorWrapper(informationPoint)))
+                        .installOn(instrumentation);
+                stopwatch.stop();
+                LOG.trace(() -> "Advice installed at " + key + " and all successors in " + stopwatch.elapsed());
+            } else {
+                transformer = agentBuilder
+                        .type(named(key.getClassName()))
+                        .transform((builder, typeDescription, classLoader, module) -> builder.visit(prepareVisitorWrapper(informationPoint)))
+                        .installOn(instrumentation);
+                stopwatch.stop();
+                LOG.trace(() -> "Advice installed at " + key + " (not for successors) in " + stopwatch.elapsed());
+            }
             return transformer;
         });
     }

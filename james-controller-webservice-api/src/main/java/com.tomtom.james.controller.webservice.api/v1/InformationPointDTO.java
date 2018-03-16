@@ -25,6 +25,7 @@ public class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
+    private Boolean useForSuccessors = false;
 
     public String getClassName() {
         return className;
@@ -56,6 +57,25 @@ public class InformationPointDTO {
 
     public void setSampleRate(Integer sampleRate) {
         this.sampleRate = sampleRate;
+    }
+
+    public Boolean getUseForSuccessors() {
+        return useForSuccessors;
+    }
+
+    public void setUseForSuccessors(Boolean useForSuccessors) {
+        this.useForSuccessors = useForSuccessors;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("InformationPointDTO | ");
+        builder.append(" className=" + className);
+        builder.append(" methodName=" + methodName);
+        builder.append(" sampleRate=" + sampleRate);
+        builder.append(" useForSuccessors=" + useForSuccessors);
+        return builder.toString();
     }
 
     @Override
