@@ -7,7 +7,9 @@ import org.apache.commons.lang3.ClassUtils;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -17,44 +19,54 @@ public class JamesClassScanner implements Runnable {
     private static final Logger LOG = Logger.getLogger(JamesClassScanner.class);
     private int initialDelay = 10000;
     private int scanPeriod = 5000;
-    private GlobalClassStructure globalClassStructure;
+    private ClassStructure processedClasses = new BasicClassStructure();
+    private ClassStructure classStructure;
     private NewClassQueue newClassQueue;
 
-    public JamesClassScanner(NewClassQueue newClassQueue, GlobalClassStructure globalClassStructure, int initialDelay, int scanPeriod) {
+    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure classStructure, int initialDelay, int scanPeriod) {
         this.newClassQueue = newClassQueue;
-        this.globalClassStructure = globalClassStructure;
+        this.classStructure = classStructure;
         this.initialDelay = initialDelay;
         this.scanPeriod = scanPeriod;
+    }
+
+    @SuppressWarnings("unused")
+    private void logCurrentClassStructure() {
+        LOG.trace("--class structure begin -----------------------------------------------------------------------------");
+        classStructure.getMap().forEach((className, children) -> {
+            LOG.trace("     " + className);
+            children.forEach(child -> LOG.trace("          - " + child.getName() + " ::: " + child.toString()));
+        });
+        LOG.trace("--class structure end -------------------------------------------------------------------------------");
     }
 
 
     /**
      * get parent interfaces and superclasses
-     * update globalClassStructure
+     * update classStructure
      *
      * @param source
      * @return
      */
-    private ClassDescriptor processClass(Class<?> clazz) {
-
-        Set<Class<?>> parentClassesAndInterfaces = new HashSet<>();
-        parentClassesAndInterfaces.addAll(ClassUtils.getAllInterfaces(clazz)); // interfaces
-        parentClassesAndInterfaces.addAll(ClassUtils.getAllSuperclasses(clazz)); // superclasses
-        parentClassesAndInterfaces.forEach(parent -> {
-            if(!globalClassStructure.contains(parent)) {
-                processClass(parent); // FIXME - possible fuckup - recurrency !!!!!!
+    private void processClass(Class clazz) {
+        if (!clazz.isInterface()) { // interface can not be child - because every method.isEmpty == true, abstractClass could be ...
+            Set<Class<?>> parentClassesAndInterfaces = new HashSet<>();
+            parentClassesAndInterfaces.addAll(ClassUtils.getAllInterfaces(clazz)); // interfaces
+            parentClassesAndInterfaces.addAll(ClassUtils.getAllSuperclasses(clazz)); // superclasses
+            for (Class parentClass : parentClassesAndInterfaces) {
+                if (classStructure.contains(parentClass.getName())) {
+                    processClass(parentClass); // FIXME recurrent call !!!!!!!!!!!!!!!!!!!!
+                }
+                if (parentClass.isInterface() || Modifier.isAbstract(parentClass.getModifiers())) {
+                    // we cache children only for interfaces and abstract classes
+                    classStructure.addChild(parentClass.getName(), clazz);
+                }
             }
-            // FIXME - think twice - do we have to add interface as a child of interfacess ??? (.. I suppose - NO )
-            // add clazz as a child of parents but only for abstract classes and interfaces
-            if (parent.isInterface() || Modifier.isAbstract(parent.getModifiers())) {
-                globalClassStructure.addChild(parent, clazz);
-            }
-        });
-        globalClassStructure.addEmpty(clazz);
+        }
     }
 
-    private void processClasses(List<Class<?>> source) {
-        source.stream().forEach(this::processClass);
+    private void processClasses(List<Class> clazz) {
+        clazz.stream().forEach(this::processClass);
     }
 
     /**
@@ -78,17 +90,29 @@ public class JamesClassScanner implements Runnable {
             Stopwatch stopwatch = Stopwatch.createStarted();
             // FIXME - optimize getting delta
             List<Class> newScan = Arrays.asList(instrumentation.getAllLoadedClasses());
-            newScan.removeAll(globalClassStructure.keySet()); // removed already processed classes
+            // removed already processed classes
+            newScan.removeAll(processedClasses
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()));
             LOG.trace(String.format("JamesClassScanner - delta size : %h  from %h processing delta time = %h", newScan.size(), newScan.size(), stopwatch.elapsed().toString()));
 
+            // build ClassStructure
             Stopwatch processingStopWatch = Stopwatch.createStarted();
-            List<ClassDescriptor> delta = processClasses(newScan); // process and prepare parents and children
+            processClasses(newScan); // process and prepare parents and children
             processingStopWatch.stop();
             LOG.trace("JamesClassScanner - class processing time = " + processingStopWatch.elapsed());
 
-            newClassQueue.addAll(delta); // put all processed to queue
+            // add new classes to processed classes
+            newScan.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
+
+            //logCurrentClassStructure(); // FIXME set if log level is trace
+
+            //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
+            newClassQueue.addAll(newScan); // put all processed to queue
             stopwatch.stop();
-            LOG.trace("JamesClassScanner - finished scan time = " + stopwatch.elapsed());
+            LOG.debug("JamesClassScanner - finished scan time = " + stopwatch.elapsed());
             try {
                 if (scanPeriod - stopwatch.elapsed(TimeUnit.MILLISECONDS) > 0) {
                     Thread.sleep(scanPeriod - stopwatch.elapsed(TimeUnit.MILLISECONDS));

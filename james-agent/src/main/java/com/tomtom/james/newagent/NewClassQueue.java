@@ -2,6 +2,6 @@ package com.tomtom.james.newagent;
 
 import java.util.Queue;
 
-public interface NewClassQueue extends Queue<ClassDescriptor> {
+public interface NewClassQueue extends Queue<Class> {
 
 }
