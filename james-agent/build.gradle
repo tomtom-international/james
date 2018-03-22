@@ -50,6 +50,7 @@ dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
     compile group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddy
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonslang
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
