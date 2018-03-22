@@ -33,7 +33,8 @@ class InformationPointDTOSpec extends Specification {
     "className": "class-name-value",
     "methodName": "method-name-value",
     "script": ["line1", "line2"],
-    "sampleRate": 70
+    "sampleRate": 70,
+    "useForSuccessors": true
 }]
 '''
 
@@ -50,6 +51,7 @@ class InformationPointDTOSpec extends Specification {
         ip.methodName == "method-name-value"
         !ip.script.isPresent()
         ip.sampleRate == 100
+        !ip.useForSuccessors
     }
 
     def "Should parse complete JSON to DTO"() {
@@ -62,5 +64,6 @@ class InformationPointDTOSpec extends Specification {
         ip.methodName == "method-name-value"
         ip.script.get() == "line1\nline2"
         ip.sampleRate == 70
+        ip.useForSuccessors
     }
 }

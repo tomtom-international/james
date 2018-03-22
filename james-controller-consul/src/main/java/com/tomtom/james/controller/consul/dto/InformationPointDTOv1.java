@@ -22,6 +22,7 @@ public class InformationPointDTOv1 extends Versioned {
 
     private List<String> script;
     private Integer sampleRate;
+    private Boolean useForSuccessors = false;
 
     public List<String> getScript() {
         return script;
@@ -29,5 +30,9 @@ public class InformationPointDTOv1 extends Versioned {
 
     public Integer getSampleRate() {
         return sampleRate;
+    }
+
+    public Boolean getUseForSuccessors() {
+        return useForSuccessors;
     }
 }
