@@ -1,30 +1,59 @@
 package com.tomtom.james.newagent;
 
 import com.google.common.io.Resources;
+import com.tomtom.james.agent.ControllersManager;
+import com.tomtom.james.agent.PluginManager;
+import com.tomtom.james.agent.ShutdownHook;
+import com.tomtom.james.agent.ToolkitManager;
+import com.tomtom.james.common.api.informationpoint.InformationPointService;
+import com.tomtom.james.common.api.publisher.EventPublisher;
+import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.configuration.AgentConfiguration;
+import com.tomtom.james.configuration.AgentConfigurationFactory;
 import com.tomtom.james.configuration.ConfigurationInitializationException;
+import com.tomtom.james.informationpoint.InformationPointServiceImpl;
+import com.tomtom.james.newagent.tools.*;
+import com.tomtom.james.publisher.EventPublisherFactory;
+import com.tomtom.james.script.ScriptEngineFactory;
+import com.tomtom.james.store.InformationPointStore;
+import com.tomtom.james.store.InformationPointStoreFactory;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.NotFoundException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+
 
 public class JVMAgent {
     private static final Logger LOG = Logger.getLogger(JVMAgent.class);
-    private static Instrumentation instrumentation = null;
-    private static Thread classScannerThread;
+    public static Instrumentation instrumentation = null;
+    private static Thread jamesHQ;
+    private static NewInformationPointQueue newInformationPointQueue = new BasicNewInformationPointQueue(); // TODO should it be defined on the class level ?
+    private static NewClassQueue newClassQueue = new BasicNewClassQueue(); // TODO should it be defined on the class level ?
 
     public static Instrumentation getInstrumentation() {
         try {
-            return (Instrumentation) ClassLoader.getSystemClassLoader()
-                    .loadClass(JVMAgent.class.getName())
-                    .getDeclaredField("instrumentation")
-                    .get(null);
+            if (instrumentation == null) {
+                return (Instrumentation) ClassLoader.getSystemClassLoader()
+                        .loadClass(JVMAgent.class.getName())
+                        .getDeclaredField("instrumentation")
+                        .get(null);
+            } else {
+                return instrumentation;
+            }
         } catch (Exception e) {
             LOG.error("JVMAgent - instrumentation not found in SystemClassLoader, probably JVMAgent is not installed in the JVM.");
             return null;
@@ -42,6 +71,16 @@ public class JVMAgent {
         }
     }
 
+    //FIXME remove this method - it's only for log debug
+    private static void message(String message) {
+        System.out.println("########################################################################");
+        System.out.println("########################################################################");
+        System.out.println("   " + message);
+        System.out.println("########################################################################");
+        System.out.println("########################################################################");
+        System.out.println();
+    }
+
     /**
      * The entry point invoked when this agent is started by {@code -javaagent}.
      */
@@ -55,33 +94,48 @@ public class JVMAgent {
      */
     public static void agentmain(String agentArgs, Instrumentation inst) throws Throwable {
         LOG.trace("JVMAgent agentmain");
+        if (!inst.isRedefineClassesSupported())
+            throw new RuntimeException("this JVM does not support redefinition of classes");
+        instrumentation = inst;
         setupAgent(instrumentation);
     }
 
-    private static void setupAgent(Instrumentation instrumentation) {
+    private static void setupAgent(Instrumentation inst) {
         LOG.trace("JVMAgent agentmain");
         try {
-            if (!inst.isRedefineClassesSupported())
-                throw new RuntimeException("this JVM does not support redefinition of classes");
-            instrumentation = inst;
-            //configuration = AgentConfigurationFactory.create();
+            if (inst != null) {
+                if (!inst.isRedefineClassesSupported()) {
+                    throw new RuntimeException("this JVM does not support redefinition of classes");
+                }
+            }
+            AgentConfiguration configuration = AgentConfigurationFactory.create();
             //Logger.setCurrentLogLevel(configuration.getLogLevel());
-            //printBanner(configuration);
+            printBanner(configuration);
 
+            PluginManager pluginManager = new PluginManager(configuration.getPluginIncludeDirectories(), configuration.getPluginIncludeFiles());
+            EventPublisher publisher = EventPublisherFactory.create(pluginManager, configuration.getPublishersConfigurations());
+            InformationPointStore store = InformationPointStoreFactory.create(configuration.getInformationPointStoreConfiguration());
+            ToolkitManager toolkitManager = new ToolkitManager(pluginManager, configuration.getToolkitsConfigurations());
+            ScriptEngine engine = ScriptEngineFactory.create(publisher, configuration, toolkitManager);
+            ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
+            InformationPointService informationPointService = new InformationPointServiceImpl(store, newInformationPointQueue);
+            controllersManager.initializeControllers(informationPointService, engine, publisher);
 
+            // create ClassService
+            ClassService classService = new BasicClassService(newClassQueue, 10000, 5000); // FIXME hardcoded configuration
+            LOG.debug("JVMAgent - ClassService is executed.");
 
-            // execute period class scanner
-            NewClassQueue deltaBuffer = new BasicNewClassQueue();
-            classScannerThread = new Thread(new JamesClassScanner(deltaBuffer));
-            classScannerThread.run();
-            LOG.trace("JVMAgent - class scanner is running.");
+            jamesHQ = new Thread(new JamesHQ(informationPointService, classService, newInformationPointQueue, newClassQueue, 1000)); // FIXME hardcoded configuration
+            LOG.debug("JVMAgent - JamesHQ is executed.");
 
+            ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
+            LOG.info("JVMAgent - initialization complete.");
 
         } catch (ConfigurationInitializationException e) {
             e.printStackTrace();
         }
     }
-
 
     /**
      * Redefines a class.
@@ -118,15 +172,14 @@ public class JVMAgent {
         LOG.trace("JVMAgent startAgent");
         if (instrumentation != null)
             return;
-
         try {
-            LOG.trace("JVMAgent needs to find and connect to VM.");
-            File agentJar = createJarFile();
-            String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-            String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
-            VirtualMachine vm = VirtualMachine.attach(pid);
-            vm.loadAgent(agentJar.getAbsolutePath(), null);
-            vm.detach();
+//            LOG.trace("JVMAgent needs to find and connect to VM.");
+//            File agentJar = createJarFile();
+//            String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+//            String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+//            VirtualMachine vm = VirtualMachine.attach(pid);
+//            vm.loadAgent(agentJar.getAbsolutePath(), null);
+//            vm.detach();
         } catch (Exception e) {
             throw new NotFoundException("JVMAgent", e);
         }
@@ -143,6 +196,45 @@ public class JVMAgent {
         }
 
         throw new NotFoundException("JVMAgent agent (timeout)");
+    }
+
+
+    public static File createAgentJarFile(String fileName) throws IOException, CannotCompileException, NotFoundException {
+        return createJarFile(new File(fileName));
+    }
+
+    private static File createJarFile() throws IOException, CannotCompileException, NotFoundException {
+        File jar = File.createTempFile("jvmagent", ".jar");
+        jar.deleteOnExit();
+        return createJarFile(jar);
+    }
+
+    private static File createJarFile(File jar)
+            throws IOException, CannotCompileException, NotFoundException {
+        Manifest manifest = new Manifest();
+        Attributes attrs = manifest.getMainAttributes();
+        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        attrs.put(new Attributes.Name("Premain-Class"), JVMAgent.class.getName());
+        attrs.put(new Attributes.Name("Agent-Class"), JVMAgent.class.getName());
+        attrs.put(new Attributes.Name("Can-Retransform-Classes"), "true");
+        attrs.put(new Attributes.Name("Can-Redefine-Classes"), "true");
+
+        JarOutputStream jos = null;
+        try {
+            jos = new JarOutputStream(new FileOutputStream(jar), manifest);
+            String cname = JVMAgent.class.getName();
+            JarEntry e = new JarEntry(cname.replace('.', '/') + ".class");
+            jos.putNextEntry(e);
+            ClassPool pool = ClassPool.getDefault();
+            CtClass clazz = pool.get(cname);
+            jos.write(clazz.toBytecode());
+            jos.closeEntry();
+        } finally {
+            if (jos != null)
+                jos.close();
+        }
+
+        return jar;
     }
 
 }

@@ -1,6 +1,7 @@
-package com.tomtom.james.newagent;
+package com.tomtom.james.newagent.tools;
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.newagent.tools.NewInformationPointQueue;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

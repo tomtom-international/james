@@ -1,4 +1,4 @@
-package com.tomtom.james.newagent;
+package com.tomtom.james.newagent.tools;
 
 import java.util.Collection;
 import java.util.Map;
@@ -11,7 +11,7 @@ public interface ClassStructure {
 
     boolean contains(String className);
 
-    Set<Class<?>> getChildren(String className);
+    Set<Class> getChildren(String className);
 
     void addChild(String className, Class<?> clazz);
 

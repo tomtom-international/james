@@ -31,7 +31,7 @@ public class ToolkitManager {
     private static final Logger LOG = Logger.getLogger(ToolkitManager.class);
     private final Map<String, Toolkit> toolkits;
 
-    ToolkitManager(PluginManager pluginManager, Collection<ToolkitConfiguration> toolkitsConfigurations) {
+    public ToolkitManager(PluginManager pluginManager, Collection<ToolkitConfiguration> toolkitsConfigurations) {
         toolkits = toolkitsConfigurations.stream()
                 .map(configuration -> createAndInitializeToolkit(pluginManager, configuration))
                 .filter(Optional::isPresent)

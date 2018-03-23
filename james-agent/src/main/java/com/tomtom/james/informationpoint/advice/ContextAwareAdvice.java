@@ -137,18 +137,19 @@ public class ContextAwareAdvice {
         }
     }
 
-    public static String[] getCallStack() {
-        int size = 100;
-        int adviceStackEntryCount = 2;
-        String[] callStack = new String[size];
-        for (int i = 0; i < size; i++) {
-            Class c = sun.reflect.Reflection.getCallerClass(i + adviceStackEntryCount);
-            if (c == null) {
-                return Arrays.copyOfRange(callStack, 0, i);
-            }
-            callStack[i] = c.getName();
-        }
-        return callStack;
+    public static String[] getCallStack() { // FIXME commented
+//        int size = 100;
+//        int adviceStackEntryCount = 2;
+//        String[] callStack = new String[size];
+//        for (int i = 0; i < size; i++) {
+//            Class c = sun.reflect.Reflection.getCallerClass(i + adviceStackEntryCount);
+//            if (c == null) {
+//                return Arrays.copyOfRange(callStack, 0, i);
+//            }
+//            callStack[i] = c.getName();
+//        }
+//        return callStack;
+        return new String[] {};
     }
 
     public static List<RuntimeInformationPointParameter> createParameterList(Method method, Object[] args) {

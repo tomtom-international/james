@@ -2,14 +2,14 @@ package com.tomtom.james.newagent;
 
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.tools.ClassStructure;
+import com.tomtom.james.newagent.tools.NewClassQueue;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -19,15 +19,16 @@ public class JamesClassScanner implements Runnable {
     private static final Logger LOG = Logger.getLogger(JamesClassScanner.class);
     private int initialDelay = 10000;
     private int scanPeriod = 5000;
-    private ClassStructure processedClasses = new BasicClassStructure();
+    private ClassStructure processedClasses;
     private ClassStructure classStructure;
     private NewClassQueue newClassQueue;
 
-    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure classStructure, int initialDelay, int scanPeriod) {
+    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, int initialDelay, int scanPeriod) {
         this.newClassQueue = newClassQueue;
         this.classStructure = classStructure;
         this.initialDelay = initialDelay;
         this.scanPeriod = scanPeriod;
+        this.processedClasses = processedClasses;
     }
 
     @SuppressWarnings("unused")

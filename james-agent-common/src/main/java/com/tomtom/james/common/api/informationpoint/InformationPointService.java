@@ -22,6 +22,7 @@ import java.util.Optional;
 public interface InformationPointService {
 
     Collection<InformationPoint> getInformationPoints();
+    Collection<InformationPoint> getInformationPoints(String className);
     Optional<InformationPoint> getInformationPoint(String className, String methodName);
     void addInformationPoint(InformationPoint informationPoint);
     void removeInformationPoint(InformationPoint informationPoint);

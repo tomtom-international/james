@@ -60,8 +60,8 @@ class Agent {
             ToolkitManager toolkitManager = new ToolkitManager(pluginManager, configuration.getToolkitsConfigurations());
             ScriptEngine engine = ScriptEngineFactory.create(publisher, configuration, toolkitManager);
             ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
-            InformationPointService informationPointService = new InformationPointServiceImpl(store, instrumentation);
-            controllersManager.initializeControllers(informationPointService, engine, publisher);
+            //InformationPointService informationPointService = new InformationPointServiceImpl(store, instrumentation);
+            //controllersManager.initializeControllers(informationPointService, engine, publisher);
 
             ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
