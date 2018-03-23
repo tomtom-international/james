@@ -1,9 +1,6 @@
 package com.tomtom.james.newagent.tools;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BasicClassStructure implements ClassStructure {
@@ -15,7 +12,7 @@ public class BasicClassStructure implements ClassStructure {
 
     @Override
     public Set<Class> getChildren(String className) {
-        return container.get(className);
+        return (container.get(className) != null) ? container.get(className) : new HashSet<>();
     }
 
     // FIXME - possible synchronization FUCKUP - think twice ! - current classScanner is single threaded and there is no risk ... but ...
@@ -36,4 +33,15 @@ public class BasicClassStructure implements ClassStructure {
         return container.values();
     }
 
+    //FIXME remove after tests
+    public void printClassStructure() {
+        System.out.println("-------------------------------------------------------------");
+        List<String> keys = new ArrayList<>(container.keySet());
+        Collections.sort(keys);
+        for (String className : keys) {
+            System.out.println(" " + className);
+            container.get(className).forEach(item -> System.out.println("      - " + item));
+        }
+        System.out.println("-------------------------------------------------------------");
+    }
 }

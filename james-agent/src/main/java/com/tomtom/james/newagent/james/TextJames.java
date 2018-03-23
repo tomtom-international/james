@@ -29,7 +29,7 @@ public class TextJames implements James {
             } else {
                 JamesObjective objective = objectives.poll();
                 if (objective != null) {
-                    LOG.info("TextJames :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
+                    LOG.info("TextJames :: queue["+objectives.size()+"] :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
                 }
             }
         }

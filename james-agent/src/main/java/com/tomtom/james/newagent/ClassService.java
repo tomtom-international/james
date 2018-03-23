@@ -6,4 +6,9 @@ public interface ClassService {
     Set<Class> getAllClasses(String className);
     Set<Class> getAllClasses();
     Set<Class> getChildrenOf(String className);
+
+    // FIXME remove after tests
+    void printChildrenStructure();
+    // FIXME remove after tests
+    void printAllClassesStructure();
 }

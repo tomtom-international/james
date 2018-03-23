@@ -4,7 +4,6 @@ import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.newagent.james.James;
 import com.tomtom.james.newagent.james.TextJames;
 import com.tomtom.james.newagent.tools.NewClassQueue;
 import com.tomtom.james.newagent.tools.NewInformationPointQueue;
@@ -36,10 +35,12 @@ public class JamesHQ implements Runnable {
         // start James
         james = new Thread(new TextJames(jamesObjectives, 1000));
         james.setDaemon(true);
-        james.run();
+        james.start();
 
         while (true) {
             Stopwatch stopwatch = Stopwatch.createStarted();
+
+            LOG.trace("JamesHQ :: newInformationPointQueue [" + newInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
 
             // new ip
             // on already processed classes
@@ -48,7 +49,7 @@ public class JamesHQ implements Runnable {
                 InformationPoint informationPoint = newInformationPointQueue.poll();
                 if (informationPoint != null) {
                     LOG.trace("JamesHQ - processing new InformationPoint : " + informationPoint);
-                    if (classService.getChildrenOf(informationPoint.getClassName()) != null) {
+                    if (classService.getChildrenOf(informationPoint.getClassName()).size() > 0) {
                         // information point is declared on interaface or abstract class - we add information point for every child
                         LOG.trace("JamesHQ - preparing JamesObjectives based on ClassStructure : " + informationPoint);
                         classService.getChildrenOf(informationPoint.getClassName())
@@ -56,7 +57,7 @@ public class JamesHQ implements Runnable {
                     } else {
                         // information point is declared on simple class - we add information for every class in every classloader
                         LOG.trace("JamesHQ - preparing simple JamesObjectives " + informationPoint);
-                        classService.getChildrenOf(informationPoint.getClassName())
+                        classService.getAllClasses(informationPoint.getClassName())
                                 .forEach(clazz -> jamesObjectives.add(new JamesObjective(clazz, informationPoint)));
                     }
 
@@ -65,14 +66,14 @@ public class JamesHQ implements Runnable {
             informationPointsProcessingStopwatch.stop();
             LOG.trace("JamesHQ - all new InformationPoints processing time = " + informationPointsProcessingStopwatch.elapsed());
 
-
             Stopwatch newClassesProcessingStopwatch = Stopwatch.createStarted();
             while (!newClassesQueue.isEmpty()) {
                 Class newClazz = newClassesQueue.poll();
                 if (newClazz != null) {
-                    if (classService.getChildrenOf(newClazz.getName()) != null) {
+                    if (classService.getChildrenOf(newClazz.getName()).size() > 0) {
                         // this means that newClazz is interface or abstract class and we put information points on every child
                         LOG.trace("JamesHQ - processing new interface or abstract class : " + newClazz.getName());
+
                         classService.getChildrenOf(newClazz.getName()).forEach(clazz -> informationPointService
                                 .getInformationPoints(clazz.getName())
                                 .forEach(informationPoint -> jamesObjectives.add(new JamesObjective(clazz, informationPoint))));

@@ -35,4 +35,15 @@ public class BasicClassService implements ClassService {
     public Set<Class> getChildrenOf(String className) {
         return childrenMap.getChildren(className);
     }
+
+    @Override
+    public void printChildrenStructure() {
+        childrenMap.printClassStructure();
+    }
+
+    @Override
+    public void printAllClassesStructure() {
+        allClassesMap.printClassStructure();
+    }
+
 }

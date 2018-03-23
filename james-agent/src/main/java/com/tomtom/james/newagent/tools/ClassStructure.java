@@ -19,4 +19,6 @@ public interface ClassStructure {
 
     Collection<Set<Class>> values();
 
+    // FIXME remove after tests
+    void printClassStructure();
 }

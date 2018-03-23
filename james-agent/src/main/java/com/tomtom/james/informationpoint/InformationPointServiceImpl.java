@@ -23,6 +23,7 @@ import com.tomtom.james.newagent.tools.NewInformationPointQueue;
 import com.tomtom.james.store.InformationPointStore;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InformationPointServiceImpl implements InformationPointService {
 
@@ -47,7 +48,7 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     @Override
     public Collection<InformationPoint> getInformationPoints(String className) {
-        return informationPoints;
+        return informationPoints.stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toList());
     }
 
     @Override
@@ -62,7 +63,7 @@ public class InformationPointServiceImpl implements InformationPointService {
         informationPoints.add(informationPoint);
         store.store(informationPoints);
         newInformationPointQueue.add(informationPoint);
-        LOG.trace("InformationPoint added : " + informationPoint);
+        LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + newInformationPointQueue.size());
     }
 
     @Override
