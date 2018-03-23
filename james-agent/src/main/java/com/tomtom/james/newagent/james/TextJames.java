@@ -20,16 +20,17 @@ public class TextJames implements James {
         LOG.trace("TextJames starts running.");
         while(true) {
             if (objectives.isEmpty()) {
-                LOG.trace("TextJames - no objectives in queue - sleeps " + sleepTime + " ms");
+                //LOG.trace("TextJames - no objectives in queue - sleeps " + sleepTime + " ms");
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
-            JamesObjective objective = objectives.poll();
-            if (objective != null) {
-                LOG.info("TextJames :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
+            } else {
+                JamesObjective objective = objectives.poll();
+                if (objective != null) {
+                    LOG.info("TextJames :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
+                }
             }
         }
     }

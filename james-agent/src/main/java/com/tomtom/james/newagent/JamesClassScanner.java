@@ -32,11 +32,11 @@ public class JamesClassScanner implements Runnable {
     }
 
     @SuppressWarnings("unused")
-    private void logCurrentClassStructure() {
+    private void logCurrentClassStructure(ClassStructure data) {
         LOG.trace("--class structure begin -----------------------------------------------------------------------------");
-        classStructure.getMap().forEach((className, children) -> {
-            LOG.trace("     " + className);
-            children.forEach(child -> LOG.trace("          - " + child.getName() + " ::: " + child.toString()));
+        data.getMap().forEach((className, children) -> {
+            System.out.println("     " + className);
+            children.forEach(child -> System.out.println("          - " + child.getName() + " ::: " + child.toString()));
         });
         LOG.trace("--class structure end -------------------------------------------------------------------------------");
     }
@@ -91,27 +91,25 @@ public class JamesClassScanner implements Runnable {
             Stopwatch stopwatch = Stopwatch.createStarted();
             // FIXME - optimize getting delta
             List<Class> newScan = Arrays.asList(instrumentation.getAllLoadedClasses());
-            // removed already processed classes
-            newScan.removeAll(processedClasses
-                    .values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList()));
-            LOG.trace(String.format("JamesClassScanner - delta size : %h  from %h processing delta time = %h", newScan.size(), newScan.size(), stopwatch.elapsed().toString()));
+            // delta
+            Stopwatch deltaStopwatch = Stopwatch.createStarted();
+            List<Class> delta = newScan.stream().filter(c -> !processedClasses.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).contains(c)).collect(Collectors.toList());
+            deltaStopwatch.stop();
+            LOG.trace(String.format("JamesClassScanner - delta size : %h  from %h processing delta time = %s", delta.size(), newScan.size(), deltaStopwatch.elapsed()));
 
             // build ClassStructure
             Stopwatch processingStopWatch = Stopwatch.createStarted();
-            processClasses(newScan); // process and prepare parents and children
+            processClasses(delta); // process and prepare parents and children
             processingStopWatch.stop();
             LOG.trace("JamesClassScanner - class processing time = " + processingStopWatch.elapsed());
 
             // add new classes to processed classes
-            newScan.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
+            delta.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
 
             //logCurrentClassStructure(); // FIXME set if log level is trace
 
             //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
-            newClassQueue.addAll(newScan); // put all processed to queue
+            newClassQueue.addAll(delta); // put all processed to queue
             stopwatch.stop();
             LOG.debug("JamesClassScanner - finished scan time = " + stopwatch.elapsed());
             try {

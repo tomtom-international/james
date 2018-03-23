@@ -17,8 +17,8 @@ public class BasicClassService implements ClassService {
         allClassesMap = new BasicClassStructure();
         childrenMap = new BasicClassStructure();
         scanner = new Thread(new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, initDelay, scanPeriod));
-        //scanner.setDaemon(true);
-        scanner.run();
+        scanner.setDaemon(true);
+        scanner.start();
     }
 
     @Override

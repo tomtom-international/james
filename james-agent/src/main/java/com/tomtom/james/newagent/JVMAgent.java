@@ -109,7 +109,7 @@ public class JVMAgent {
                 }
             }
             AgentConfiguration configuration = AgentConfigurationFactory.create();
-            //Logger.setCurrentLogLevel(configuration.getLogLevel());
+            Logger.setCurrentLogLevel(configuration.getLogLevel());
             printBanner(configuration);
 
             PluginManager pluginManager = new PluginManager(configuration.getPluginIncludeDirectories(), configuration.getPluginIncludeFiles());
@@ -126,6 +126,8 @@ public class JVMAgent {
             LOG.debug("JVMAgent - ClassService is executed.");
 
             jamesHQ = new Thread(new JamesHQ(informationPointService, classService, newInformationPointQueue, newClassQueue, 1000)); // FIXME hardcoded configuration
+            jamesHQ.setDaemon(true);
+            jamesHQ.start();
             LOG.debug("JVMAgent - JamesHQ is executed.");
 
             ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);

@@ -1,0 +1,13 @@
+
+"c:\Program Files\Java\jdk1.8.0_131\bin\java.exe" -javaagent:jvmagent-1.0.jar -Djames.configurationPath="c:/tmp/james/james.yaml" -Djava.util.logging.config.file="c:/tools/tomcat8\conf\logging.properties" -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager  -Xmx6G -Xms4G -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 "-Djdk.tls.ephemeralDHKeySize=2048" -Djava.protocol.handler.pkgs=org.apache.catalina.webresources  -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8081 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=pl1w7l-106600 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n  -Djava.endorsed.dirs="c:/tools/tomcat8\endorsed" -classpath "c:/tools/tomcat8\bin\bootstrap.jar;c:/tools/tomcat8\bin\tomcat-juli.jar" -Dcatalina.base="c:/tools/tomcat8" -Dcatalina.home="c:/tools/tomcat8" -Djava.io.tmpdir="c:/tools/tomcat8\temp" org.apache.catalina.startup.Bootstrap  start
+
+
+
+
+
+
+"c:\Program Files\Java\jdk1.8.0_131\bin\java.exe" -javaagent:james-agent-1.0-SNAPSHOT-all.jar -Djames.configurationPath="c:/tmp/james/james.yaml" -Djava.util.logging.config.file="c:/tools/tomcat8\conf\logging.properties" -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager  -Xmx6G -Xms4G -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 "-Djdk.tls.ephemeralDHKeySize=2048" -Djava.protocol.handler.pkgs=org.apache.catalina.webresources  -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8081 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Djava.rmi.server.hostname=pl1w7l-106600 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n  -Djava.endorsed.dirs="c:/tools/tomcat8\endorsed" -classpath "c:/tools/tomcat8\bin\bootstrap.jar;c:/tools/tomcat8\bin\tomcat-juli.jar" -Dcatalina.base="c:/tools/tomcat8" -Dcatalina.home="c:/tools/tomcat8" -Djava.io.tmpdir="c:/tools/tomcat8\temp" org.apache.catalina.startup.Bootstrap  start
+
+
+james-m
+
