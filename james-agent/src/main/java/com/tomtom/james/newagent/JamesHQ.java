@@ -5,6 +5,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.james.TextJames;
+import com.tomtom.james.newagent.james.TimingJames;
 import com.tomtom.james.newagent.tools.NewClassQueue;
 import com.tomtom.james.newagent.tools.NewInformationPointQueue;
 
@@ -33,7 +34,8 @@ public class JamesHQ implements Runnable {
     @Override
     public void run() {
         // start James
-        james = new Thread(new TextJames(jamesObjectives, 1000));
+        //james = new Thread(new TextJames(jamesObjectives, 1000));
+        james = new Thread(new TimingJames(jamesObjectives, 1000));
         james.setDaemon(true);
         james.start();
 
