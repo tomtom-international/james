@@ -13,7 +13,7 @@ public class TextJames extends AbstractJames {
     }
 
     public void work(JamesObjective objective) {
-        LOG.info("TextJames :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
+        LOG.info("TextJames :: objective ["+objective.getType()+"]" + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
     }
 
 }

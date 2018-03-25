@@ -86,6 +86,11 @@ public class JamesClassScanner implements Runnable {
         if (instrumentation == null) {
             throw new RuntimeException(" JAMES has found that 'instrumentation' is not ready (null) !!!!");
         }
+        try {
+            Thread.sleep(initialDelay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while (true) {
             LOG.trace("JamesClassScanner - scan started.");
             Stopwatch stopwatch = Stopwatch.createStarted();

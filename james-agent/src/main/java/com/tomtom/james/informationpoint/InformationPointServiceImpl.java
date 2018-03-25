@@ -19,7 +19,7 @@ package com.tomtom.james.informationpoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.newagent.tools.NewInformationPointQueue;
+import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.store.InformationPointStore;
 
 import java.util.*;
@@ -31,14 +31,16 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     private final InformationPointStore store;
     private final List<InformationPoint> informationPoints;
-    private final NewInformationPointQueue newInformationPointQueue;
+    private final InformationPointQueue informationPointQueue;
+    private final InformationPointQueue removeInformationPointQueue;
 
 
-    public InformationPointServiceImpl(InformationPointStore store, NewInformationPointQueue newInformationPointQueue) {
+    public InformationPointServiceImpl(InformationPointStore store, InformationPointQueue informationPointQueue, InformationPointQueue removeInformationPointQueue) {
         this.store = Objects.requireNonNull(store);
-        this.newInformationPointQueue = newInformationPointQueue;
+        this.informationPointQueue = informationPointQueue;
+        this.removeInformationPointQueue = removeInformationPointQueue;
         informationPoints = new ArrayList<>(store.restore());
-        newInformationPointQueue.addAll(informationPoints); // put all restored information points to the queue
+        informationPointQueue.addAll(informationPoints); // put all restored information points to the queue
     }
 
     @Override
@@ -62,14 +64,15 @@ public class InformationPointServiceImpl implements InformationPointService {
     public void addInformationPoint(InformationPoint informationPoint) {
         informationPoints.add(informationPoint);
         store.store(informationPoints);
-        newInformationPointQueue.add(informationPoint);
-        LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + newInformationPointQueue.size());
+        informationPointQueue.add(informationPoint);
+        LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + informationPointQueue.size());
     }
 
     @Override
     public void removeInformationPoint(InformationPoint informationPoint) {
         informationPoints.remove(informationPoint);
-        store.store(informationPoints); // FIXME !!!!!!!!!!! there need to be a way to remove information point - now is possible only to add IP !!!!!!!!!!!!!!!!!!!!!
+        removeInformationPointQueue.add(informationPoint);
+        store.store(informationPoints);
     }
 
 }

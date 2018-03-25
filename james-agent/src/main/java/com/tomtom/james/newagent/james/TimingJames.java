@@ -15,22 +15,19 @@ public class TimingJames extends AbstractJames {
         super(objectives, sleepTime);
     }
 
-    @Override
-    public void work(JamesObjective objective) {
-        LOG.trace("TimingJames : " + objective);
+    public void add(Class clazz, String methodName) {
         ClassPool pool = ClassPool.getDefault();
-        pool.insertClassPath(new LoaderClassPath(objective.getClazz().getClassLoader()));
+        pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {
-            CtClass ctClass = pool.get(objective.getClazz().getName());
-            CtMethod method = ctClass.getDeclaredMethod(objective.getInformationPoint().getMethodName());
+            CtClass ctClass = pool.get(clazz.getName());
+            CtMethod method = ctClass.getDeclaredMethod(methodName);
             ctClass.stopPruning(true);
             ctClass.defrost();
             method.addLocalVariable("_startTime", CtClass.longType);
             method.insertBefore("_startTime = System.nanoTime();");
-            method.insertAfter("System.out.println(\"#### INJECTED :: Execution Duration "+ "(nano sec): \"+ (System.nanoTime() - _startTime) );");
-            JVMAgent.redefine(objective.getClazz(), ctClass);
+            method.insertAfter("System.out.println(\"#### INJECTED :: Execution Duration " + "(nano sec): \"+ (System.nanoTime() - _startTime) );");
+            JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
-            LOG.debug("TimingJames : " + objective + " :: DONE !");
         } catch (NotFoundException e) {
             e.printStackTrace();
         } catch (CannotCompileException e) {
@@ -38,7 +35,37 @@ public class TimingJames extends AbstractJames {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void remove(Class clazz, String methodName) {
+        ClassPool pool = ClassPool.getDefault();
+        pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
+        try {
+            CtClass ctClass = pool.get(clazz.getName());
+            CtMethod method = ctClass.getDeclaredMethod(methodName);
+            ctClass.stopPruning(true);
+            ctClass.defrost();
+            JVMAgent.redefine(clazz, ctClass);
+            ctClass.detach();
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+        } catch (CannotCompileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public void work(JamesObjective objective) {
+        LOG.trace("TimingJames : " + objective);
+        if (objective.getType() == JamesObjective.ObjectiveType.ADD) {
+            add(objective.getClazz(), objective.getInformationPoint().getMethodName());
+        } else {
+            remove(objective.getClazz(), objective.getInformationPoint().getMethodName());
+        }
+        LOG.debug("TimingJames : " + objective + " :: " + objective.getType() + " :: DONE !");
     }
 
 }

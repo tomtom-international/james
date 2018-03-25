@@ -17,7 +17,7 @@
 package com.tomtom.james.informationpoint
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint
-import com.tomtom.james.newagent.tools.NewInformationPointQueue
+import com.tomtom.james.newagent.tools.InformationPointQueue
 import com.tomtom.james.store.InformationPointStore
 import spock.lang.Specification
 
@@ -28,7 +28,7 @@ class InformationPointServiceImplSpec extends Specification {
     def store = Mock(InformationPointStore)
     def instrumentation = Mock(Instrumentation)
     def adviceOperations = Mock(AdviceOperations)
-    def newInformationPointQueue = Mock(NewInformationPointQueue)
+    def newInformationPointQueue = Mock(InformationPointQueue)
 
     def "Should add information point"() {
         given:
@@ -51,7 +51,7 @@ class InformationPointServiceImplSpec extends Specification {
 //        given:
 //        def informationPoint = createInformationPoint()
 //        store.restore() >> [informationPoint]
-//        def service = new InformationPointServiceImpl(store, newInformationPointQueue)
+//        def service = new InformationPointServiceImpl(store, addInformationPointQueue)
 //
 //        when:
 //        service.removeInformationPoint(informationPoint)

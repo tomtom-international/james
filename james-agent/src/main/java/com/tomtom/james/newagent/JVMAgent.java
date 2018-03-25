@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.io.Resources;
 import com.tomtom.james.agent.ControllersManager;
 import com.tomtom.james.agent.PluginManager;
@@ -41,7 +42,8 @@ public class JVMAgent {
     private static final Logger LOG = Logger.getLogger(JVMAgent.class);
     public static Instrumentation instrumentation = null;
     private static Thread jamesHQ;
-    private static NewInformationPointQueue newInformationPointQueue = new BasicNewInformationPointQueue(); // TODO should it be defined on the class level ?
+    private static InformationPointQueue addInformationPointQueue = new BasicInformationPointQueue(); // TODO should it be defined on the class level ? - or move it to InformationPointService ?
+    private static InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue(); // TODO should it be defined on the class level ? - or move it to InformationPointService ?
     private static NewClassQueue newClassQueue = new BasicNewClassQueue(); // TODO should it be defined on the class level ?
 
     public static Instrumentation getInstrumentation() {
@@ -112,27 +114,40 @@ public class JVMAgent {
             Logger.setCurrentLogLevel(configuration.getLogLevel());
             printBanner(configuration);
 
+            Stopwatch stopwatch = Stopwatch.createStarted();
             PluginManager pluginManager = new PluginManager(configuration.getPluginIncludeDirectories(), configuration.getPluginIncludeFiles());
+            LOG.trace("pluginManager time=" + stopwatch.elapsed());
             EventPublisher publisher = EventPublisherFactory.create(pluginManager, configuration.getPublishersConfigurations());
+            LOG.trace("publisher time=" + stopwatch.elapsed());
             InformationPointStore store = InformationPointStoreFactory.create(configuration.getInformationPointStoreConfiguration());
+            LOG.trace("store time=" + stopwatch.elapsed());
             ToolkitManager toolkitManager = new ToolkitManager(pluginManager, configuration.getToolkitsConfigurations());
+            LOG.trace("toolkitManager time=" + stopwatch.elapsed());
             ScriptEngine engine = ScriptEngineFactory.create(publisher, configuration, toolkitManager);
+            LOG.trace("engine time=" + stopwatch.elapsed());
             ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
-            InformationPointService informationPointService = new InformationPointServiceImpl(store, newInformationPointQueue);
+            LOG.trace("controllerManager time=" + stopwatch.elapsed());
+            InformationPointService informationPointService = new InformationPointServiceImpl(store, addInformationPointQueue, removeInformationPointQueue);
+            LOG.trace("informationPointService time=" + stopwatch.elapsed());
             controllersManager.initializeControllers(informationPointService, engine, publisher);
+            LOG.trace("initialize controllers time=" + stopwatch.elapsed());
 
             // create ClassService
             ClassService classService = new BasicClassService(newClassQueue, 10000, 5000); // FIXME hardcoded configuration
+            LOG.trace("classService time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - ClassService is executed.");
 
-            jamesHQ = new Thread(new JamesHQ(informationPointService, classService, newInformationPointQueue, newClassQueue, 1000)); // FIXME hardcoded configuration
+            jamesHQ = new Thread(new JamesHQ(informationPointService, classService, addInformationPointQueue, removeInformationPointQueue, newClassQueue, 1000, 10000)); // FIXME hardcoded configuration
             jamesHQ.setDaemon(true);
             jamesHQ.start();
+            LOG.trace("James HQ time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - JamesHQ is executed.");
 
             ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
-            LOG.info("JVMAgent - initialization complete.");
+            LOG.trace("shutdownHook time=" + stopwatch.elapsed());
+            stopwatch.stop();
+            LOG.info("JVMAgent - initialization complete - time=" + stopwatch.elapsed());
 
         } catch (ConfigurationInitializationException e) {
             e.printStackTrace();
