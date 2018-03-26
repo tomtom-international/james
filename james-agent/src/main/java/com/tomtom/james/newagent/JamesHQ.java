@@ -111,7 +111,7 @@ public class JamesHQ implements Runnable {
                                 .forEach(informationPoint -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, clazz, informationPoint))));
                     } else {
                         // we get all information points for new class (by class name) and prepare Objectives
-                        LOG.trace("JamesHQ - processing new class : " + newClazz.getName());
+                        LOG.trace("JamesHQ - processing new class : " + newClazz.getName() + " :: size = " + informationPointService.getInformationPoints(newClazz.getName()));
                         informationPointService.getInformationPoints(newClazz.getName())
                                 .forEach(informationPoint -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint)));
                     }

@@ -98,6 +98,7 @@ public class JamesClassScanner implements Runnable {
             List<Class> newScan = Arrays.asList(instrumentation.getAllLoadedClasses());
             // delta
             Stopwatch deltaStopwatch = Stopwatch.createStarted();
+            
             List<Class> delta = newScan.stream().filter(c -> !processedClasses.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).contains(c)).collect(Collectors.toList());
             deltaStopwatch.stop();
             LOG.trace(String.format("JamesClassScanner - delta size : %d  from %d processing delta time = %s", delta.size(), newScan.size(), deltaStopwatch.elapsed()));

@@ -50,7 +50,7 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     @Override
     public Collection<InformationPoint> getInformationPoints(String className) {
-        return informationPoints.stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toList());
+        return informationPoints.stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toSet());
     }
 
     @Override
