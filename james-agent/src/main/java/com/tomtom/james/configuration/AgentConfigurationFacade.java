@@ -85,6 +85,16 @@ class AgentConfigurationFacade implements AgentConfiguration {
                 .collect(Collectors.toList());
     }
 
+    public Collection<String> getIgnoredPackages() {
+        return configuration.get("classScanner.ignoredPackages")
+                .map(StructuredConfiguration::asList)
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(StructuredConfiguration::asString)
+                .collect(Collectors.toList());
+    }
+
+
     @Override
     public InformationPointStoreConfiguration getInformationPointStoreConfiguration() {
         return configuration.get("informationPointStore")

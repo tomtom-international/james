@@ -13,10 +13,10 @@ public class BasicClassService implements ClassService {
     private ClassStructure childrenMap;
 
 
-    public BasicClassService(NewClassQueue newClassQueue, int initDelay, int scanPeriod) {
-        allClassesMap = new BasicClassStructure();
-        childrenMap = new BasicClassStructure();
-        scanner = new Thread(new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, initDelay, scanPeriod));
+    public BasicClassService(NewClassQueue newClassQueue, Collection<String> ignoredPackages, int initDelay, int scanPeriod) {
+        this.allClassesMap = new BasicClassStructure();
+        this.childrenMap = new BasicClassStructure();
+        scanner = new Thread(new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, ignoredPackages, initDelay, scanPeriod));
         scanner.setDaemon(true);
         scanner.start();
     }

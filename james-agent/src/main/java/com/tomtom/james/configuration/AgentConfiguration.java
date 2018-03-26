@@ -34,6 +34,7 @@ public interface AgentConfiguration {
 
     Collection<String> getPluginIncludeDirectories();
     Collection<String> getPluginIncludeFiles();
+    Collection<String> getIgnoredPackages();
 
     boolean isQuiet();
     Logger.Level getLogLevel();

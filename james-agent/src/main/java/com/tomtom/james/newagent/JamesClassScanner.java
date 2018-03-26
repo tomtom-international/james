@@ -22,13 +22,16 @@ public class JamesClassScanner implements Runnable {
     private ClassStructure processedClasses;
     private ClassStructure classStructure;
     private NewClassQueue newClassQueue;
+    private Collection<String> ignoredPackages;
 
-    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, int initialDelay, int scanPeriod) {
+    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, Collection<String> ignoredPackages, int initialDelay, int scanPeriod) {
         this.newClassQueue = newClassQueue;
         this.classStructure = classStructure;
         this.initialDelay = initialDelay;
         this.scanPeriod = scanPeriod;
+        this.ignoredPackages = ignoredPackages;
         this.processedClasses = processedClasses;
+        LOG.trace("JamesClassScanner : initDelay [" + initialDelay + "ms] : scanPeriod [" + scanPeriod + "ms]: ignoredPackages = " + ignoredPackages.stream().collect(Collectors.joining(", ")));
     }
 
     @SuppressWarnings("unused")
@@ -66,7 +69,7 @@ public class JamesClassScanner implements Runnable {
         }
     }
 
-    private void processClasses(List<Class> clazz) {
+    private void processClasses(Collection<Class> clazz) {
         clazz.stream().forEach(this::processClass);
     }
 
@@ -98,10 +101,26 @@ public class JamesClassScanner implements Runnable {
             List<Class> newScan = Arrays.asList(instrumentation.getAllLoadedClasses());
             // delta
             Stopwatch deltaStopwatch = Stopwatch.createStarted();
-            
-            List<Class> delta = newScan.stream().filter(c -> !processedClasses.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).contains(c)).collect(Collectors.toList());
+            // filter packages
+            // caches all classes that is already processed
+            Set<Class> alreadyProcessed = processedClasses.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            // calculating delta = newscan - already processedClasses - ignored packages
+            Set<Class> delta = newScan // FIXME fast but ugly code
+                    .stream()
+                    .filter(c -> {
+                        // check if it's already processed
+                        if (alreadyProcessed.contains(c)) {
+                            return false;
+                        }
+                        // check if it's in ignored packages - from configuration
+                        if (ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) != null) {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toSet());
             deltaStopwatch.stop();
-            LOG.trace(String.format("JamesClassScanner - delta size : %d  from %d processing delta time = %s", delta.size(), newScan.size(), deltaStopwatch.elapsed()));
+            LOG.trace(String.format("JamesClassScanner - delta size : %d  from %d processing delta time = %s | class structure size %d", delta.size(), newScan.size(), deltaStopwatch.elapsed(), alreadyProcessed.size()));
 
             // build ClassStructure
             Stopwatch processingStopWatch = Stopwatch.createStarted();

@@ -36,6 +36,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 
 public class JVMAgent {
@@ -133,7 +134,9 @@ public class JVMAgent {
             LOG.trace("initialize controllers time=" + stopwatch.elapsed());
 
             // create ClassService
-            ClassService classService = new BasicClassService(newClassQueue, 10000, 5000); // FIXME hardcoded configuration
+            LOG.trace("ClassService init :: ignoredPackages=" + configuration.getIgnoredPackages().stream().collect(Collectors.joining(", ")));
+
+            ClassService classService = new BasicClassService(newClassQueue, configuration.getIgnoredPackages(), 10000, 5000); // FIXME hardcoded configuration
             LOG.trace("classService time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - ClassService is executed.");
 

@@ -21,6 +21,23 @@ controllers:
 #      port: 8500
 #      folderPath: james/test/information-points
 
+
+classScanner:
+  ignoredPackages:
+    - java.
+#    - com.tomtom.james
+    - sun.
+    - org.apache.
+    - javax.servlet.
+    - com.sun.
+    - org.codehaus.
+    - groovy.
+    - javassist.
+    - jdk.
+    - javax.
+    - org.w3c.
+    - org.xml
+
 publishers:
   - id: james.publisher.console
     properties:
