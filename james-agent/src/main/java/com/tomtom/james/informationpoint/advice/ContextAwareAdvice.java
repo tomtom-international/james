@@ -65,7 +65,7 @@ public class ContextAwareAdvice {
                        Object returned,
                        Throwable thrown) {
 
-        Duration executionTime = Duration.ofMillis(_startTime);
+        Duration executionTime = Duration.ofMillis(System.nanoTime() - _startTime);
 
         try {
             if (LOG.isTraceEnabled()) {

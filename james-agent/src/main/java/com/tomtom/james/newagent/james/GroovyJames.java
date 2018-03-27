@@ -26,17 +26,17 @@ public class GroovyJames extends AbstractJames {
         method.insertBefore(s.toString());
     }
 
-    private void insertAfter(Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NoSuchMethodException {
 
-        String script = informationPoint.getScript().get()
-                    .replace("\\","\\\\")
-                    .replace("\"","\\\"")
-                    .replace("\r","\\r")
-                    .replace("\n","\\n");
-        System.out.println("##########################################################");
-        System.out.println(script);
-        System.out.println("##########################################################");
+    // FIXME !!!!!!!!!!  is it enough to escape this strings or .... are we creating a gap making whole system liable to groovy / java injection ?
+    private String escapeScriptString(String script) {
+        return script.replace("\\","\\\\")
+                .replace("\"","\\\"")
+                .replace("\r","\\r")
+                .replace("\n","\\n");
+    }
 
+    private void insertAfter(Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+        String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, ");
         s.append("\""+ informationPoint.getClassName() + "\", ");
@@ -49,25 +49,27 @@ public class GroovyJames extends AbstractJames {
         s.append("($r)$_, "); // result
         s.append("null ");    // exception
         s.append(" ); ");
-
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        System.out.println(s.toString());
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        method.insertAfter(s.toString());
+        method.insertAfter(s.toString(),false);
     }
 
     private void addCatch(ClassPool pool, Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
-        CtClass throwableClass = pool.getCtClass("java.lang.Throwable");
-
-        Method origin = null;
-        try {
-            origin = clazz.getDeclaredMethod(informationPoint.getMethodName());
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-
+        String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        method.addCatch(s.toString(), throwableClass);
+        //s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, ");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( 0L, ");
+        s.append("\""+ informationPoint.getClassName() + "\", ");
+        s.append("\""+ informationPoint.getMethodName() + "\", ");
+        s.append("\""+ script +"\", ");
+        s.append(informationPoint.getSampleRate() +", "); // sample rate
+        s.append("$0.getClass().getMethod(\""+informationPoint.getMethodName()+"\",$sig), "); // method
+        s.append("$0, "); // this
+        s.append("$args, ");  // arguments
+        s.append("null, "); // result
+        s.append("$e");    // exception
+        s.append(" ); ");
+        s.append(" throw $e; ");
+        CtClass exceptionCtClass = pool.getDefault().getCtClass("java.lang.Exception");
+        method.addCatch(s.toString(), exceptionCtClass);
     }
 
     private void add(Class clazz, InformationPoint informationPoint) {
@@ -85,7 +87,7 @@ public class GroovyJames extends AbstractJames {
             // after method
             insertAfter(clazz, method, informationPoint);
             // catch exceptions
-            //addCatch(pool, clazz, method, informationPoint);
+            addCatch(pool, clazz, method, informationPoint);
 
             JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
@@ -94,8 +96,6 @@ public class GroovyJames extends AbstractJames {
         } catch (CannotCompileException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
