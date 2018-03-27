@@ -25,7 +25,7 @@ controllers:
 classScanner:
   ignoredPackages:
     - java.
-#    - com.tomtom.james
+    - com.tomtom.james
     - sun.
     - org.apache.
     - javax.servlet.

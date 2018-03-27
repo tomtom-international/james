@@ -7,6 +7,7 @@ import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Queue;
 
 public class GroovyJames extends AbstractJames {
@@ -17,7 +18,7 @@ public class GroovyJames extends AbstractJames {
     }
 
     private void add(Class clazz, InformationPoint informationPoint) {
-        LOG.trace("GroovyJames instrumentation : " + informationPoint + " | " + clazz.getName() + "["+clazz.hashCode()+"] | classloader:" + clazz.getClassLoader());
+        LOG.trace("GroovyJames instrumentation : " + informationPoint + " | " + clazz.getName() + "[" + clazz.hashCode() + "] | classloader:" + clazz.getClassLoader());
         ClassPool pool = ClassPool.getDefault();
         pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {
@@ -31,28 +32,54 @@ public class GroovyJames extends AbstractJames {
             method.addLocalVariable("_startTime", CtClass.longType);
             method.insertBefore(
                     " _startTime = System.nanoTime(); \n" +
-                    " _LOG = com.tomtom.james.common.log.Logger.getLogger(com.tomtom.james.informationpoint.advice.ContextAwareAdvice.class); \n" +
-                    " if (_LOG.isTraceEnabled()) {\n" +
-                    "   _LOG.trace(\"onEnter: START [originTypeName= " + informationPoint.getClassName() + ", originMethodName= " + informationPoint.getMethodName() + "]\"); \n" +
-                    " }\n");
+                            " _LOG = com.tomtom.james.common.log.Logger.getLogger(com.tomtom.james.informationpoint.advice.ContextAwareAdvice.class); \n" + // FIXME there should be other class in log creation
+                            " if (_LOG.isTraceEnabled()) {\n" +
+                            "   _LOG.trace(\"onEnter: START [originTypeName= " + informationPoint.getClassName() + ", originMethodName= " + informationPoint.getMethodName() + "]\"); \n" +
+                            " }\n");
 
 
+            Method origin = null;
+            try {
+                origin = clazz.getDeclaredMethod(informationPoint.getMethodName());
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+
+            method.insertAfter(
+                    "if (_LOG.isTraceEnabled()) { \n" +
+                            " _LOG.trace(\"onExit: START \" \n" +
+                            "+ \"[origin=" + origin + "\" \n" +
+                            "+ \", informationPointClassName=" + informationPoint.getClassName() + "\" \n" +
+                            "+ \", informationPointMethodName=" + informationPoint.getMethodName() + "\" \n" +
+                            "+ \", script=" + (informationPoint.getScript().isPresent()) + "\" \n" +
+                            "+ \", sampleRate=" + informationPoint.getSampleRate() + "\" \n" +
+                            "+ \", instance= \" + $0  \n" + // FIXME should it be changed $0 to this - check the difference $0 vs this?
+                            "+ \", arguments=\" + java.util.Arrays.asList($args) \n" +
+                            "+ \", returned=\" + $_ \n" +
+                            "+ \", thrown=\" \n" + // no exception
+                            "+ \"]\"); " +
+                            "}"
+            );
 
 
-
-
-
-                //method.insertAfter(" _LOG.trace(\" >>>>>>>>>>>>>>>>>>>>>>dupa !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); \n" );
-
-            method.insertAfter(" " +
-//                    "try {" +
-                      " {       _LOG.trace(\" timing = \" + (System.nanoTime() - _startTime) + \"ns \"); \n }"
-//                    "} catch (Throwable _e) { \n" +
-//                    "   _LOG.error(_e);" +
-//                    "}"
-                    );
-
-
+            CtClass throwableClass = pool.getCtClass("java.lang.Throwable");
+            method.addCatch("" +
+                            " com.tomtom.james.common.log.Logger _LOG = com.tomtom.james.common.log.Logger.getLogger(com.tomtom.james.informationpoint.advice.ContextAwareAdvice.class); \n" +
+                            "if (_LOG.isTraceEnabled()) { \n" +
+                            " _LOG.trace(\"onExit: START \" \n" +
+                            "+ \"[origin=" + origin + "\" \n" +
+                            "+ \", informationPointClassName=" + informationPoint.getClassName() + "\" \n" +
+                            "+ \", informationPointMethodName=" + informationPoint.getMethodName() + "\" \n" +
+                            "+ \", script=" + (informationPoint.getScript().isPresent()) + "\" \n" +
+                            "+ \", sampleRate=" + informationPoint.getSampleRate() + "\" \n" +
+                            "+ \", instance= \" + $0  \n" + // FIXME should it be changed $0 to this - check the difference $0 vs this?
+                            "+ \", arguments=\" + java.util.Arrays.asList($args) \n" +
+                            "+ \", returned=\" \n" +  // no returning value because of exception
+                            "+ \", thrown=\" + $e \n" +
+                            "+ \"]\"); " +
+                            "} \n" +
+                            "throw $e;"
+                    , throwableClass);
 
 
             JVMAgent.redefine(clazz, ctClass);
