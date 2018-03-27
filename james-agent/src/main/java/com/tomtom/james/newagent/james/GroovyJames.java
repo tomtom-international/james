@@ -17,70 +17,75 @@ public class GroovyJames extends AbstractJames {
         super(objectives, sleepTime);
     }
 
+    private void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+        method.addLocalVariable("_startTime", CtClass.longType);
+        StringBuilder s = new StringBuilder("");
+                    s.append(" _startTime = System.nanoTime(); \n");
+                    s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter($0.getClass().getName(), \"" + informationPoint.getMethodName() + "\");");
+        s.append(" ");
+        method.insertBefore(s.toString());
+    }
+
+    private void insertAfter(Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NoSuchMethodException {
+
+        String script = informationPoint.getScript().get()
+                    .replace("\\","\\\\")
+                    .replace("\"","\\\"")
+                    .replace("\r","\\r")
+                    .replace("\n","\\n");
+        System.out.println("##########################################################");
+        System.out.println(script);
+        System.out.println("##########################################################");
+
+        StringBuilder s = new StringBuilder();
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, ");
+        s.append("\""+ informationPoint.getClassName() + "\", ");
+        s.append("\""+ informationPoint.getMethodName() + "\", ");
+        s.append("\""+ script +"\", ");
+        s.append(informationPoint.getSampleRate() +", "); // sample rate
+        s.append("$0.getClass().getMethod(\""+informationPoint.getMethodName()+"\",$sig), "); // method
+        s.append("$0, "); // this
+        s.append("$args, ");  // arguments
+        s.append("($r)$_, "); // result
+        s.append("null ");    // exception
+        s.append(" ); ");
+
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        System.out.println(s.toString());
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        method.insertAfter(s.toString());
+    }
+
+    private void addCatch(ClassPool pool, Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
+        CtClass throwableClass = pool.getCtClass("java.lang.Throwable");
+
+        Method origin = null;
+        try {
+            origin = clazz.getDeclaredMethod(informationPoint.getMethodName());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        StringBuilder s = new StringBuilder();
+        method.addCatch(s.toString(), throwableClass);
+    }
+
     private void add(Class clazz, InformationPoint informationPoint) {
         LOG.trace("GroovyJames instrumentation : " + informationPoint + " | " + clazz.getName() + "[" + clazz.hashCode() + "] | classloader:" + clazz.getClassLoader());
         ClassPool pool = ClassPool.getDefault();
         pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {
             CtClass ctClass = pool.get(clazz.getName());
-            pool.importPackage("com.tomtom.james.common.log");
             CtMethod method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
             ctClass.stopPruning(true);
             ctClass.defrost();
-            CtClass LOGCtClass = pool.get(com.tomtom.james.common.log.Logger.class.getName());
-            method.addLocalVariable("_LOG", LOGCtClass);
-            method.addLocalVariable("_startTime", CtClass.longType);
-            method.insertBefore(
-                    " _startTime = System.nanoTime(); \n" +
-                            " _LOG = com.tomtom.james.common.log.Logger.getLogger(com.tomtom.james.informationpoint.advice.ContextAwareAdvice.class); \n" + // FIXME there should be other class in log creation
-                            " if (_LOG.isTraceEnabled()) {\n" +
-                            "   _LOG.trace(\"onEnter: START [originTypeName= " + informationPoint.getClassName() + ", originMethodName= " + informationPoint.getMethodName() + "]\"); \n" +
-                            " }\n");
 
-
-            Method origin = null;
-            try {
-                origin = clazz.getDeclaredMethod(informationPoint.getMethodName());
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-
-            method.insertAfter(
-                    "if (_LOG.isTraceEnabled()) { \n" +
-                            " _LOG.trace(\"onExit: START \" \n" +
-                            "+ \"[origin=" + origin + "\" \n" +
-                            "+ \", informationPointClassName=" + informationPoint.getClassName() + "\" \n" +
-                            "+ \", informationPointMethodName=" + informationPoint.getMethodName() + "\" \n" +
-                            "+ \", script=" + (informationPoint.getScript().isPresent()) + "\" \n" +
-                            "+ \", sampleRate=" + informationPoint.getSampleRate() + "\" \n" +
-                            "+ \", instance= \" + $0  \n" + // FIXME should it be changed $0 to this - check the difference $0 vs this?
-                            "+ \", arguments=\" + java.util.Arrays.asList($args) \n" +
-                            "+ \", returned=\" + $_ \n" +
-                            "+ \", thrown=\" \n" + // no exception
-                            "+ \"]\"); " +
-                            "}"
-            );
-
-
-            CtClass throwableClass = pool.getCtClass("java.lang.Throwable");
-            method.addCatch("" +
-                            " com.tomtom.james.common.log.Logger _LOG = com.tomtom.james.common.log.Logger.getLogger(com.tomtom.james.informationpoint.advice.ContextAwareAdvice.class); \n" +
-                            "if (_LOG.isTraceEnabled()) { \n" +
-                            " _LOG.trace(\"onExit: START \" \n" +
-                            "+ \"[origin=" + origin + "\" \n" +
-                            "+ \", informationPointClassName=" + informationPoint.getClassName() + "\" \n" +
-                            "+ \", informationPointMethodName=" + informationPoint.getMethodName() + "\" \n" +
-                            "+ \", script=" + (informationPoint.getScript().isPresent()) + "\" \n" +
-                            "+ \", sampleRate=" + informationPoint.getSampleRate() + "\" \n" +
-                            "+ \", instance= \" + $0  \n" + // FIXME should it be changed $0 to this - check the difference $0 vs this?
-                            "+ \", arguments=\" + java.util.Arrays.asList($args) \n" +
-                            "+ \", returned=\" \n" +  // no returning value because of exception
-                            "+ \", thrown=\" + $e \n" +
-                            "+ \"]\"); " +
-                            "} \n" +
-                            "throw $e;"
-                    , throwableClass);
-
+            // before method
+            insertBefore(method, informationPoint);
+            // after method
+            insertAfter(clazz, method, informationPoint);
+            // catch exceptions
+            //addCatch(pool, clazz, method, informationPoint);
 
             JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
@@ -89,6 +94,8 @@ public class GroovyJames extends AbstractJames {
         } catch (CannotCompileException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
