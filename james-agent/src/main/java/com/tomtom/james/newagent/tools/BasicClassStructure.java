@@ -2,8 +2,10 @@ package com.tomtom.james.newagent.tools;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class BasicClassStructure implements ClassStructure {
+    // map className -> set of Class in any classloader
     private Map<String, Set<Class>> container = new ConcurrentHashMap<>();
 
     public boolean contains(String className) {

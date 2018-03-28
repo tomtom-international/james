@@ -8,7 +8,11 @@ import com.tomtom.james.newagent.james.GroovyJames;
 import com.tomtom.james.newagent.james.TimingJames;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.newagent.tools.NewClassQueue;
+import org.apache.commons.lang3.ClassUtils;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -97,24 +101,31 @@ public class JamesHQ implements Runnable {
                 }
             }
 
-
+            // new class
             Stopwatch newClassesProcessingStopwatch = Stopwatch.createStarted();
             while (!newClassesQueue.isEmpty()) {
                 Class newClazz = newClassesQueue.poll();
                 if (newClazz != null) {
-                    if (classService.getChildrenOf(newClazz.getName()).size() > 0) {
-                        // this means that newClazz is interface or abstract class and we put information points on every child
-                        LOG.trace("JamesHQ - processing new interface or abstract class : " + newClazz.getName());
-
-                        classService.getChildrenOf(newClazz.getName()).forEach(clazz -> informationPointService
-                                .getInformationPoints(clazz.getName())
-                                .forEach(informationPoint -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, clazz, informationPoint))));
-                    } else {
-                        // we get all information points for new class (by class name) and prepare Objectives
-                        LOG.trace("JamesHQ - processing new class : " + newClazz.getName() + " :: size = [" + informationPointService.getInformationPoints(newClazz.getName()).size() + "]");
-                        informationPointService.getInformationPoints(newClazz.getName())
-                                .forEach(informationPoint -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint)));
+                    // first we need to check if there is any information point on any parent interface of superclass of given newClazz
+                    List<Class<?>> interfacesAndSuperClasses = new ArrayList<>();
+                    interfacesAndSuperClasses.addAll(ClassUtils.getAllInterfaces(newClazz));
+                    interfacesAndSuperClasses.addAll(ClassUtils.getAllSuperclasses(newClazz));
+                    for(Class superClass : interfacesAndSuperClasses) {
+                        if (informationPointService.getInformationPoints(superClass.getName()).size() > 0) {
+                            for (InformationPoint informationPoint : informationPointService.getInformationPoints(superClass.getName())) {
+                                LOG.trace(" [SUPER] : " + newClazz + " :: " + informationPoint);
+                                jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint));
+                            }
+                        }
                     }
+                    // next we check if there is any information points for directly newClazz
+                    if (informationPointService.getInformationPoints(newClazz.getName()).size() > 0) {
+                        for(InformationPoint informationPoint : informationPointService.getInformationPoints(newClazz.getName())) {
+                            LOG.trace(" [DIRECT] : " + newClazz + " :: " + informationPoint);
+                            jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint));
+                        }
+                    }
+
                 }
             }
             newClassesProcessingStopwatch.stop();

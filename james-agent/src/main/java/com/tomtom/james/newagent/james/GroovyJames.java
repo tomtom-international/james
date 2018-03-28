@@ -78,7 +78,15 @@ public class GroovyJames extends AbstractJames {
         pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {
             CtClass ctClass = pool.get(clazz.getName());
-            CtMethod method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
+            CtMethod method = null;
+            try {
+                method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
+            } catch (NotFoundException notFound) {
+                return; // class is abstact and doesn't contain methods body
+            }
+            if (method == null || method.isEmpty()) {
+                return; // skip instrumentation for all not implemented methods (in abstract classes)
+            }
             ctClass.stopPruning(true);
             ctClass.defrost();
 

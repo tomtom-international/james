@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent;
 
+import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.tools.ClassStructure;
@@ -11,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * responsible for maintenace of the all class map, and structure of parents and children
@@ -44,6 +46,19 @@ public class JamesClassScanner implements Runnable {
         LOG.trace("--class structure end -------------------------------------------------------------------------------");
     }
 
+    @SuppressWarnings("unused")
+    private void logCurrentClassStructure(ClassStructure data, String root) {
+        LOG.trace("-- start @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--");
+        for(String key : data.getMap().keySet().stream().filter(c -> c.startsWith(root)).collect(Collectors.toList())) {
+            Set<Class> set = data.getChildren(key);
+            LOG.trace(" [" + key +"] " + set.size());
+            for(Class c : set) {
+                LOG.trace("               :: " + c.getName());
+            }
+        }
+        LOG.trace("-- end @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--");
+    }
+
 
     /**
      * get parent interfaces and superclasses
@@ -53,19 +68,18 @@ public class JamesClassScanner implements Runnable {
      * @return
      */
     private void processClass(Class clazz) {
+
         if (!clazz.isInterface()) { // interface can not be child - because every method.isEmpty == true, abstractClass could be ...
             Set<Class<?>> parentClassesAndInterfaces = new HashSet<>();
             parentClassesAndInterfaces.addAll(ClassUtils.getAllInterfaces(clazz)); // interfaces
             parentClassesAndInterfaces.addAll(ClassUtils.getAllSuperclasses(clazz)); // superclasses
-            for (Class parentClass : parentClassesAndInterfaces) {
-                if (classStructure.contains(parentClass.getName())) {
-                    processClass(parentClass); // FIXME recurrent call !!!!!!!!!!!!!!!!!!!!
-                }
-                if (parentClass.isInterface() || Modifier.isAbstract(parentClass.getModifiers())) {
-                    // we cache children only for interfaces and abstract classes
-                    classStructure.addChild(parentClass.getName(), clazz);
-                }
-            }
+            parentClassesAndInterfaces.stream()
+                    .filter(c ->ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null)  == null) // remove ignored packages
+                    .forEach(c -> {
+                        if (c.isInterface() || Modifier.isAbstract(c.getModifiers())) {
+                            classStructure.addChild(c.getName(), clazz);
+                        }
+                    });
         }
     }
 
@@ -131,7 +145,10 @@ public class JamesClassScanner implements Runnable {
             // add new classes to processed classes
             delta.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
 
-            //logCurrentClassStructure(); // FIXME set if log level is trace
+// FIXME remove below all commented
+//            logCurrentClassStructure(processedClasses, "xxx.yyy"); // FIXME set if log level is trace
+//            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------");
+//            logCurrentClassStructure(classStructure, "xxx.yyy"); // FIXME set if log level is trace
 
             //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
             newClassQueue.addAll(delta); // put all processed to queue
