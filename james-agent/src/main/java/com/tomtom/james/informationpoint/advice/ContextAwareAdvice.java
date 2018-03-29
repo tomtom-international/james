@@ -126,7 +126,7 @@ public class ContextAwareAdvice {
         }
     }
 
-    public static String[] getCallStack() { // FIXME commented
+    public static String[] getCallStack() {
         int size = 100;
         int adviceStackEntryCount = 2;
         String[] callStack = new String[size];

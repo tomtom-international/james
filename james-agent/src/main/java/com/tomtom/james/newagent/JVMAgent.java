@@ -47,6 +47,10 @@ public class JVMAgent {
     private static InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue(); // TODO should it be defined on the class level ? - or move it to InformationPointService ?
     private static NewClassQueue newClassQueue = new BasicNewClassQueue(); // TODO should it be defined on the class level ?
 
+    /**
+     * do not change this method, don't even think about it !!!
+     * @return
+     */
     public static Instrumentation getInstrumentation() {
         try {
             if (instrumentation == null) {
@@ -74,16 +78,6 @@ public class JVMAgent {
         }
     }
 
-    //FIXME remove this method - it's only for log debug
-    private static void message(String message) {
-        System.out.println("########################################################################");
-        System.out.println("########################################################################");
-        System.out.println("   " + message);
-        System.out.println("########################################################################");
-        System.out.println("########################################################################");
-        System.out.println();
-    }
-
     /**
      * The entry point invoked when this agent is started by {@code -javaagent}.
      */
@@ -103,6 +97,10 @@ public class JVMAgent {
         setupAgent(instrumentation);
     }
 
+    /**
+     * should prepare whole james world to work
+     * @param inst
+     */
     private static void setupAgent(Instrumentation inst) {
         LOG.trace("JVMAgent agentmain");
         try {
@@ -116,31 +114,50 @@ public class JVMAgent {
             printBanner(configuration);
 
             Stopwatch stopwatch = Stopwatch.createStarted();
+
             PluginManager pluginManager = new PluginManager(configuration.getPluginIncludeDirectories(), configuration.getPluginIncludeFiles());
             LOG.trace("pluginManager time=" + stopwatch.elapsed());
+
             EventPublisher publisher = EventPublisherFactory.create(pluginManager, configuration.getPublishersConfigurations());
             LOG.trace("publisher time=" + stopwatch.elapsed());
+
             InformationPointStore store = InformationPointStoreFactory.create(configuration.getInformationPointStoreConfiguration());
             LOG.trace("store time=" + stopwatch.elapsed());
+
             ToolkitManager toolkitManager = new ToolkitManager(pluginManager, configuration.getToolkitsConfigurations());
             LOG.trace("toolkitManager time=" + stopwatch.elapsed());
+
             ScriptEngine engine = ScriptEngineFactory.create(publisher, configuration, toolkitManager);
             LOG.trace("engine time=" + stopwatch.elapsed());
+
             ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
             LOG.trace("controllerManager time=" + stopwatch.elapsed());
+
+            // iformation point provider
             InformationPointService informationPointService = new InformationPointServiceImpl(store, addInformationPointQueue, removeInformationPointQueue);
             LOG.trace("informationPointService time=" + stopwatch.elapsed());
+
             controllersManager.initializeControllers(informationPointService, engine, publisher);
             LOG.trace("initialize controllers time=" + stopwatch.elapsed());
 
-            // create ClassService
-            LOG.trace("ClassService init :: ignoredPackages=" + configuration.getIgnoredPackages().stream().collect(Collectors.joining(", ")));
-
-            ClassService classService = new BasicClassService(newClassQueue, configuration.getIgnoredPackages(), 10000, 5000); // FIXME hardcoded configuration
+            // ClassService - scans JVM loaded classes and put every new class to the newClassQuery
+            LOG.trace("ClassService init :: ignoredPackages=" + configuration.getClassScannerConfiguration().getIgnoredPackages().stream().collect(Collectors.joining(", ")));
+            ClassService classService = new BasicClassService(newClassQueue,
+                    configuration.getClassScannerConfiguration().getIgnoredPackages(),
+                    configuration.getClassScannerConfiguration().getInitialDelay(),
+                    configuration.getClassScannerConfiguration().getScanPeriod());
             LOG.trace("classService time=" + stopwatch.elapsed());
+
             LOG.debug("JVMAgent - ClassService is executed.");
 
-            jamesHQ = new Thread(new JamesHQ(informationPointService, classService, addInformationPointQueue, removeInformationPointQueue, newClassQueue, 1000, 10000)); // FIXME hardcoded configuration
+            jamesHQ = new Thread(
+                        new JamesHQ(informationPointService,
+                                classService,
+                                addInformationPointQueue,
+                                removeInformationPointQueue,
+                                newClassQueue,
+                                configuration.getJamesHQConfiguration().getInitialDelay(),
+                                configuration.getJamesHQConfiguration().getScanPeriod()));
             jamesHQ.setDaemon(true);
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());

@@ -5,12 +5,10 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.james.GroovyJames;
-import com.tomtom.james.newagent.james.TimingJames;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.newagent.tools.NewClassQueue;
 import org.apache.commons.lang3.ClassUtils;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -19,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 public class JamesHQ implements Runnable {
     private static final Logger LOG = Logger.getLogger(JamesHQ.class);
-    private int initialDelay = 10000;
-    private int scanPeriod = 1000;
+    private long initialDelay = 10000;
+    private long scanPeriod = 1000;
     private InformationPointService informationPointService;
     private ClassService classService;
     private NewClassQueue newClassesQueue;
@@ -29,7 +27,7 @@ public class JamesHQ implements Runnable {
     private Queue<JamesObjective> jamesObjectives = new ConcurrentLinkedQueue<>();
     private Thread james;
 
-    public JamesHQ(InformationPointService informationPointService, ClassService classService, InformationPointQueue addInformationPointQueue, InformationPointQueue removeInformationPointQueue, NewClassQueue newClassQueue, int scanPeriod, int initialDelay) {
+    public JamesHQ(InformationPointService informationPointService, ClassService classService, InformationPointQueue addInformationPointQueue, InformationPointQueue removeInformationPointQueue, NewClassQueue newClassQueue, long initialDelay, long scanPeriod) {
         this.scanPeriod = scanPeriod;
         this.initialDelay = initialDelay;
         this.informationPointService = informationPointService;
@@ -54,7 +52,7 @@ public class JamesHQ implements Runnable {
         james.setDaemon(true);
         james.start();
 
-        while (true) {
+        while (true) { // FIXME refactor - too complex
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
@@ -110,7 +108,7 @@ public class JamesHQ implements Runnable {
                     List<Class<?>> interfacesAndSuperClasses = new ArrayList<>();
                     interfacesAndSuperClasses.addAll(ClassUtils.getAllInterfaces(newClazz));
                     interfacesAndSuperClasses.addAll(ClassUtils.getAllSuperclasses(newClazz));
-                    for(Class superClass : interfacesAndSuperClasses) {
+                    for (Class superClass : interfacesAndSuperClasses) {
                         if (informationPointService.getInformationPoints(superClass.getName()).size() > 0) {
                             for (InformationPoint informationPoint : informationPointService.getInformationPoints(superClass.getName())) {
                                 LOG.trace(" [SUPER] : " + newClazz + " :: " + informationPoint);
@@ -120,7 +118,7 @@ public class JamesHQ implements Runnable {
                     }
                     // next we check if there is any information points for directly newClazz
                     if (informationPointService.getInformationPoints(newClazz.getName()).size() > 0) {
-                        for(InformationPoint informationPoint : informationPointService.getInformationPoints(newClazz.getName())) {
+                        for (InformationPoint informationPoint : informationPointService.getInformationPoints(newClazz.getName())) {
                             LOG.trace(" [DIRECT] : " + newClazz + " :: " + informationPoint);
                             jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint));
                         }

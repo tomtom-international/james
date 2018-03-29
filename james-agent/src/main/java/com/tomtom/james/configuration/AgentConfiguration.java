@@ -31,10 +31,11 @@ public interface AgentConfiguration {
 
     InformationPointStoreConfiguration getInformationPointStoreConfiguration();
     ScriptEngineConfiguration getScriptEngineConfiguration();
+    ClassScannerConfiguration getClassScannerConfiguration();
+    JamesHQConfiguration getJamesHQConfiguration();
 
     Collection<String> getPluginIncludeDirectories();
     Collection<String> getPluginIncludeFiles();
-    Collection<String> getIgnoredPackages();
 
     boolean isQuiet();
     Logger.Level getLogLevel();

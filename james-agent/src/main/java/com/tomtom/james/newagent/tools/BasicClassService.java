@@ -13,7 +13,7 @@ public class BasicClassService implements ClassService {
     private ClassStructure childrenMap;
 
 
-    public BasicClassService(NewClassQueue newClassQueue, Collection<String> ignoredPackages, int initDelay, int scanPeriod) {
+    public BasicClassService(NewClassQueue newClassQueue, Collection<String> ignoredPackages, long initDelay, long scanPeriod) {
         this.allClassesMap = new BasicClassStructure();
         this.childrenMap = new BasicClassStructure();
         scanner = new Thread(new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, ignoredPackages, initDelay, scanPeriod));
@@ -34,16 +34,6 @@ public class BasicClassService implements ClassService {
     @Override
     public Set<Class> getChildrenOf(String className) {
         return childrenMap.getChildren(className);
-    }
-
-    @Override
-    public void printChildrenStructure() {
-        childrenMap.printClassStructure();
-    }
-
-    @Override
-    public void printAllClassesStructure() {
-        allClassesMap.printClassStructure();
     }
 
 }

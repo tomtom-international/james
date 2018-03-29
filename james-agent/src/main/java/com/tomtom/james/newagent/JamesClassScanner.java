@@ -19,14 +19,14 @@ import java.util.stream.Stream;
  */
 public class JamesClassScanner implements Runnable {
     private static final Logger LOG = Logger.getLogger(JamesClassScanner.class);
-    private int initialDelay = 10000;
-    private int scanPeriod = 5000;
+    private long initialDelay = 10000;
+    private long scanPeriod = 5000;
     private ClassStructure processedClasses;
     private ClassStructure classStructure;
     private NewClassQueue newClassQueue;
     private Collection<String> ignoredPackages;
 
-    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, Collection<String> ignoredPackages, int initialDelay, int scanPeriod) {
+    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, Collection<String> ignoredPackages, long initialDelay, long scanPeriod) {
         this.newClassQueue = newClassQueue;
         this.classStructure = classStructure;
         this.initialDelay = initialDelay;
@@ -108,10 +108,10 @@ public class JamesClassScanner implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        while (true) {
+        while (true) { // FIXME refactor - too complex
             LOG.trace("JamesClassScanner - scan started.");
             Stopwatch stopwatch = Stopwatch.createStarted();
-            // FIXME - optimize getting delta
+
             List<Class> newScan = Arrays.asList(instrumentation.getAllLoadedClasses());
             // delta
             Stopwatch deltaStopwatch = Stopwatch.createStarted();
@@ -119,7 +119,7 @@ public class JamesClassScanner implements Runnable {
             // caches all classes that is already processed
             Set<Class> alreadyProcessed = processedClasses.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
             // calculating delta = newscan - already processedClasses - ignored packages
-            Set<Class> delta = newScan // FIXME fast but ugly code
+            Set<Class> delta = newScan
                     .stream()
                     .filter(c -> {
                         // check if it's already processed
@@ -144,11 +144,6 @@ public class JamesClassScanner implements Runnable {
 
             // add new classes to processed classes
             delta.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
-
-// FIXME remove below all commented
-//            logCurrentClassStructure(processedClasses, "xxx.yyy"); // FIXME set if log level is trace
-//            System.out.println("----------------------------------------------------------------------------------------------------------------------------------------");
-//            logCurrentClassStructure(classStructure, "xxx.yyy"); // FIXME set if log level is trace
 
             //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
             newClassQueue.addAll(delta); // put all processed to queue

@@ -85,15 +85,19 @@ class AgentConfigurationFacade implements AgentConfiguration {
                 .collect(Collectors.toList());
     }
 
-    public Collection<String> getIgnoredPackages() {
-        return configuration.get("classScanner.ignoredPackages")
-                .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(StructuredConfiguration::asString)
-                .collect(Collectors.toList());
+    @Override
+    public ClassScannerConfiguration getClassScannerConfiguration() {
+        return configuration.get("classScanner")
+                .map(ClassScannerConfigurationFacade::new)
+                .orElse(new ClassScannerConfigurationFacade(new StructuredConfiguration.Empty()));
     }
 
+    @Override
+    public JamesHQConfiguration getJamesHQConfiguration() {
+        return configuration.get("jamesHQ")
+                .map(JamesHQConfigurationFacade::new)
+                .orElse(new JamesHQConfigurationFacade(new StructuredConfiguration.Empty()));
+    }
 
     @Override
     public InformationPointStoreConfiguration getInformationPointStoreConfiguration() {
