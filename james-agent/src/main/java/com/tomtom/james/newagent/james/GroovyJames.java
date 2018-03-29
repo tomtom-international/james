@@ -2,12 +2,12 @@ package com.tomtom.james.newagent.james;
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.GlobalValueStore;
 import com.tomtom.james.newagent.JVMAgent;
 import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Queue;
 
 public class GroovyJames extends AbstractJames {
@@ -20,12 +20,11 @@ public class GroovyJames extends AbstractJames {
     private void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
-                    s.append(" _startTime = System.nanoTime(); \n");
+                    s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\""+informationPoint+"\", System.nanoTime()); ");
                     s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter($0.getClass().getName(), \"" + informationPoint.getMethodName() + "\");");
         s.append(" ");
         method.insertBefore(s.toString());
     }
-
 
     // FIXME !!!!!!!!!!  is it enough to escape this strings or .... are we creating a gap making whole system liable to groovy / java injection ?
     private String escapeScriptString(String script) {
@@ -38,7 +37,8 @@ public class GroovyJames extends AbstractJames {
     private void insertAfter(Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, ");
+        s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); \n");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, \n");
         s.append("\""+ informationPoint.getClassName() + "\", ");
         s.append("\""+ informationPoint.getMethodName() + "\", ");
         s.append("\""+ script +"\", ");
@@ -46,7 +46,7 @@ public class GroovyJames extends AbstractJames {
         s.append("$0.getClass().getMethod(\""+informationPoint.getMethodName()+"\",$sig), "); // method
         s.append("$0, "); // this
         s.append("$args, ");  // arguments
-        s.append("($r)$_, "); // result
+        s.append("($r)$_, "); // resulto
         s.append("null ");    // exception
         s.append(" ); ");
         method.insertAfter(s.toString(),false);
@@ -55,8 +55,8 @@ public class GroovyJames extends AbstractJames {
     private void addCatch(ClassPool pool, Class clazz, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        //s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, ");
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( 0L, ");
+        s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); ");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, ");
         s.append("\""+ informationPoint.getClassName() + "\", ");
         s.append("\""+ informationPoint.getMethodName() + "\", ");
         s.append("\""+ script +"\", ");
@@ -79,6 +79,7 @@ public class GroovyJames extends AbstractJames {
         try {
             CtClass ctClass = pool.get(clazz.getName());
             CtMethod method = null;
+            //pool.importPackage("com.tomtom.james.newagent");
             try {
                 method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
             } catch (NotFoundException notFound) {
