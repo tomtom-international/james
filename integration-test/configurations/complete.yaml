@@ -1,5 +1,5 @@
 quiet: false
-logLevel: info
+logLevel: trace
 
 plugins:
   includeDirectories:
@@ -24,7 +24,7 @@ controllers:
 jamesHQ:
   initialDelay: 200
   scanPeriod: 200
-  jamesInterval:500
+  jamesInterval: 500
 
 classScanner:
   initialDelay: 500

@@ -20,6 +20,7 @@ public class GroovyJames extends AbstractJames {
     private void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
+//                    s.append(" System.out.println(\"################################## INSTRUMENTATION ####################################################\"); ");
                     s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\""+informationPoint+"\", System.nanoTime()); ");
                     s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter($0.getClass().getName(), \"" + informationPoint.getMethodName() + "\");");
         s.append(" ");
@@ -73,7 +74,7 @@ public class GroovyJames extends AbstractJames {
     }
 
     private void add(Class clazz, InformationPoint informationPoint) {
-        LOG.trace("GroovyJames instrumentation : " + informationPoint + " | " + clazz.getName() + "[" + clazz.hashCode() + "] | classloader:" + clazz.getClassLoader());
+        LOG.error("GroovyJames instrumentation : " + informationPoint + " | " + clazz.getName() + "[" + clazz.hashCode() + "] | classloader:" + clazz.getClassLoader());
         ClassPool pool = ClassPool.getDefault();
         pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {

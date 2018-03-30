@@ -12,7 +12,7 @@ import org.apache.commons.lang3.ClassUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class JamesHQ implements Runnable {
@@ -25,7 +25,7 @@ public class JamesHQ implements Runnable {
     private NewClassQueue newClassesQueue;
     private InformationPointQueue addInformationPointQueue;
     private InformationPointQueue removeInformationPointQueue;
-    private Queue<JamesObjective> jamesObjectives = new ConcurrentLinkedQueue<>();
+    private Queue<JamesObjective> jamesObjectives = new ArrayBlockingQueue<>(10000);
     private Thread james;
 
     public JamesHQ(InformationPointService informationPointService, ClassService classService, InformationPointQueue addInformationPointQueue, InformationPointQueue removeInformationPointQueue, NewClassQueue newClassQueue, long initialDelay, long scanPeriod, long jamesInterval) {
@@ -38,7 +38,6 @@ public class JamesHQ implements Runnable {
         this.addInformationPointQueue = addInformationPointQueue;
         this.removeInformationPointQueue = removeInformationPointQueue;
     }
-
 
     @Override
     public void run() {
@@ -57,11 +56,11 @@ public class JamesHQ implements Runnable {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
-                processNewInformationPoints();
-                processRemoveInformationPoints();
-                processNewClasses();
+            int newIPCounter = processNewInformationPoints();
+            int removedIPCounter  = processRemoveInformationPoints();
+            int newClassesCounter = processNewClasses();
             stopwatch.stop();
-            LOG.debug("JamesHQ scan time = " + stopwatch.elapsed());
+            LOG.debug("JamesHQ [newIP:"+newIPCounter+", removedIP:"+removedIPCounter+", newClasses:"+newClassesCounter+"] scan time = " + stopwatch.elapsed());
             try {
                 if (scanPeriod - stopwatch.elapsed(TimeUnit.MILLISECONDS) > 0) {
                     Thread.sleep(scanPeriod - stopwatch.elapsed(TimeUnit.MILLISECONDS));
@@ -72,9 +71,9 @@ public class JamesHQ implements Runnable {
         }
     }
 
-    private void processNewClasses() {
-        // new class
+    private int processNewClasses() {
         Stopwatch newClassesProcessingStopwatch = Stopwatch.createStarted();
+        int counter = 0;
         while (!newClassesQueue.isEmpty()) {
             Class newClazz = newClassesQueue.poll();
             if (newClazz != null) {
@@ -85,26 +84,28 @@ public class JamesHQ implements Runnable {
                 for (Class superClass : interfacesAndSuperClasses) {
                     if (informationPointService.getInformationPoints(superClass.getName()).size() > 0) {
                         for (InformationPoint informationPoint : informationPointService.getInformationPoints(superClass.getName())) {
-                            LOG.trace(" [SUPER] : " + newClazz + " :: " + informationPoint);
                             jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint));
+                            counter++;
                         }
                     }
                 }
                 // next we check if there is any information points for directly newClazz
                 if (informationPointService.getInformationPoints(newClazz.getName()).size() > 0) {
                     for (InformationPoint informationPoint : informationPointService.getInformationPoints(newClazz.getName())) {
-                        LOG.trace(" [DIRECT] : " + newClazz + " :: " + informationPoint);
                         jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, newClazz, informationPoint));
+                        counter++;
                     }
                 }
-
             }
         }
         newClassesProcessingStopwatch.stop();
-        LOG.trace("JamesHQ - all new Classes processing time = " + newClassesProcessingStopwatch.elapsed());
+        LOG.trace("JamesHQ - all new Classes [" + counter + "]processing time = " + newClassesProcessingStopwatch.elapsed());
+
+        return counter;
     }
 
-    private void processRemoveInformationPoints() {
+    private int processRemoveInformationPoints() {
+        int counter = 0;
         // remove ip
         while (!removeInformationPointQueue.isEmpty()) { //FIXME - starvation issue - so many IP or new classes that everything stops ????
             InformationPoint informationPoint = removeInformationPointQueue.poll();
@@ -113,21 +114,29 @@ public class JamesHQ implements Runnable {
                 if (classService.getChildrenOf(informationPoint.getClassName()).size() > 0) {
                     // information point is declared on interaface or abstract class - we add information point for every child
                     LOG.trace("JamesHQ - preparing JamesObjectives based on ClassStructure : " + informationPoint);
-                    classService.getChildrenOf(informationPoint.getClassName())
-                            .forEach(child -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.REMOVE, child, informationPoint)));
+                    counter += classService
+                            .getChildrenOf(informationPoint.getClassName())
+                            .stream()
+                            .peek(child -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.REMOVE, child, informationPoint)))
+                            .count();
                 } else {
                     // information point is declared on simple class - we add information for every class in every classloader
                     LOG.trace("JamesHQ - preparing simple JamesObjectives " + informationPoint);
-                    classService.getAllClasses(informationPoint.getClassName())
-                            .forEach(clazz -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.REMOVE, clazz, informationPoint)));
+                    counter += classService
+                            .getAllClasses(informationPoint.getClassName())
+                            .stream()
+                            .peek(clazz -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.REMOVE, clazz, informationPoint)))
+                            .count();
                 }
             }
         }
+        return counter;
     }
 
-    private void processNewInformationPoints() {
+    private int processNewInformationPoints() {
         // new ip
         // on already processed classes
+        int counter = 0;
         Stopwatch informationPointsProcessingStopwatch = Stopwatch.createStarted();
         while (!addInformationPointQueue.isEmpty()) { //FIXME - starvation issue - so many IP or new classes that everything stops ????
             InformationPoint informationPoint = addInformationPointQueue.poll();
@@ -136,18 +145,25 @@ public class JamesHQ implements Runnable {
                 if (classService.getChildrenOf(informationPoint.getClassName()).size() > 0) {
                     // information point is declared on interaface or abstract class - we add information point for every child
                     LOG.trace("JamesHQ - preparing JamesObjectives based on ClassStructure : " + informationPoint);
-                    classService.getChildrenOf(informationPoint.getClassName())
-                            .forEach(child -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, child, informationPoint)));
+                    counter += classService
+                            .getChildrenOf(informationPoint.getClassName())
+                            .stream()
+                            .peek(child -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, child, informationPoint)))
+                            .count();
                 } else {
                     // information point is declared on simple class - we add information for every class in every classloader
                     LOG.trace("JamesHQ - preparing simple JamesObjectives " + informationPoint);
-                    classService.getAllClasses(informationPoint.getClassName())
-                            .forEach(clazz -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, clazz, informationPoint)));
+                    counter += classService
+                            .getAllClasses(informationPoint.getClassName())
+                            .stream()
+                            .peek(clazz -> jamesObjectives.add(new JamesObjective(JamesObjective.ObjectiveType.ADD, clazz, informationPoint)))
+                            .count();
                 }
             }
         }
         informationPointsProcessingStopwatch.stop();
         LOG.trace("JamesHQ - all new InformationPoints processing time = " + informationPointsProcessingStopwatch.elapsed());
+        return counter;
     }
 
 

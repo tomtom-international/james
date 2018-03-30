@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class JamesHQConfigurationFacade implements JamesHQConfiguration {
-    private static final Long JAMESHQ_DEFAULT_INITIAL_DELAY = 10000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
+    private static final Long JAMESHQ_DEFAULT_INITIAL_DELAY = 10000L;
     private static final Long JAMES_DEFAULT_INTERVAL = 1000L;
-    private static final Long JAMESHQ_DEFAULT_SCAN_PERIOD = 5000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
+    private static final Long JAMESHQ_DEFAULT_SCAN_PERIOD = 5000L;
     private StructuredConfiguration configuration;
 
     public JamesHQConfigurationFacade(StructuredConfiguration structuredConfiguration) {

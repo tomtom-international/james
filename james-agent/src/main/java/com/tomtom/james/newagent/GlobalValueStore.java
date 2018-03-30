@@ -1,14 +1,17 @@
 package com.tomtom.james.newagent;
 
 public class GlobalValueStore {
-    public static ValueStore valueStore = new ValueStore<Long>();
+    public static ValueStore valueStore = null;
 
-    private static ValueStore<Long> getValueStore() {
+    static {
         try {
-            return (ValueStore<Long>) ClassLoader.getSystemClassLoader()
+            valueStore = (ValueStore<Long>) ClassLoader.getSystemClassLoader()
                     .loadClass(GlobalValueStore.class.getName())
                     .getDeclaredField("valueStore")
                     .get(null);
+            if (valueStore == null) {
+                valueStore = new ValueStore<Long>();
+            }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -16,7 +19,10 @@ public class GlobalValueStore {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return valueStore;
+    }
+
+    protected static ValueStore<Long> getValueStore() {
+            return valueStore;
     }
 
     public static void put(String key, long value) {
@@ -24,7 +30,11 @@ public class GlobalValueStore {
     }
 
     public static long get(String key) {
-        return getValueStore().get(Thread.currentThread().getId() + key);
+
+        String key1 = Thread.currentThread().getId() + key;
+        return getValueStore().get(
+                key1
+        );
     }
 
     public static long getAndRemove(String key){

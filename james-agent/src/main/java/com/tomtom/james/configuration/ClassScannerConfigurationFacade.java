@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class ClassScannerConfigurationFacade implements ClassScannerConfiguration {
-    private static final Long CLASSSCANNER_DEFAULT_INITIAL_DELAY = 10000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
-    private static final Long CLASSSCANNER_DEFAULT_SCAN_PERIOD = 5000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
+    private static final Long CLASSSCANNER_DEFAULT_INITIAL_DELAY = 10000L;
+    private static final Long CLASSSCANNER_DEFAULT_SCAN_PERIOD = 5000L;
     private StructuredConfiguration configuration;
 
     public ClassScannerConfigurationFacade(StructuredConfiguration structuredConfiguration) {
