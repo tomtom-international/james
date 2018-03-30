@@ -8,7 +8,10 @@ import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -34,35 +37,10 @@ public class JamesClassScanner implements Runnable {
         LOG.trace("JamesClassScanner : initDelay [" + initialDelay + "ms] : scanPeriod [" + scanPeriod + "ms]: ignoredPackages = " + ignoredPackages.stream().collect(Collectors.joining(", ")));
     }
 
-    @SuppressWarnings("unused")
-    private void logCurrentClassStructure(ClassStructure data) {
-        LOG.trace("--class structure begin -----------------------------------------------------------------------------");
-        data.getMap().forEach((className, children) -> {
-            System.out.println("     " + className);
-            children.forEach(child -> System.out.println("          - " + child.getName() + " ::: " + child.toString()));
-        });
-        LOG.trace("--class structure end -------------------------------------------------------------------------------");
-    }
-
-    @SuppressWarnings("unused")
-    private void logCurrentClassStructure(ClassStructure data, String root) {
-        LOG.trace("-- start @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--");
-        for (String key : data.getMap().keySet().stream().filter(c -> c.startsWith(root)).collect(Collectors.toList())) {
-            Set<Class> set = data.getChildren(key);
-            LOG.trace(" [" + key + "] " + set.size());
-            for (Class c : set) {
-                LOG.trace("               :: " + c.getName());
-            }
-        }
-        LOG.trace("-- end @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--");
-    }
-
-
     /**
      * get parent interfaces and superclasses
      * update classStructure
      *
-     * @param source
      * @return
      */
     private void processClass(Class clazz) {
@@ -87,7 +65,6 @@ public class JamesClassScanner implements Runnable {
         processingStopWatch.stop();
         LOG.trace("JamesClassScanner - all new classes processing time = " + processingStopWatch.elapsed());
     }
-
 
     private Set<Class> prepareDelta(Class[] newScan) {
         Stopwatch deltaStopwatch = Stopwatch.createStarted();
@@ -149,17 +126,17 @@ public class JamesClassScanner implements Runnable {
         waitThere(initialDelay);
         while (true) {
             Stopwatch stopwatch = Stopwatch.createStarted();
-                // prepare delta - new classes, not already processed and not from ignored packages
-                Set<Class> delta = prepareDelta(instrumentation.getAllLoadedClasses());
+            // prepare delta - new classes, not already processed and not from ignored packages
+            Set<Class> delta = prepareDelta(instrumentation.getAllLoadedClasses());
 
-                // process delta - process every class and prepare parents and children structure
-                processClasses(delta);
+            // process delta - process every class and prepare parents and children structure
+            processClasses(delta);
 
-                // add new classes to processed classes
-                delta.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
+            // add new classes to processed classes
+            delta.forEach(clazz -> processedClasses.addChild(clazz.getName(), clazz));
 
-                //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
-                newClassQueue.addAll(delta); // put all processed to queue
+            //pass all classes to the Queue for HQ processing (process class from queue versus all information points and check if any changes is needed)
+            newClassQueue.addAll(delta); // put all processed to queue
             stopwatch.stop();
             LOG.debug("JamesClassScanner - finished scan [delta size = " + delta.size() + "]time = " + stopwatch.elapsed());
             waitThere(scanPeriod, stopwatch.elapsed(TimeUnit.MILLISECONDS));

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 public class JamesHQConfigurationFacade implements JamesHQConfiguration {
     private static final Long JAMESHQ_DEFAULT_INITIAL_DELAY = 10000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
+    private static final Long JAMES_DEFAULT_INTERVAL = 1000L;
     private static final Long JAMESHQ_DEFAULT_SCAN_PERIOD = 5000L; // FIXME where should be this value defined ? maybe in JVMAgent ????
     private StructuredConfiguration configuration;
 
@@ -27,6 +28,13 @@ public class JamesHQConfigurationFacade implements JamesHQConfiguration {
         return configuration.get("scanPeriod")
                 .map(StructuredConfiguration::asLong)
                 .orElse(JAMESHQ_DEFAULT_SCAN_PERIOD);
+    }
+
+    @Override
+    public long getJamesInterval() {
+        return configuration.get("jamesInterval")
+                .map(StructuredConfiguration::asLong)
+                .orElse(JAMES_DEFAULT_INTERVAL);
     }
 
 }

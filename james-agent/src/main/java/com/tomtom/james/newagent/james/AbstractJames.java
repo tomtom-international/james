@@ -6,10 +6,10 @@ import java.util.Queue;
 
 public abstract class AbstractJames implements James {
 
-    private int sleepTime = 1000;
+    private long sleepTime = 1000;
     private Queue<JamesObjective> objectives;
 
-    public AbstractJames(Queue<JamesObjective> objectives, int sleepTime) {
+    public AbstractJames(Queue<JamesObjective> objectives, long sleepTime) {
         this.objectives = objectives;
         this.sleepTime = sleepTime;
     }

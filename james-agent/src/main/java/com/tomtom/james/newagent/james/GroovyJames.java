@@ -13,7 +13,7 @@ import java.util.Queue;
 public class GroovyJames extends AbstractJames {
     private static final Logger LOG = Logger.getLogger(GroovyJames.class);
 
-    public GroovyJames(Queue<JamesObjective> objectives, int sleepTime) {
+    public GroovyJames(Queue<JamesObjective> objectives, long sleepTime) {
         super(objectives, sleepTime);
     }
 

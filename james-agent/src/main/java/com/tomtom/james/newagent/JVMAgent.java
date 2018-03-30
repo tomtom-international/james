@@ -158,7 +158,8 @@ public class JVMAgent {
                                 removeInformationPointQueue,
                                 newClassQueue,
                                 configuration.getJamesHQConfiguration().getInitialDelay(),
-                                configuration.getJamesHQConfiguration().getScanPeriod()));
+                                configuration.getJamesHQConfiguration().getScanPeriod(),
+                                configuration.getJamesHQConfiguration().getJamesInterval()));
             jamesHQ.setDaemon(true);
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());
