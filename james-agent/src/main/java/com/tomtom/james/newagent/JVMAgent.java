@@ -43,9 +43,6 @@ public class JVMAgent {
     private static final Logger LOG = Logger.getLogger(JVMAgent.class);
     public static Instrumentation instrumentation = null;
     private static Thread jamesHQ;
-    private static InformationPointQueue addInformationPointQueue = new BasicInformationPointQueue(); // TODO should it be defined on the class level ? - or move it to InformationPointService ?
-    private static InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue(); // TODO should it be defined on the class level ? - or move it to InformationPointService ?
-    private static NewClassQueue newClassQueue = new BasicNewClassQueue(); // TODO should it be defined on the class level ?
 
     /**
      * do not change this method, don't even think about it !!!
@@ -132,6 +129,10 @@ public class JVMAgent {
 
             ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
             LOG.trace("controllerManager time=" + stopwatch.elapsed());
+
+            InformationPointQueue addInformationPointQueue = new BasicInformationPointQueue();
+            InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue();
+            NewClassQueue newClassQueue = new BasicNewClassQueue();
 
             // iformation point provider
             InformationPointService informationPointService = new InformationPointServiceImpl(store, addInformationPointQueue, removeInformationPointQueue);

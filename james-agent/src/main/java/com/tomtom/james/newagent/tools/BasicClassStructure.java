@@ -35,15 +35,4 @@ public class BasicClassStructure implements ClassStructure {
         return container.values();
     }
 
-    //FIXME remove after tests
-    public void printClassStructure() {
-        System.out.println("-------------------------------------------------------------");
-        List<String> keys = new ArrayList<>(container.keySet());
-        Collections.sort(keys);
-        for (String className : keys) {
-            System.out.println(" " + className);
-            container.get(className).forEach(item -> System.out.println("      - " + item));
-        }
-        System.out.println("-------------------------------------------------------------");
-    }
 }
