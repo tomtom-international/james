@@ -29,12 +29,13 @@ class InformationPointServiceImplSpec extends Specification {
     def instrumentation = Mock(Instrumentation)
     def adviceOperations = Mock(AdviceOperations)
     def newInformationPointQueue = Mock(InformationPointQueue)
+    def removeInformationPointQueue = Mock(InformationPointQueue)
 
     def "Should add information point"() {
         given:
         def informationPoint = createInformationPoint()
         store.restore() >> []
-        def service = new InformationPointServiceImpl(store, newInformationPointQueue)
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         service.addInformationPoint(informationPoint)
@@ -46,28 +47,28 @@ class InformationPointServiceImplSpec extends Specification {
         service.getInformationPoint("class-name", "method-name").get() == informationPoint
     }
 
-    // FIXME - !!!!!!!!!!! repair - remove information point
-//    def "Should remove information point"() {
-//        given:
-//        def informationPoint = createInformationPoint()
-//        store.restore() >> [informationPoint]
-//        def service = new InformationPointServiceImpl(store, addInformationPointQueue)
-//
-//        when:
-//        service.removeInformationPoint(informationPoint)
-//
-//        then:
-//        true
-//        1 * store.store([])
-//        !service.getInformationPoint("class-name", "method-name").isPresent()
-//    }
+
+    def "Should remove information point"() {
+        given:
+        def informationPoint = createInformationPoint()
+        store.restore() >> [informationPoint]
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
+
+        when:
+        service.removeInformationPoint(informationPoint)
+
+        then:
+        true
+        1 * store.store([])
+        !service.getInformationPoint("class-name", "method-name").isPresent()
+    }
 
     def "Should get registered information points"() {
         given:
         def informationPoint1 = createInformationPoint("-1")
         def informationPoint2 = createInformationPoint("-2")
         store.restore() >> [informationPoint1, informationPoint2]
-        def service = new InformationPointServiceImpl(store, newInformationPointQueue)
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         def informationPoints = service.getInformationPoints()

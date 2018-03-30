@@ -1,5 +1,5 @@
 quiet: false
-logLevel: trace
+logLevel: info
 
 plugins:
   includeDirectories:
@@ -21,8 +21,14 @@ controllers:
 #      port: 8500
 #      folderPath: james/test/information-points
 
+jamesHQ:
+  initialDelay: 200
+  scanPeriod: 200
+  jamesInterval:500
 
 classScanner:
+  initialDelay: 500
+  scanPeriod: 500
   ignoredPackages:
     - java.
     - com.tomtom.james

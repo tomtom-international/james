@@ -40,11 +40,12 @@ class ContextAwareAdviceSpec extends Specification {
     def "Should call success handler after successful method execution"() {
         given:
         def method = Object.class.getMethod("equals", Object.class)
-        def currentThread = Thread.currentThread();
+        def currentThread = Thread.currentThread()
 
         when:
-        def stopwatch = ContextAwareAdvice.onEnter(originClassName, originMethodName)
-        ContextAwareAdvice.onExit(stopwatch, informationPointClassName, informationPointMethodName, script, sampleRate,
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(originClassName, originMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName, script, sampleRate,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
@@ -69,8 +70,9 @@ class ContextAwareAdviceSpec extends Specification {
         def currentThread = Thread.currentThread()
 
         when:
-        def stopwatch = ContextAwareAdvice.onEnter(originClassName, originMethodName)
-        ContextAwareAdvice.onExit(stopwatch, informationPointClassName, informationPointMethodName, script, sampleRate,
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(originClassName, originMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName, script, sampleRate,
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
         then:
