@@ -36,8 +36,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfSubclass()
         jamesController.createInformationPoint(ip)
-        sleep (1000)
+        sleep(2000)
         def result1 = AppClient.methodOfSubclass()
         def eventsAfterFirstCall = readPublishedEventsWithWait(1)
 

@@ -3,7 +3,7 @@ package com.tomtom.james.newagent;
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.tools.ClassStructure;
-import com.tomtom.james.newagent.tools.NewClassQueue;
+import com.tomtom.james.newagent.tools.ClassQueue;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
@@ -24,10 +24,10 @@ public class JamesClassScanner implements Runnable {
     private long scanPeriod = 5000;
     private ClassStructure processedClasses;
     private ClassStructure classStructure;
-    private NewClassQueue newClassQueue;
+    private ClassQueue newClassQueue;
     private Collection<String> ignoredPackages;
 
-    public JamesClassScanner(NewClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, Collection<String> ignoredPackages, long initialDelay, long scanPeriod) {
+    public JamesClassScanner(ClassQueue newClassQueue, ClassStructure processedClasses, ClassStructure classStructure, Collection<String> ignoredPackages, long initialDelay, long scanPeriod) {
         this.newClassQueue = newClassQueue;
         this.classStructure = classStructure;
         this.initialDelay = initialDelay;

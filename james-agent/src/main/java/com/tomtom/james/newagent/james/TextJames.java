@@ -4,6 +4,7 @@ import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.JamesObjective;
 
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 public class TextJames extends AbstractJames {
     private static final Logger LOG = Logger.getLogger(TextJames.class);
@@ -13,7 +14,7 @@ public class TextJames extends AbstractJames {
     }
 
     public void work(JamesObjective objective) {
-        LOG.info("TextJames :: objective ["+objective.getType()+"]" + objective.getClazz().getName() + " :: " + objective.getInformationPoint() + "   |   " + objective.getClazz());
+        LOG.info("TextJames :: objective " + objective.getClazz().getName() + " :: " + objective.getInformationPoints().stream().map(ip -> ip.getMethodName()).collect(Collectors.joining(", ")));
     }
 
 }
