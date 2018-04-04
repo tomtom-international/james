@@ -7,6 +7,8 @@ import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 public class GroovyJames extends AbstractJames {
@@ -29,9 +31,13 @@ public class GroovyJames extends AbstractJames {
     private void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
-        s.append(" System.out.println(\"################################## INSTRUMENTATION + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "####################################################\"); ");
+        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
         s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\"" + informationPoint + "\", System.nanoTime()); ");
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter($0.getClass().getName(), \"" + informationPoint.getMethodName() + "\");");
+        if (Modifier.isStatic(method.getModifiers())) {
+            s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter(\""+method.getDeclaringClass().getName()+"\", \"" + informationPoint.getMethodName() + "\");");
+        } else {
+            s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter($0.getClass().getName(), \"" + informationPoint.getMethodName() + "\");");
+        }
         s.append(" ");
         method.insertBefore(s.toString());
     }
@@ -39,16 +45,22 @@ public class GroovyJames extends AbstractJames {
     private void insertAfter(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
+        s.append(" System.out.println(\"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< INSTRUMENTATION AFTER+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\"); ");
         s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\"" + informationPoint + "\"); \n");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append("$0.getClass().getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-        s.append("$0, "); // this
+        if (Modifier.isStatic(method.getModifiers())) {
+            s.append(method.getDeclaringClass().getName() + ".class.getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+            s.append("null, "); // this is static method - no instance
+        } else{
+            s.append("$0.getClass().getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+            s.append("$0, "); // this
+        }
         s.append("$args, ");  // arguments
-        s.append("($r)$_, "); // resulto
+        s.append("($r)$_, "); // result
         s.append("null ");    // exception
         s.append(" ); ");
         method.insertAfter(s.toString(), false);
@@ -57,14 +69,20 @@ public class GroovyJames extends AbstractJames {
     private void addCatch(ClassPool pool, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
+        s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
         s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\"" + informationPoint + "\"); ");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append("$0.getClass().getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-        s.append("$0, "); // this
+        if (Modifier.isStatic(method.getModifiers())) {
+            s.append(method.getDeclaringClass().getName() + ".class.getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+            s.append("null, "); // this is static method - no instance
+        } else{
+            s.append("$0.getClass().getMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+            s.append("$0, "); // this
+        }
         s.append("$args, ");  // arguments
         s.append("null, "); // result
         s.append("$e");    // exception
@@ -82,26 +100,31 @@ public class GroovyJames extends AbstractJames {
         pool.insertClassPath(new LoaderClassPath(clazz.getClassLoader()));
         try {
             CtClass ctClass = pool.get(clazz.getName());
+            ctClass.stopPruning(true);
+            ctClass.defrost();
+            List<CtMethod> ctMethodList = new ArrayList<>();
             for (InformationPoint informationPoint : objective.getInformationPoints()) {
+                LOG.error("--------- instrumentation: " + clazz.getName() + "#" + informationPoint.getMethodName() + " [IP:" + informationPoint + "] ------------------- ");
                 CtMethod method = null;
                 //pool.importPackage("com.tomtom.james.newagent");
                 try {
                     method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
+                    ctMethodList.add(method);
                 } catch (NotFoundException notFound) {
-                    return; // class is abstact and doesn't contain methods body
+                    LOG.error(" ERROR - Method not found : [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
+                    continue; // method is inherited from parent class or it's abstract method
                 }
                 if (method == null || method.isEmpty()) {
-                    return; // skip instrumentation for all not implemented methods (in abstract classes)
+                    LOG.error(" ERROR !!!! Method is empty or null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
                 }
-                ctClass.stopPruning(true);
-                ctClass.defrost();
-
-                // before method
-                insertBefore(method, informationPoint);
-                // after method
-                insertAfter(method, informationPoint);
-                // catch exceptions
-                addCatch(pool, method, informationPoint);
+                else {
+                    // before method
+                    insertBefore(method, informationPoint);
+                    // after method
+                    insertAfter(method, informationPoint);
+                    // catch exceptions
+                    addCatch(pool, method, informationPoint);
+                }
             }
             JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
