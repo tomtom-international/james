@@ -42,11 +42,10 @@ public class JamesHQ implements Runnable {
         this.removeInformationPointQueue = removeInformationPointQueue;
     }
 
-
     private JamesObjective prepareObjectiveForSingleClass(Class clazz) {
         // simple class
         JamesObjective objective = new JamesObjective(clazz);
-        for(InformationPoint informationPoint : informationPointService.getInformationPoints(clazz.getName())) {
+        for (InformationPoint informationPoint : informationPointService.getInformationPoints(clazz.getName())) {
             if (!clazz.isInterface() || !Modifier.isAbstract(clazz.getModifiers())) {
                 objective.addInformationPoint(informationPoint);
             }
@@ -63,8 +62,7 @@ public class JamesHQ implements Runnable {
                         objective.addInformationPoint(informationPoint);
                     } else if (Modifier.isAbstract(superClass.getModifiers())) {
                         // abstract class
-                        long methodsCount = Arrays.asList(superClass.getMethods())
-                                .stream()
+                        long methodsCount = Arrays.stream(superClass.getMethods())
                                 .filter(m -> m.getName().equals(informationPoint.getMethodName())) // methods with name from IP
                                 .filter(m -> Modifier.isAbstract(m.getModifiers())) // only abstract
                                 .count();
@@ -79,7 +77,7 @@ public class JamesHQ implements Runnable {
         return objective;
     }
 
-    private int newProcessNewClass() {
+    private int processNewClass() {
         int counter = 0;
         while (!newClassesQueue.isEmpty()) {
             Class clazz = newClassesQueue.poll();
@@ -108,24 +106,24 @@ public class JamesHQ implements Runnable {
         return counter;
     }
 
-    private int newProcessAddInformationPoint() {
+    private int processAddInformationPoint() {
         int counter = 0;
-        while(!addInformationPointQueue.isEmpty()) {
-            LOG.error(" New IP QUEUE [" + addInformationPointQueue.size() +"] ");
+        while (!addInformationPointQueue.isEmpty()) {
+            LOG.error(" New IP QUEUE [" + addInformationPointQueue.size() + "] ");
             InformationPoint informationPoint = addInformationPointQueue.poll();
             if (informationPoint != null) {
                 LOG.error(" New IP " + informationPoint);
                 counter += prapareObjectiveForSignleInformationPoint(informationPoint);
             }
         }
-        LOG.trace("processInformationPoints add needs redefine " + counter +" classes.");
+        LOG.trace("processInformationPoints add needs redefine " + counter + " classes.");
         return counter;
     }
 
-    private int newProcessRemoveInformationPoint() {
+    private int processRemoveInformationPoint() {
         int counter = 0;
-        while(!removeInformationPointQueue.isEmpty()) {
-            InformationPoint informationPoint = addInformationPointQueue.poll();
+        while (!removeInformationPointQueue.isEmpty()) {
+            InformationPoint informationPoint = removeInformationPointQueue.poll();
             if (informationPoint != null) {
                 counter += classService.getAllClasses(informationPoint.getClassName())
                         .stream()
@@ -133,7 +131,7 @@ public class JamesHQ implements Runnable {
                         .count();
             }
         }
-        LOG.trace("processInformationPoints remove needs redefine " + counter +" classes.");
+        LOG.trace("processInformationPoints remove needs redefine " + counter + " classes.");
         return counter;
     }
 
@@ -155,9 +153,9 @@ public class JamesHQ implements Runnable {
 
             LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
 
-            int newIPCounter = newProcessAddInformationPoint();
-            int removedIPCounter = newProcessRemoveInformationPoint();
-            int newClassesCounter = newProcessNewClass();
+            int removedIPCounter = processRemoveInformationPoint();
+            int newIPCounter = processAddInformationPoint();
+            int newClassesCounter = processNewClass();
 
             stopwatch.stop();
             LOG.debug("JamesHQ [newIP:" + newIPCounter + ", removedIP:" + removedIPCounter + ", newClasses:" + newClassesCounter + "] scan time = " + stopwatch.elapsed());
