@@ -16,45 +16,41 @@
 
 package com.tomtom.james.informationpoint;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.store.InformationPointStore;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.utility.JavaModule;
 
-import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InformationPointServiceImpl implements InformationPointService {
 
     private static final Logger LOG = Logger.getLogger(InformationPointServiceImpl.class);
 
     private final InformationPointStore store;
-    private final AdviceOperations adviceOperations;
     private final List<InformationPoint> informationPoints;
+    private final InformationPointQueue informationPointQueue;
+    private final InformationPointQueue removeInformationPointQueue;
 
-    public InformationPointServiceImpl(InformationPointStore store,
-                                       Instrumentation instrumentation) {
-        this(store, instrumentation, new ByteBuddyAdviceOperations(createAgentBuilder(), instrumentation));
-    }
 
-    @VisibleForTesting
-    InformationPointServiceImpl(InformationPointStore store,
-                                Instrumentation instrumentation,
-                                AdviceOperations adviceOperations) {
+    public InformationPointServiceImpl(InformationPointStore store, InformationPointQueue informationPointQueue, InformationPointQueue removeInformationPointQueue) {
         this.store = Objects.requireNonNull(store);
-        this.adviceOperations = Objects.requireNonNull(adviceOperations);
+        this.informationPointQueue = informationPointQueue;
+        this.removeInformationPointQueue = removeInformationPointQueue;
         informationPoints = new ArrayList<>(store.restore());
-        informationPoints.forEach(adviceOperations::installAdvice);
+        informationPointQueue.addAll(informationPoints); // put all restored information points to the queue
     }
 
     @Override
     public Collection<InformationPoint> getInformationPoints() {
         return Collections.unmodifiableCollection(informationPoints);
+    }
+
+    @Override
+    public Collection<InformationPoint> getInformationPoints(String className) {
+        return informationPoints.stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toSet());
     }
 
     @Override
@@ -66,45 +62,17 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     @Override
     public void addInformationPoint(InformationPoint informationPoint) {
-        adviceOperations.installAdvice(informationPoint);
         informationPoints.add(informationPoint);
         store.store(informationPoints);
+        informationPointQueue.add(informationPoint);
+        LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + informationPointQueue.size());
     }
 
     @Override
     public void removeInformationPoint(InformationPoint informationPoint) {
-        adviceOperations.uninstallAdvice(informationPoint);
         informationPoints.remove(informationPoint);
+        removeInformationPointQueue.add(informationPoint);
         store.store(informationPoints);
     }
 
-    private static AgentBuilder createAgentBuilder() {
-        AgentBuilder builder = new AgentBuilder.Default()
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
-                .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-                .with(new LoggingTransformationListener());
-        if (Boolean.parseBoolean(System.getProperty("james.verboseAgentBuilder", "false"))) {
-            builder = builder.with(AgentBuilder.Listener.StreamWriting.toSystemOut());
-        }
-        return builder;
-    }
-
-    private static class LoggingTransformationListener extends AgentBuilder.Listener.Adapter {
-        @Override
-        public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module,
-                                     boolean loaded, DynamicType dynamicType) {
-            LOG.trace(() -> "Class transformation applied to " + typeDescription.getName());
-        }
-
-        @Override
-        public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded,
-                            Throwable throwable) {
-            if (throwable.getMessage().contains("com.singularity.ee.agent.appagent")) {
-                LOG.debug(() -> "Unable to transform class " + typeName + " instrumented by AppDynamics");
-            } else {
-                LOG.warn(() -> "Class transformation of " + typeName + " failed", throwable);
-            }
-        }
-    }
 }

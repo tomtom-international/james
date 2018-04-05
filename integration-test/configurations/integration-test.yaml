@@ -1,4 +1,5 @@
-logLevel: trace
+quiet: false
+logLevel: info
 
 plugins:
   includeFiles:
@@ -16,3 +17,26 @@ publishers:
     properties:
       prettifyJSON: true
   - id: integrationTest.publisher
+
+jamesHQ:
+  initialDelay: 200
+  scanPeriod: 1000
+  jamesInterval: 500
+
+classScanner:
+  initialDelay: 500
+  scanPeriod: 1000
+  ignoredPackages:
+    - java.
+    - com.tomtom.james
+    - sun.
+    - org.apache.
+    - javax.servlet.
+    - com.sun.
+    - org.codehaus.
+    - groovy.
+    - javassist.
+    - jdk.
+    - javax.
+    - org.w3c.
+    - org.xml

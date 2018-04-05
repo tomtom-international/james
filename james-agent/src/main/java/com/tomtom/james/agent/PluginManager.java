@@ -45,7 +45,7 @@ public class PluginManager {
 
     private final Collection<URLClassLoader> pluginClassLoaders;
 
-    PluginManager(Collection<String> pluginDirectoriesPaths, Collection<String> pluginFilesPaths) {
+    public PluginManager(Collection<String> pluginDirectoriesPaths, Collection<String> pluginFilesPaths) {
         Collection<URL> pluginURLs = findPlugins(
                 Objects.requireNonNull(pluginDirectoriesPaths),
                 Objects.requireNonNull(pluginFilesPaths));

@@ -26,14 +26,14 @@ import com.tomtom.james.configuration.AgentConfiguration;
 import java.util.Collection;
 import java.util.Objects;
 
-class ShutdownHook extends Thread {
+public class ShutdownHook extends Thread {
 
     private static final Logger LOG = Logger.getLogger(ShutdownHook.class);
 
     private final AgentConfiguration agentConfiguration;
     private final Collection<Closeable> closeables;
 
-    ShutdownHook(ControllersManager controllersManager,
+    public ShutdownHook(ControllersManager controllersManager,
                  ScriptEngine scriptEngine,
                  EventPublisher eventPublisher,
                  AgentConfiguration agentConfiguration) {
