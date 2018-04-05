@@ -1,5 +1,5 @@
 quiet: false
-logLevel: info
+logLevel: trace
 
 plugins:
   includeFiles:

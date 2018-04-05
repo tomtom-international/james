@@ -1,0 +1,608 @@
+Starting a Gradle Daemon, 86 busy and 1 stopped Daemons could not be reused, use --status for details
+:buildSrc:compileJava NO-SOURCE
+:buildSrc:compileGroovy UP-TO-DATE
+:buildSrc:processResources NO-SOURCE
+:buildSrc:classes UP-TO-DATE
+:buildSrc:jar UP-TO-DATE
+:buildSrc:assemble UP-TO-DATE
+:buildSrc:compileTestJava NO-SOURCE
+:buildSrc:compileTestGroovy NO-SOURCE
+:buildSrc:processTestResources NO-SOURCE
+:buildSrc:testClasses UP-TO-DATE
+:buildSrc:test NO-SOURCE
+:buildSrc:check UP-TO-DATE
+:buildSrc:build UP-TO-DATE
+:james-agent-common:compileJava UP-TO-DATE
+:james-agent-common:processResources NO-SOURCE
+:james-agent-common:classes UP-TO-DATE
+:james-agent-common:jar UP-TO-DATE
+:james-agent:compileJava UP-TO-DATE
+:james-agent:compileGroovy NO-SOURCE
+:james-agent:processResources UP-TO-DATE
+:james-agent:classes UP-TO-DATE
+:james-agent:jar UP-TO-DATE
+:james-controller-webservice-api:compileJava UP-TO-DATE
+:james-controller-webservice-api:processResources NO-SOURCE
+:james-controller-webservice-api:classes UP-TO-DATE
+:james-controller-webservice-api:jar UP-TO-DATE
+:james-controller-webservice-client:compileJava UP-TO-DATE
+:james-controller-webservice-client:processResources NO-SOURCE
+:james-controller-webservice-client:classes UP-TO-DATE
+:james-controller-webservice-client:jar UP-TO-DATE
+:integration-test:compileJava UP-TO-DATE
+:integration-test:compileGroovy NO-SOURCE
+:integration-test:processResources UP-TO-DATE
+:integration-test:classes UP-TO-DATE
+:integration-test:prepareConfiguration UP-TO-DATE
+:integration-test:runAppWithJames
+:integration-test:compileTestJava NO-SOURCE
+:integration-test:compileTestGroovy
+:integration-test:processTestResources UP-TO-DATE
+:integration-test:testClasses
+:integration-test:integrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.5.6.RELEASE)
+
+2018-04-05 12:41:54.370  INFO 12284 --- [           main] com.tomtom.james.it.webservice.App       : Starting App on PL1W7L-106600 with PID 12284 (C:\work\repos\james-core-fork\james\integration-test\build\classes\java\main started by kozielew in C:\work\repos\james-core-fork\james\integration-test)
+2018-04-05 12:41:54.373  INFO 12284 --- [           main] com.tomtom.james.it.webservice.App       : No active profile set, falling back to default profiles: default
+2018-04-05 12:41:54.429  INFO 12284 --- [           main] ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@6399551e: startup date [Thu Apr 05 12:41:54 CEST 2018]; root of context hierarchy
+Test app's webservice is down, next attempt in 1 second (java.net.ConnectException: Connection refused: connect)
+2018-04-05 12:41:55.489  INFO 12284 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat initialized with port(s): 8008 (http)
+2018-04-05 12:41:55.499  INFO 12284 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2018-04-05 12:41:55.500  INFO 12284 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet Engine: Apache Tomcat/8.5.16
+2018-04-05 12:41:55.624  INFO 12284 --- [ost-startStop-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2018-04-05 12:41:55.624  INFO 12284 --- [ost-startStop-1] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 1197 ms
+2018-04-05 12:41:55.740  INFO 12284 --- [ost-startStop-1] o.s.b.w.servlet.ServletRegistrationBean  : Mapping servlet: 'dispatcherServlet' to [/]
+2018-04-05 12:41:55.743  INFO 12284 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'characterEncodingFilter' to: [/*]
+2018-04-05 12:41:55.743  INFO 12284 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+2018-04-05 12:41:55.743  INFO 12284 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'httpPutFormContentFilter' to: [/*]
+2018-04-05 12:41:55.744  INFO 12284 --- [ost-startStop-1] o.s.b.w.servlet.FilterRegistrationBean   : Mapping filter: 'requestContextFilter' to: [/*]
+2018-04-05 12:41:56.077  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@6399551e: startup date [Thu Apr 05 12:41:54 CEST 2018]; root of context hierarchy
+2018-04-05 12:41:56.133  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/exit]}" onto public void com.tomtom.james.it.webservice.BuildSystemSupportController.exit()
+2018-04-05 12:41:56.134  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/status]}" onto public java.lang.String com.tomtom.james.it.webservice.BuildSystemSupportController.status()
+2018-04-05 12:41:56.137  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfSuperclassOverriddenInSubclassCalledFromSubclass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfSuperclassOverriddenInSubclassCalledFromSubclass()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/abstractMethodOfSuperclass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.abstractMethodOfSuperclass()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfInterface]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfInterface()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/publicStaticMethod]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.publicStaticMethod()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/privateStaticMethod]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.privateStaticMethod()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfSuperclass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfSuperclass()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/overloadedMethodOfSubclass_String]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.overloadedMethodOfSubclass1()
+2018-04-05 12:41:56.138  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/overloadedMethodOfSubclass_Int]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.overloadedMethodOfSubclass2()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/overloadedMethodOfSubclass_String_Int]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.overloadedMethodOfSubclass3()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfInternalClass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfInternalClass()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfInterface_twoSubclassesCalled]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfInterface2()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodNotThrowingAnException]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodNotThrowingAnException()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodThrowingAnException]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodThrowingAnException()
+2018-04-05 12:41:56.139  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfSubclass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfSubclass()
+2018-04-05 12:41:56.140  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/methodOfSuperclassOverriddenInSubclass]}" onto public java.lang.String com.tomtom.james.it.webservice.TestServiceController.methodOfSuperclassOverriddenInSubclass()
+2018-04-05 12:41:56.143  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2018-04-05 12:41:56.143  INFO 12284 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2018-04-05 12:41:56.175  INFO 12284 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-04-05 12:41:56.175  INFO 12284 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-04-05 12:41:56.210  INFO 12284 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-04-05 12:41:56.589  INFO 12284 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2018-04-05 12:41:56.627  INFO 12284 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8008 (http)
+2018-04-05 12:41:56.630  INFO 12284 --- [           main] com.tomtom.james.it.webservice.App       : Started App in 2.492 seconds (JVM running for 4.496)
+2018-04-05 12:41:57.158  INFO 12284 --- [nio-8008-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring FrameworkServlet 'dispatcherServlet'
+2018-04-05 12:41:57.158  INFO 12284 --- [nio-8008-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization started
+2018-04-05 12:41:57.173  INFO 12284 --- [nio-8008-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization completed in 15 ms
+Test app's webservice is up, starting test task
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.InformationPointsSpec > Information point list should be empty after James is started PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.InformationPointsSpec > Should add information point PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.InformationPointsSpec > Should remove information point PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of subclass, information point on subclass STANDARD_OUT
+    12:41:59.218 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSubclass"
+    12:41:59.221 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:41:59.230 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSubclass" resulted in 200 (null)
+    12:41:59.231 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:01.237 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSubclass"
+    12:42:01.237 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:01.245 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSubclass" resulted in 200 (null)
+    12:42:01.246 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+{
+  "timestamp" : "2018-04-05T10:42:01.441Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfSubclass",
+    "returnValue" : "methodOfSubclass-value",
+    "arg(arg0)" : "methodOfSubclass-arg0"
+  }
+}
+    12:42:01.595 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSubclass"
+    12:42:01.595 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:01.597Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfSubclass",
+    "returnValue" : "methodOfSubclass-value",
+    "arg(arg0)" : "methodOfSubclass-arg0"
+  }
+}
+    12:42:01.598 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSubclass" resulted in 200 (null)
+    12:42:01.598 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+     events after first call ::  [[result:success, className:com.tomtom.james.it.webservice.TestService, methodName:methodOfSubclass, returnValue:methodOfSubclass-value, arg(arg0):methodOfSubclass-arg0]]
+     events after second call ::  [[result:success, className:com.tomtom.james.it.webservice.TestService, methodName:methodOfSubclass, returnValue:methodOfSubclass-value, arg(arg0):methodOfSubclass-arg0]]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of subclass, information point on subclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass, information point on superclass STANDARD_OUT
+    12:42:03.817 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclass"
+    12:42:03.817 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:03.821Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.AbstractTestService",
+    "methodName" : "methodOfSuperclass",
+    "returnValue" : "methodOfSuperclass-value",
+    "arg(arg0)" : "methodOfSuperclass-arg0"
+    12:42:03.821 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclass" resulted in 200 (null)
+  }
+}
+    12:42:03.822 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass, information point on superclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Abstract method of superclass, information point on subclass STANDARD_OUT
+    12:42:04.030 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/abstractMethodOfSuperclass"
+    12:42:04.030 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:04.033 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/abstractMethodOfSuperclass" resulted in 200 (null)
+    12:42:04.033 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:06.035 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/abstractMethodOfSuperclass"
+    12:42:06.035 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:06.038Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "abstractMethodOfSuperclass",
+    "returnValue" : "abstractMethodOfSuperclass-valueFromSubclass",
+    "arg(arg0)" : "abstractMethodOfSuperclass-arg0"
+  }
+}
+    12:42:06.039 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/abstractMethodOfSuperclass" resulted in 200 (null)
+    12:42:06.039 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Abstract method of superclass, information point on subclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Abstract method of superclass, information point on superclass STANDARD_OUT
+    12:42:06.247 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/abstractMethodOfSuperclass"
+    12:42:06.247 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:06.249Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "abstractMethodOfSuperclass",
+    "returnValue" : "abstractMethodOfSuperclass-valueFromSubclass",
+    "arg(arg0)" : "abstractMethodOfSuperclass-arg0"
+  }
+}
+    12:42:06.249 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/abstractMethodOfSuperclass" resulted in 200 (null)
+    12:42:06.249 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:08.251 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/abstractMethodOfSuperclass"
+    12:42:08.251 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:08.254 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/abstractMethodOfSuperclass" resulted in 200 (null)
+    12:42:08.255 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Abstract method of superclass, information point on superclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass, information point on superclass STANDARD_OUT
+    12:42:08.463 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass"
+    12:42:08.463 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:08.466 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass" resulted in 200 (null)
+    12:42:08.466 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:10.470 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass"
+    12:42:10.470 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:10.473 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass" resulted in 200 (null)
+    12:42:10.473 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass, information point on superclass FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:186
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass, information point on subclass STANDARD_OUT
+    12:42:15.485 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass"
+    12:42:15.485 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:15.489 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass" resulted in 200 (null)
+    12:42:15.490 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:17.492 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass"
+    12:42:17.492 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:17.495Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfSuperclassOverriddenInSubclass",
+    "returnValue" : "methodOfSuperclassOverriddenInSubclass-valueFromSubclass",
+    "arg(arg0)" : "methodOfSuperclassOverriddenInSubclass-arg0"
+  }
+}
+    12:42:17.498 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclass" resulted in 200 (null)
+    12:42:17.498 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass, information point on subclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass and calling superclass, information point on superclass STANDARD_OUT
+    12:42:17.705 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass"
+    12:42:17.706 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:17.709 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass" resulted in 200 (null)
+    12:42:17.709 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:19.712 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass"
+    12:42:19.712 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:19.714Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.AbstractTestService",
+    "methodName" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
+    "returnValue" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-valueFromSuperclass",
+    "arg(arg0)" : "arg-from-subclass"
+  }
+}
+    12:42:19.716 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass" resulted in 200 (null)
+    12:42:19.716 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass and calling superclass, information point on superclass FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:246
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass and calling superclass, information point on subclass STANDARD_OUT
+    12:42:24.732 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass"
+    12:42:24.732 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:24.735 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass" resulted in 200 (null)
+    12:42:24.736 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+{
+  "timestamp" : "2018-04-05T10:42:24.736Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.AbstractTestService",
+    "methodName" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
+    "returnValue" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-valueFromSuperclass",
+    "arg(arg0)" : "arg-from-subclass"
+  }
+}
+    12:42:26.738 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass"
+    12:42:26.738 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:26.741Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
+    "returnValue" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-valueFromSubclass",
+    "arg(arg0)" : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-arg0"
+  }
+}
+    12:42:26.742 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfSuperclassOverriddenInSubclassCalledFromSubclass" resulted in 200 (null)
+    12:42:26.742 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of superclass overridden in subclass and calling superclass, information point on subclass FAILED
+    org.spockframework.runtime.SpockComparisonFailure at ScriptExecutionSpec.groovy:287
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:String) STANDARD_OUT
+    12:42:27.016 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_String"
+    12:42:27.016 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:27.020 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_String" resulted in 200 (null)
+    12:42:27.020 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:29.023 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_String"
+    12:42:29.023 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:29.026Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "overloadedMethodOfSubclass",
+    "returnValue" : "overloadedMethodOfSubclass-valueFor(String)",
+    "arg(arg0)" : "overloadedMethodOfSubclass-arg0"
+  }
+}
+    12:42:29.027 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_String" resulted in 200 (null)
+    12:42:29.027 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:String) PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:int) STANDARD_OUT
+    12:42:29.235 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_Int"
+    12:42:29.236 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:29.239 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_Int" resulted in 200 (null)
+    12:42:29.240 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:31.243 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_Int"
+    12:42:31.243 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:31.246 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_Int" resulted in 200 (null)
+    12:42:31.246 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:int) FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:343
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:String, arg1:int) STANDARD_OUT
+    12:42:36.252 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_String_Int"
+    12:42:36.252 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:36.255 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_String_Int" resulted in 200 (null)
+    12:42:36.256 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:38.258 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/overloadedMethodOfSubclass_String_Int"
+    12:42:38.258 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:38.261 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/overloadedMethodOfSubclass_String_Int" resulted in 200 (null)
+    12:42:38.261 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Overloaded method, variant (arg0:String, arg1:int) FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:373
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of internal class STANDARD_OUT
+    12:42:43.269 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInternalClass"
+    12:42:43.269 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:43.273 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInternalClass" resulted in 200 (null)
+    12:42:43.273 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:43.275 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInternalClass"
+    12:42:43.275 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:43.277 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInternalClass" resulted in 200 (null)
+    12:42:43.277 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of internal class FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:404
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in subclass, information point on subclass STANDARD_OUT
+    12:42:50.293 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface"
+    12:42:50.293 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:50.297 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface" resulted in 200 (null)
+    12:42:50.298 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:52.301 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface"
+    12:42:52.301 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:52.304Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfInterface",
+    "returnValue" : "methodOfInterface-value",
+    "arg(arg0)" : "methodOfInterface-arg0"
+  }
+}
+    12:42:52.305 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface" resulted in 200 (null)
+    12:42:52.305 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in subclass, information point on subclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in subclass, information point on interface STANDARD_OUT
+    12:42:52.515 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface"
+    12:42:52.516 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:52.517Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfInterface",
+    "returnValue" : "methodOfInterface-value",
+    "arg(arg0)" : "methodOfInterface-arg0"
+  }
+}
+    12:42:52.518 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface" resulted in 200 (null)
+    12:42:52.518 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:54.521 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface"
+    12:42:54.521 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:54.526Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfInterface",
+    "returnValue" : "methodOfInterface-value",
+    "arg(arg0)" : "methodOfInterface-arg0"
+  }
+}
+    12:42:54.528 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface" resulted in 200 (null)
+    12:42:54.529 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in subclass, information point on interface FAILED
+    org.spockframework.runtime.SpockComparisonFailure at ScriptExecutionSpec.groovy:468
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in two subclasses, information point on interface STANDARD_OUT
+    12:42:54.740 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface_twoSubclassesCalled"
+    12:42:54.740 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:54.742Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfInterface",
+    "returnValue" : "methodOfInterface-value",
+    "arg(arg0)" : "methodOfInterface-arg0"
+  }
+}
+    12:42:54.743 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface_twoSubclassesCalled" resulted in 200 (null)
+    12:42:54.744 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:56.746 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodOfInterface_twoSubclassesCalled"
+    12:42:56.746 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:56.748Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "methodOfInterface",
+    "returnValue" : "methodOfInterface-value",
+    "arg(arg0)" : "methodOfInterface-arg0"
+  }
+}
+    12:42:56.750 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodOfInterface_twoSubclassesCalled" resulted in 200 (null)
+    12:42:56.750 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method of interface implemented in two subclasses, information point on interface FAILED
+    org.spockframework.runtime.SpockComparisonFailure at ScriptExecutionSpec.groovy:498
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with verbose information point, not throwing exception STANDARD_OUT
+    12:42:56.969 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodNotThrowingAnException"
+    12:42:56.969 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:56.972 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodNotThrowingAnException" resulted in 200 (null)
+    12:42:56.972 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:42:58.975 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodNotThrowingAnException"
+    12:42:58.975 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:42:58.979 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodNotThrowingAnException" resulted in 200 (null)
+    12:42:58.979 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+{
+  "timestamp" : "2018-04-05T10:42:59.014Z",
+  "content" : {
+    "informationPointClassName" : "com.tomtom.james.it.webservice.TestServiceThrowingExceptions",
+    "informationPointMethodName" : "doNotThrow",
+    "originDeclaringClassName" : "com.tomtom.james.it.webservice.TestServiceThrowingExceptions",
+    "originName" : "doNotThrow",
+    "instanceFieldValue" : 7,
+    "returnValue" : "doNotThrow result",
+    "arg(arg0)" : "arg0-value",
+    "arg(arg1)" : 101
+  }
+}
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with verbose information point, not throwing exception PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with information point publishing volatile fields, not throwing exception STANDARD_OUT
+    12:42:59.187 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodNotThrowingAnException"
+    12:42:59.187 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:42:59.189Z",
+  "content" : {
+    "informationPointClassName" : "com.tomtom.james.it.webservice.TestServiceThrowingExceptions",
+    "informationPointMethodName" : "doNotThrow",
+    "originDeclaringClassName" : "com.tomtom.james.it.webservice.TestServiceThrowingExceptions",
+    "originName" : "doNotThrow",
+    "instanceFieldValue" : 7,
+    "returnValue" : "doNotThrow result",
+    "arg(arg0)" : "arg0-value",
+    "arg(arg1)" : 101
+  }
+}
+    12:42:59.189 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodNotThrowingAnException" resulted in 200 (null)
+    12:42:59.190 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:43:01.192 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodNotThrowingAnException"
+    12:43:01.192 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:43:01.195 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodNotThrowingAnException" resulted in 200 (null)
+    12:43:01.196 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+{
+  "timestamp" : "2018-04-05T10:43:01.226Z",
+  "content" : {
+    "executionTimeNanos" : 110701000000,
+    "callStack" : [ "com.tomtom.james.informationpoint.advice.ContextAwareAdvice", "com.tomtom.james.it.webservice.TestServiceThrowingExceptions", "com.tomtom.james.it.webservice.TestServiceController", "org.springframework.web.method.support.InvocableHandlerMethod", "org.springframework.web.method.support.InvocableHandlerMethod", "org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod", "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter", "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter", "org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter", "org.springframework.web.servlet.DispatcherServlet", "org.springframework.web.servlet.DispatcherServlet", "org.springframework.web.servlet.FrameworkServlet", "org.springframework.web.servlet.FrameworkServlet", "javax.servlet.http.HttpServlet", "org.springframework.web.servlet.FrameworkServlet", "javax.servlet.http.HttpServlet", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.tomcat.websocket.server.WsFilter", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.springframework.web.filter.RequestContextFilter", "org.springframework.web.filter.OncePerRequestFilter", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.springframework.web.filter.HttpPutFormContentFilter", "org.springframework.web.filter.OncePerRequestFilter", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.springframework.web.filter.HiddenHttpMethodFilter", "org.springframework.web.filter.OncePerRequestFilter", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.springframework.web.filter.CharacterEncodingFilter", "org.springframework.web.filter.OncePerRequestFilter", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.ApplicationFilterChain", "org.apache.catalina.core.StandardWrapperValve", "org.apache.catalina.core.StandardContextValve", "org.apache.catalina.authenticator.AuthenticatorBase", "org.apache.catalina.core.StandardHostValve", "org.apache.catalina.valves.ErrorReportValve", "org.apache.catalina.core.StandardEngineValve", "org.apache.catalina.connector.CoyoteAdapter", "org.apache.coyote.http11.Http11Processor", "org.apache.coyote.AbstractProcessorLight", "org.apache.coyote.AbstractProtocol$ConnectionHandler", "org.apache.tomcat.util.net.NioEndpoint$SocketProcessor", "org.apache.tomcat.util.net.SocketProcessorBase", "java.util.concurrent.ThreadPoolExecutor", "java.util.concurrent.ThreadPoolExecutor$Worker", "org.apache.tomcat.util.threads.TaskThread$WrappingRunnable", "java.lang.Thread" ],
+    "currentThreadName" : "http-nio-8008-exec-1"
+  }
+}
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with information point publishing volatile fields, not throwing exception FAILED
+    org.spockframework.runtime.SpockComparisonFailure at ScriptExecutionSpec.groovy:569
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with verbose information point, throwing exception STANDARD_OUT
+    12:43:01.408 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodThrowingAnException"
+    12:43:01.408 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:43:01.412 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodThrowingAnException" resulted in 200 (null)
+    12:43:01.412 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:43:03.418 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/methodThrowingAnException"
+    12:43:03.419 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:43:03.423 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/methodThrowingAnException" resulted in 200 (null)
+    12:43:03.423 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Method with verbose information point, throwing exception FAILED
+    org.awaitility.core.ConditionTimeoutException at ScriptExecutionSpec.groovy:589
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Public static method of subclass, information point on subclass STANDARD_OUT
+    12:43:08.431 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/publicStaticMethod"
+    12:43:08.431 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:43:08.434 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/publicStaticMethod" resulted in 200 (null)
+    12:43:08.435 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:43:10.438 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/publicStaticMethod"
+    12:43:10.438 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:43:10.441Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "publicStaticMethod",
+    "returnValue" : "publicStaticMethod-value",
+    "arg(arg0)" : "publicStaticMethod-arg0"
+  }
+}
+    12:43:10.442 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/publicStaticMethod" resulted in 200 (null)
+    12:43:10.442 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Public static method of subclass, information point on subclass PASSED
+|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Private static method of subclass, information point on subclass STANDARD_OUT
+    12:43:10.650 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/privateStaticMethod"
+    12:43:10.650 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+    12:43:10.653 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/privateStaticMethod" resulted in 200 (null)
+    12:43:10.653 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+    12:43:12.655 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Created GET request for "http://localhost:8008/privateStaticMethod"
+    12:43:12.655 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+{
+  "timestamp" : "2018-04-05T10:43:12.658Z",
+  "content" : {
+    "result" : "success",
+    "className" : "com.tomtom.james.it.webservice.TestService",
+    "methodName" : "privateStaticMethod",
+    "returnValue" : "privateStaticMethod-value",
+    "arg(arg0)" : "privateStaticMethod-arg0"
+  }
+}
+    12:43:12.659 [Test worker] DEBUG org.springframework.web.client.RestTemplate - GET request for "http://localhost:8008/privateStaticMethod" resulted in 200 (null)
+    12:43:12.659 [Test worker] DEBUG org.springframework.web.client.RestTemplate - Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@f130e95]
+==== FINISHED =============================================================================================================================
+
+com.tomtom.james.it.core.ScriptExecutionSpec > Private static method of subclass, information point on subclass PASSED
+:integration-test:integrationTest FAILED
+:integration-test:shutdownApp
+2018-04-05 12:43:13.000  INFO 12284 --- [       Thread-9] ationConfigEmbeddedWebApplicationContext : Closing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@6399551e: startup date [Thu Apr 05 12:41:54 CEST 2018]; root of context hierarchy
+2018-04-05 12:43:13.002  INFO 12284 --- [       Thread-9] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+17 actionable tasks: 4 executed, 13 up-to-date

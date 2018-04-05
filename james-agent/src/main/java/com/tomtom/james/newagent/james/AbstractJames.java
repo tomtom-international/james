@@ -8,6 +8,7 @@ import javassist.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
@@ -28,7 +29,6 @@ public abstract class AbstractJames implements James {
     abstract void addCatch(ClassPool pool, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException;
 
     private void work(JamesObjective objective) {
-        LOG.error("instrumentation : " + objective.getClazz().getName() + " :: informationPoints [" + objective.getInformationPoints().size() + "]");
         Class clazz = objective.getClazz();
         ClassPool pool = ClassPool.getDefault();
         //pool.importPackage("com.tomtom.james.newagent");
@@ -39,24 +39,25 @@ public abstract class AbstractJames implements James {
             ctClass.defrost();
             List<CtMethod> ctMethodList = new ArrayList<>();
             for (InformationPoint informationPoint : objective.getInformationPoints()) {
-                LOG.error("--------- instrumentation: " + clazz.getName() + "#" + informationPoint.getMethodName() + " [IP:" + informationPoint + "] ------------------- ");
-                CtMethod method = null;
+                LOG.debug("instrumentation: " + clazz.getName() + "#" + informationPoint.getMethodName() + " [IP:" + informationPoint + "]");
                 try {
-                    method = ctClass.getDeclaredMethod(informationPoint.getMethodName());
-                    ctMethodList.add(method);
+                    CtMethod[] methods = ctClass.getDeclaredMethods(informationPoint.getMethodName()); // we need instrument aaa(String s) and aaa(Integer i) and aaa() ....
+                    ctMethodList.addAll(Arrays.asList(methods));
+                    for(CtMethod method : methods) {
+                        if (method == null || method.isEmpty()) {
+                            LOG.error(" ERROR !!!! Method is empty or null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
+                        } else {
+                            // before method
+                            insertBefore(method, informationPoint);
+                            // after method
+                            insertAfter(method, informationPoint);
+                            // catch exceptions
+                            addCatch(pool, method, informationPoint);
+                        }
+                    }
                 } catch (NotFoundException notFound) {
-                    LOG.error(" ERROR - Method not found : [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
+                    LOG.error(" ERROR !!!! Method not found : [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
                     continue; // method is inherited from parent class or it's abstract method
-                }
-                if (method == null || method.isEmpty()) {
-                    LOG.error(" ERROR !!!! Method is empty or null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
-                } else {
-                    // before method
-                    insertBefore(method, informationPoint);
-                    // after method
-                    insertAfter(method, informationPoint);
-                    // catch exceptions
-                    //addCatch(pool, method, informationPoint);
                 }
             }
             JVMAgent.redefine(clazz, ctClass);

@@ -46,10 +46,6 @@ dependencies {
 
 test {
     exclude '**/*'
-    testLogging {
-        showStandardStreams = true
-        events = ['standard_out', 'standard_error']
-    }
 }
 
 task prepareConfiguration(type: Copy) {
@@ -70,10 +66,23 @@ task shutdownApp(type: ShutdownApp) {
 
 task integrationTest(type: Test) {
     dependsOn prepareConfiguration, runAppWithJames
+    testLogging.showStandardStreams = true
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
     finalizedBy shutdownApp
     doFirst {
         waitForWebservice(8008)
     }
+
+    beforeTest {
+        println "|||| START |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+    }
+
+    afterTest { desc, result ->
+        println "==== FINISHED ============================================================================================================================="
+    }
+
 }
 integrationTest.outputs.upToDateWhen { false }
 

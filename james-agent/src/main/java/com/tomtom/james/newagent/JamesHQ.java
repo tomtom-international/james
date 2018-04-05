@@ -110,10 +110,8 @@ public class JamesHQ implements Runnable {
     private int processAddInformationPoint() {
         int counter = 0;
         while (!addInformationPointQueue.isEmpty()) {
-            LOG.error(" New IP QUEUE [" + addInformationPointQueue.size() + "] ");
             InformationPoint informationPoint = addInformationPointQueue.poll();
             if (informationPoint != null) {
-                LOG.error(" New IP " + informationPoint);
                 counter += prapareObjectiveForSignleInformationPoint(informationPoint);
             }
         }
