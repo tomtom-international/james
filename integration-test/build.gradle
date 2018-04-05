@@ -46,6 +46,10 @@ dependencies {
 
 test {
     exclude '**/*'
+    testLogging {
+        showStandardStreams = true
+        events = ['standard_out', 'standard_error']
+    }
 }
 
 task prepareConfiguration(type: Copy) {

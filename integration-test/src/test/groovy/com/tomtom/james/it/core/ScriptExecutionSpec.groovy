@@ -50,6 +50,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsAfterSecondCall = readPublishedEventsWithWait(1)
 
         then:
+
         eventsBefore.isEmpty()
         eventsAfterFirstCall == [
                 [
@@ -73,6 +74,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result2 == "methodOfSubclass-value"
     }
 
+// ??? - no
     def "Method of superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -113,7 +115,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.abstractMethodOfSuperclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.abstractMethodOfSuperclass()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -141,7 +145,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.abstractMethodOfSuperclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.abstractMethodOfSuperclass()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -159,6 +165,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "abstractMethodOfSuperclass-valueFromSubclass"
     }
 
+// FIXME - should it log anything when we set point on the superclass and we call overridden method in subclass ???
     def "Method of superclass overridden in subclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -169,7 +176,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfSuperclassOverriddenInSubclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfSuperclassOverriddenInSubclass()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -197,7 +206,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfSuperclassOverriddenInSubclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfSuperclassOverriddenInSubclass()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -225,7 +236,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfSuperclassOverriddenInSubclassCalledFromSubclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfSuperclassOverriddenInSubclassCalledFromSubclass()
         def eventsAfter = readPublishedEventsWithWait(2)
 
@@ -260,7 +273,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfSuperclassOverriddenInSubclassCalledFromSubclass()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfSuperclassOverriddenInSubclassCalledFromSubclass()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -288,7 +303,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.overloadedMethodOfSubclass_String()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.overloadedMethodOfSubclass_String()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -316,7 +333,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.overloadedMethodOfSubclass_Int()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.overloadedMethodOfSubclass_Int()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -344,7 +363,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.overloadedMethodOfSubclass_String_Int()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.overloadedMethodOfSubclass_String_Int()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -373,8 +394,10 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfInternalClass()
         jamesController.createInformationPoint(ip)
         def result = AppClient.methodOfInternalClass()
+        sleep(2000)
         def eventsAfter = readPublishedEventsWithWait(1)
 
         then:
@@ -401,7 +424,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfInterface()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfInterface()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -429,7 +454,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfInterface()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfInterface()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -457,7 +484,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodOfInterface_twoSubclassesCalled()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodOfInterface_twoSubclassesCalled()
         def eventsAfter = readPublishedEventsWithWait(2)
 
@@ -492,7 +521,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodNotThrowingAnException()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodNotThrowingAnException()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -523,7 +554,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodNotThrowingAnException()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodNotThrowingAnException()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -546,7 +579,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.methodThrowingAnException()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.methodThrowingAnException()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -577,7 +612,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.publicStaticMethod()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.publicStaticMethod()
         def eventsAfter = readPublishedEventsWithWait(1)
 
@@ -605,7 +642,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def eventsBefore = TestUtils.readPublishedEvents()
 
         when:
+        AppClient.privateStaticMethod()
         jamesController.createInformationPoint(ip)
+        sleep(2000)
         def result = AppClient.privateStaticMethod()
         def eventsAfter = readPublishedEventsWithWait(1)
 
