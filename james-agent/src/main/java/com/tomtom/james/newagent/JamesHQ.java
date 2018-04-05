@@ -143,6 +143,10 @@ public class JamesHQ implements Runnable {
                             .stream()
                             .peek(clazz -> jamesObjectives.add(prepareObjectiveForSingleClass(clazz)))
                             .count();
+                    counter += classService.getChildrenOf(informationPoint.getClassName())
+                            .stream()
+                            .peek(clazz -> jamesObjectives.add(prepareObjectiveForSingleClass(clazz)))
+                            .count();
                 }
             }
             LOG.trace("Remove InformationPoints needs redefine " + counter + " classes.");
