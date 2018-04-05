@@ -174,7 +174,7 @@ public class JamesHQ implements Runnable {
         while (true) {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
-            LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
+            LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | removeInformationPoint ["+removeInformationPointQueue.size()+"] | newClassQueue [" + newClassesQueue.size() + "] ");
 
             int removedIPCounter = processRemoveInformationPoint();
             int newIPCounter = processAddInformationPoint();
