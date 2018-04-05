@@ -7,7 +7,7 @@ import javassist.*;
 
 import java.util.Queue;
 
-public class GroovyJames extends AbstractFullJames {
+public class GroovyJames extends AbstractJames {
     private static final Logger LOG = Logger.getLogger(GroovyJames.class);
 
     public GroovyJames(Queue<JamesObjective> objectives, long sleepTime) {

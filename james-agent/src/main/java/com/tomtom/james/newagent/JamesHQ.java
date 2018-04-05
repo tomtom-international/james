@@ -5,6 +5,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.james.GroovyJames;
+import com.tomtom.james.newagent.james.TimingJames;
 import com.tomtom.james.newagent.tools.ClassQueue;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import org.apache.commons.lang3.ClassUtils;
@@ -144,9 +145,11 @@ public class JamesHQ implements Runnable {
             e.printStackTrace();
         }
 
+        // FIXME clean this shit
         //james = new Thread(new OLD_____GroovyJames(jamesObjectives, jamesInterval));
         //james = new Thread(new TextJames(jamesObjectives, jamesInterval));
         james = new Thread(new GroovyJames(jamesObjectives, jamesInterval));
+        //james = new Thread(new TimingJames(jamesObjectives, jamesInterval));
         james.setDaemon(true);
         james.start();
 

@@ -6,32 +6,28 @@ import javassist.*;
 
 import java.util.Queue;
 
-public class TextJames extends AbstractFullJames {
+public class TextJames extends AbstractJames {
 
     public TextJames(Queue<JamesObjective> objectives, long sleepTime) {
         super(objectives, sleepTime);
     }
 
     @Override
-    void insertBefore(CtMethod method, InformationPoint informationPoint) {
-        try {
-            StringBuilder s = new StringBuilder("");
-            s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
-            method.insertBefore(s.toString());
-        } catch (CannotCompileException e) {
-            e.printStackTrace();
-        }
+    void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+        StringBuilder s = new StringBuilder("");
+        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
+        method.insertBefore(s.toString());
     }
 
     @Override
-    void insertAfter(CtMethod method, InformationPoint informationPoint) {
-        try {
-            StringBuilder s = new StringBuilder("");
-            s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION AFTER + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
-            method.insertAfter(s.toString());
-        } catch (CannotCompileException e) {
-            e.printStackTrace();
-        }
+    void insertAfter(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+        StringBuilder s = new StringBuilder("");
+        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION AFTER + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
+        method.insertAfter(s.toString());
+
+        StringBuilder z = new StringBuilder("");
+        z.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION FINALLY + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\");");
+        method.insertAfter(z.toString(),true);
     }
 
     @Override
