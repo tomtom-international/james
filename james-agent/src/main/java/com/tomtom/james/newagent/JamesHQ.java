@@ -5,16 +5,12 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.james.GroovyJames;
-import com.tomtom.james.newagent.james.TimingJames;
 import com.tomtom.james.newagent.tools.ClassQueue;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -51,7 +47,7 @@ public class JamesHQ implements Runnable {
                 objective.addInformationPoint(informationPoint);
             }
         }
-        // super classes
+        // prepare IP for every parent class or interface
         List<Class<?>> interfacesAndSuperClasses = new ArrayList<>();
         interfacesAndSuperClasses.addAll(ClassUtils.getAllInterfaces(clazz));
         interfacesAndSuperClasses.addAll(ClassUtils.getAllSuperclasses(clazz));
@@ -95,7 +91,10 @@ public class JamesHQ implements Runnable {
 
     private int prapareObjectiveForSignleInformationPoint(InformationPoint informationPoint) {
         int counter = 0;
+        LOG.error("----------------------- processing Information Point :  " + informationPoint);
+        // for given classname
         for (Class clazz : classService.getAllClasses(informationPoint.getClassName())) {
+            LOG.error("------------------------------------------ class : " + clazz.getName());
             JamesObjective objective = prepareObjectiveForSingleClass(clazz);
             if (objective.getInformationPoints().size() > 0) { // if there is anything to do
                 jamesObjectives.add(objective);
@@ -104,6 +103,19 @@ public class JamesHQ implements Runnable {
             List<InformationPoint> list = addInformationPointQueue.stream().filter(ip -> objective.getInformationPoints().stream().filter(alreadyProcessed -> ip.getClassName().equals(alreadyProcessed.getClassName())).count() > 0).collect(Collectors.toList());
             addInformationPointQueue.removeAll(list);
         }
+        // for all childs
+        Set<Class> classes = classService.getChildrenOf(informationPoint.getClassName()); // there we get all childs of interface
+        for (Class clazz : classes) {
+            LOG.error("------------------------------------------ class : " + clazz.getName());
+            JamesObjective objective = prepareObjectiveForSingleClass(clazz);
+            if (objective.getInformationPoints().size() > 0) { // if there is anything to do
+                jamesObjectives.add(objective);
+            }
+            // removes all duplicates - duplicate is ip on the same class, because 'prepareObjectiveForSingleClass' gathers all ip for all methods in single JamesObjective
+            List<InformationPoint> list = addInformationPointQueue.stream().filter(ip -> objective.getInformationPoints().stream().filter(alreadyProcessed -> ip.getClassName().equals(alreadyProcessed.getClassName())).count() > 0).collect(Collectors.toList());
+            addInformationPointQueue.removeAll(list);
+        }
+
         return counter;
     }
 
@@ -121,16 +133,20 @@ public class JamesHQ implements Runnable {
 
     private int processRemoveInformationPoint() {
         int counter = 0;
-        while (!removeInformationPointQueue.isEmpty()) {
-            InformationPoint informationPoint = removeInformationPointQueue.poll();
-            if (informationPoint != null) {
-                counter += classService.getAllClasses(informationPoint.getClassName())
-                        .stream()
-                        .peek(clazz -> jamesObjectives.add(prepareObjectiveForSingleClass(clazz)))
-                        .count();
+        if (!removeInformationPointQueue.isEmpty()) {
+            LOG.trace("Remove InformationPoints: queue length = " + removeInformationPointQueue.size());
+            while (!removeInformationPointQueue.isEmpty()) {
+                InformationPoint informationPoint = removeInformationPointQueue.poll();
+                if (informationPoint != null) {
+                    LOG.trace(" remove InformationPoint: " + informationPoint);
+                    counter += classService.getAllClasses(informationPoint.getClassName())
+                            .stream()
+                            .peek(clazz -> jamesObjectives.add(prepareObjectiveForSingleClass(clazz)))
+                            .count();
+                }
             }
+            LOG.trace("Remove InformationPoints needs redefine " + counter + " classes.");
         }
-        LOG.trace("processInformationPoints remove needs redefine " + counter + " classes.");
         return counter;
     }
 

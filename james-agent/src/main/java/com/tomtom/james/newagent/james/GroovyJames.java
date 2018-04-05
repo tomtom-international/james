@@ -41,10 +41,11 @@ public class GroovyJames extends AbstractJames {
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-        if (Modifier.isStatic(method.getModifiers())) {
+        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
+            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("null, "); // this is static method - no instance
         } else {
+            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("$0, "); // this
         }
 
@@ -53,12 +54,6 @@ public class GroovyJames extends AbstractJames {
         s.append("null ");    // exception
         s.append(" ); ");
         method.insertAfter(s.toString(), false);
-
-        // finally block
-        StringBuilder f = new StringBuilder("");
-        //f.append(" System.out.println(\"---------------------------------------------------------------------------- FINALLY ----------------------------------------------------------------------------\"); \n");
-        f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); \n");
-        method.insertAfter(f.toString(),true);
 
     }
 
@@ -72,10 +67,11 @@ public class GroovyJames extends AbstractJames {
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-        if (Modifier.isStatic(method.getModifiers())) {
+        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
+            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("null, "); // this is static method - no instance
         } else {
+            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("$0, "); // this
         }
         s.append("$args, ");  // arguments
@@ -85,5 +81,11 @@ public class GroovyJames extends AbstractJames {
         s.append(" throw $e; ");
         CtClass exceptionCtClass = pool.getDefault().getCtClass("java.lang.Exception");
         method.addCatch(s.toString(), exceptionCtClass);
+
+        // finally block
+        StringBuilder f = new StringBuilder("");
+        f.append(" System.out.println(\"---------------------------------------------------------------------------- FINALLY ----------------------------------------------------------------------------\"); \n");
+        f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); \n");
+        method.insertAfter(f.toString(),true);
     }
 }

@@ -367,6 +367,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 
         when:
         AppClient.overloadedMethodOfSubclass_String_Int()
+        AppClient.overloadedMethodOfSubclass_String_Int()
+        AppClient.overloadedMethodOfSubclass_String_Int()
         jamesController.createInformationPoint(ip)
         sleep(2000)
         def result = AppClient.overloadedMethodOfSubclass_String_Int()
@@ -379,6 +381,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         println "###########################################"
         println "###########################################"
         println "###########################################"
+        println eventsAfter.size()
         println eventsAfter
         println "###########################################"
         println "###########################################"
