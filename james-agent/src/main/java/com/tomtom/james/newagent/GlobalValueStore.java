@@ -1,5 +1,7 @@
 package com.tomtom.james.newagent;
 
+import java.lang.reflect.Field;
+
 public class GlobalValueStore {
     public static ValueStore valueStore = null;
 
@@ -10,7 +12,12 @@ public class GlobalValueStore {
                     .getDeclaredField("valueStore")
                     .get(null);
             if (valueStore == null) {
-                valueStore = new ValueStore<Long>();
+                Field field;
+                field = ClassLoader.getSystemClassLoader()
+                        .loadClass(GlobalValueStore.class.getName())
+                        .getDeclaredField("valueStore");
+                field.setAccessible(true);
+                field.set(null, new ValueStore<Long>());
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -30,7 +37,6 @@ public class GlobalValueStore {
     }
 
     public static long get(String key) {
-
         String key1 = Thread.currentThread().getId() + key;
         return getValueStore().get(
                 key1

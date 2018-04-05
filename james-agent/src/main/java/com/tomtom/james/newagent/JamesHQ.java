@@ -144,6 +144,8 @@ public class JamesHQ implements Runnable {
             e.printStackTrace();
         }
 
+        //james = new Thread(new OLD_____GroovyJames(jamesObjectives, jamesInterval));
+        //james = new Thread(new TextJames(jamesObjectives, jamesInterval));
         james = new Thread(new GroovyJames(jamesObjectives, jamesInterval));
         james.setDaemon(true);
         james.start();

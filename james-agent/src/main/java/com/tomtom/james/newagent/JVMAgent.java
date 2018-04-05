@@ -106,6 +106,10 @@ public class JVMAgent {
                     throw new RuntimeException("this JVM does not support redefinition of classes");
                 }
             }
+
+            // init class - to be 100% sure that has been loaded
+            GlobalValueStore.getValueStore();
+
             AgentConfiguration configuration = AgentConfigurationFactory.create();
             Logger.setCurrentLogLevel(configuration.getLogLevel());
             printBanner(configuration);
@@ -164,9 +168,6 @@ public class JVMAgent {
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - JamesHQ is executed.");
-
-            // init class - to be 100% sure that has been loaded
-            GlobalValueStore.getValueStore();
 
             ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
             Runtime.getRuntime().addShutdownHook(shutdownHook);

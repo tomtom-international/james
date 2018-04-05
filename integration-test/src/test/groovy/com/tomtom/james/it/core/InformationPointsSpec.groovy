@@ -50,6 +50,7 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ips[0].className == "foo.bar.className"
         ips[0].methodName == "methodName"
         ips[0].sampleRate == 100
+
     }
 
     def "Should remove information point"() {
