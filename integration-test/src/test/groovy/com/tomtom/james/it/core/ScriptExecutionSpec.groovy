@@ -84,6 +84,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result2 == "methodOfSubclass-value"
     }
 
+// FIXME - this should work - ip on superclass and we call subclass that inherits called method form superclass
+// there is problem with "method" because called method does not exists in called class !!!
     def "Method of superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -144,6 +146,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "abstractMethodOfSuperclass-valueFromSubclass"
     }
 
+// FIXME - should work - like interface - gives ERROR !!!! method is empty
     def "Abstract method of superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -206,6 +209,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 //        result == "methodOfSuperclassOverriddenInSubclass-valueFromSubclass"
 //    }
 
+// FIXME - should work - problem only with result - bytebuddy gives result form parent, now is from child
     def "Method of superclass overridden in subclass, information point on subclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -396,6 +400,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "overloadedMethodOfSubclass-valueFor(String,int)"
     }
 
+// FIXME - should work fine
     def "Method of internal class"() {
         given:
         def ip = new InformationPointDTO(
