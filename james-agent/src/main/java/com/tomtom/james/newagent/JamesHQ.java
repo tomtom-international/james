@@ -1,6 +1,7 @@
 package com.tomtom.james.newagent;
 
 import com.google.common.base.Stopwatch;
+import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
@@ -53,8 +54,8 @@ public class JamesHQ implements Runnable {
                         .filter(method -> !Modifier.isAbstract(method.getModifiers()) && !Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
                         .count();
                 if (clazzCheck > 0) {
-                    LOG.trace("----------------------------------------" + informationPoint);
-                    objective.addInformationPoint(informationPoint);
+                    LOG.trace("---------------------------------------[o]" + informationPoint);
+                    objective.addInformationPoint(new ExtendedInformationPoint(informationPoint, clazz.getName()));
                 } // else this is interface or abstract method
             }
         }
@@ -79,8 +80,8 @@ public class JamesHQ implements Runnable {
                                 .count();
                         if (clazzCheck > 0) {
                             // there are IP on superClass on abstract/interface method and implemented methods in sublcass
-                            LOG.trace("------------------------------- " + clazz.getName() + " inherited IP : " + informationPoint);
-                            objective.addInformationPoint(informationPoint);
+                            LOG.trace("------------------------------[o] " + clazz.getName() + " inherited IP : " + informationPoint);
+                            objective.addInformationPoint(new ExtendedInformationPoint(informationPoint, clazz.getName()));
                         }
                     }
                 }
@@ -94,13 +95,13 @@ public class JamesHQ implements Runnable {
         LOG.trace("--------[ip] " + informationPoint);
         // directrly for given czas ?
         for(Class clazz : classService.getAllClasses(informationPoint.getClassName())) {
-            LOG.trace("---------------- " + clazz.getName() + " direct IP : " + informationPoint );
+            LOG.trace("---------------[ofc] " + clazz.getName() + " direct IP : " + informationPoint );
             objectives.add(prepareObjectiveForSingleClass(clazz));
         }
 
         // for all children
         for(Class child : classService.getChildrenOf(informationPoint.getClassName())) {
-            LOG.trace("---------------- " + child.getName() + " child IP : " + informationPoint );
+            LOG.trace("---------------[ofc] " + child.getName() + " child IP : " + informationPoint );
             objectives.add(prepareObjectiveForSingleClass(child));
         }
         return objectives;

@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 
 public class InformationPoint {
 
-    private String className;
-    private String methodName;
-    private String script;
-    private Integer sampleRate;
+    protected String className;
+    protected String methodName;
+    protected String script;
+    protected Integer sampleRate;
 
-    private InformationPoint() {
+    public InformationPoint() {
     }
 
     public String getClassName() {

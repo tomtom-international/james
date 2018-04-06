@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent.james;
 
+import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.JVMAgent;
@@ -22,11 +23,11 @@ public abstract class AbstractJames implements James {
         this.sleepTime = sleepTime;
     }
 
-    abstract void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException;
+    abstract void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException;
 
-    abstract void insertAfter(CtMethod method, InformationPoint informationPoint) throws CannotCompileException;
+    abstract void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException;
 
-    abstract void addCatch(ClassPool pool, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException;
+    abstract void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException;
 
     private void work(JamesObjective objective) {
         Class clazz = objective.getClazz();
@@ -38,7 +39,7 @@ public abstract class AbstractJames implements James {
             ctClass.stopPruning(true);
             ctClass.defrost();
             List<CtMethod> ctMethodList = new ArrayList<>();
-            for (InformationPoint informationPoint : objective.getInformationPoints()) {
+            for (ExtendedInformationPoint informationPoint : objective.getInformationPoints()) {
                 LOG.debug("instrumentation: " + clazz.getName() + "#" + informationPoint.getMethodName() + " [IP:" + informationPoint + "]");
                 try {
                     CtMethod[] methods = ctClass.getDeclaredMethods(informationPoint.getMethodName()); // we need instrument aaa(String s) and aaa(Integer i) and aaa() ....

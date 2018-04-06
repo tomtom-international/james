@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent.james;
 
+import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.JamesObjective;
@@ -22,7 +23,7 @@ public class GroovyJames extends AbstractJames {
                 .replace("\n", "\\n");
     }
 
-    protected void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+    protected void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
         s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
@@ -31,7 +32,7 @@ public class GroovyJames extends AbstractJames {
         method.insertBefore(s.toString());
     }
 
-    protected void insertAfter(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+    protected void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
         s.append(" System.out.println(\"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< INSTRUMENTATION AFTER+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\"); ");
@@ -41,13 +42,21 @@ public class GroovyJames extends AbstractJames {
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
+        s.append( informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
-            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("null, "); // this is static method - no instance
         } else {
-            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("$0, "); // this
         }
+
+//        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
+//            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+//            s.append("null, "); // this is static method - no instance
+//        } else {
+//            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+//            s.append("$0, "); // this
+//        }
 
         s.append("$args, ");  // arguments
         s.append("($r)$_, "); // result
@@ -57,7 +66,7 @@ public class GroovyJames extends AbstractJames {
 
     }
 
-    protected void addCatch(ClassPool pool, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
+    protected void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
         s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
@@ -67,19 +76,28 @@ public class GroovyJames extends AbstractJames {
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
+        s.append( informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
-            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("null, "); // this is static method - no instance
         } else {
-            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
             s.append("$0, "); // this
         }
+
+
+//        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
+//            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+//            s.append("null, "); // this is static method - no instance
+//        } else {
+//            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+//            s.append("$0, "); // this
+//        }
         s.append("$args, ");  // arguments
         s.append("null, "); // result
         s.append("$e");    // exception
         s.append(" ); ");
         s.append(" throw $e; ");
-        CtClass exceptionCtClass = pool.getDefault().getCtClass("java.lang.Exception");
+        CtClass exceptionCtClass = pool.getDefault().getCtClass("java.lang.Exception"); // FIXME static accessed from instance !!!!
         method.addCatch(s.toString(), exceptionCtClass);
 
         // finally block

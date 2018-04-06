@@ -1,6 +1,6 @@
 package com.tomtom.james.newagent.james;
 
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
 
@@ -13,25 +13,25 @@ public class TextJames extends AbstractJames {
     }
 
     @Override
-    void insertBefore(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+    void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         StringBuilder s = new StringBuilder("");
         s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
         method.insertBefore(s.toString());
     }
 
     @Override
-    void insertAfter(CtMethod method, InformationPoint informationPoint) throws CannotCompileException {
+    void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         StringBuilder s = new StringBuilder("");
         s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION AFTER + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
         method.insertAfter(s.toString());
 
         StringBuilder z = new StringBuilder("");
         z.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION FINALLY + " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\");");
-        method.insertAfter(z.toString(),true);
+        method.insertAfter(z.toString(), true);
     }
 
     @Override
-    void addCatch(ClassPool pool, CtMethod method, InformationPoint informationPoint) throws CannotCompileException, NotFoundException {
+    void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         StringBuilder s = new StringBuilder("");
         s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
         s.append(" throw $e; ");
