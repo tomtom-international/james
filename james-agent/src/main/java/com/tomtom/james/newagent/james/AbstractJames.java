@@ -47,6 +47,7 @@ public abstract class AbstractJames implements James {
                         if (method == null || method.isEmpty()) {
                             LOG.error(" ERROR !!!! Method is empty or null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
                         } else {
+                            LOG.trace(" JAMES INSTRUMENTATION :: " + clazz.getName() + " : " + informationPoint);
                             // before method
                             insertBefore(method, informationPoint);
                             // after method

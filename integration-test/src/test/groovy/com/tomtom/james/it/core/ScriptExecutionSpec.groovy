@@ -146,7 +146,6 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "abstractMethodOfSuperclass-valueFromSubclass"
     }
 
-// FIXME - should work - like interface - gives ERROR !!!! method is empty
     def "Abstract method of superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -177,7 +176,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "abstractMethodOfSuperclass-valueFromSubclass"
     }
 
-// FIXME - should it log anything when we set point on the superclass and we call overridden method in subclass ???
+//// FIXME - should it log anything when we set point on the superclass and we call overridden method in subclass ???
 //    def "Method of superclass overridden in subclass, information point on superclass"() {
 //        given:
 //        def ip = new InformationPointDTO(
@@ -209,7 +208,6 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 //        result == "methodOfSuperclassOverriddenInSubclass-valueFromSubclass"
 //    }
 
-// FIXME - should work - problem only with result - bytebuddy gives result form parent, now is from child
     def "Method of superclass overridden in subclass, information point on subclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -240,7 +238,6 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "methodOfSuperclassOverriddenInSubclass-valueFromSubclass"
     }
 
-    // FIXME - in my opinion there should be only single event - need to be discussed
     def "Method of superclass overridden in subclass and calling superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
@@ -400,7 +397,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "overloadedMethodOfSubclass-valueFor(String,int)"
     }
 
-// FIXME - should work fine
+// FIXME - should work fine - no idea why does not work
     def "Method of internal class"() {
         given:
         def ip = new InformationPointDTO(

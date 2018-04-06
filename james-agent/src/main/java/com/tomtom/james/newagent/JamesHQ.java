@@ -10,10 +10,12 @@ import com.tomtom.james.newagent.tools.InformationPointQueue;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class JamesHQ implements Runnable {
     private static final Logger LOG = Logger.getLogger(JamesHQ.class);
@@ -40,38 +42,68 @@ public class JamesHQ implements Runnable {
     }
 
     private JamesObjective prepareObjectiveForSingleClass(Class clazz) {
-        // simple class
+        //LOG.trace("---------------------------[c] " + clazz.getName());
         JamesObjective objective = new JamesObjective(clazz);
-        for (InformationPoint informationPoint : informationPointService.getInformationPoints(clazz.getName())) {
-            if (!clazz.isInterface() || !Modifier.isAbstract(clazz.getModifiers())) {
-                objective.addInformationPoint(informationPoint);
+        // directly for given clazz
+        if (informationPointService.getInformationPoints(clazz.getName()).size() > 0) {
+            LOG.trace("------------------------------- " + clazz.getName() + " direct IP");
+            for (InformationPoint informationPoint : informationPointService.getInformationPoints(clazz.getName())) {
+                long clazzCheck = Arrays.stream(clazz.getDeclaredMethods())
+                        .filter(method -> method.getName().equals(informationPoint.getMethodName()))
+                        .filter(method -> !Modifier.isAbstract(method.getModifiers()) && !Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
+                        .count();
+                if (clazzCheck > 0) {
+                    LOG.trace("----------------------------------------" + informationPoint);
+                    objective.addInformationPoint(informationPoint);
+                } // else this is interface or abstract method
             }
         }
-        // prepare IP for every parent class or interface
-        List<Class<?>> interfacesAndSuperClasses = new ArrayList<>();
-        interfacesAndSuperClasses.addAll(ClassUtils.getAllInterfaces(clazz));
-        interfacesAndSuperClasses.addAll(ClassUtils.getAllSuperclasses(clazz));
-        for (Class superClass : interfacesAndSuperClasses) {
-            if (informationPointService.getInformationPoints(superClass.getName()).size() > 0) {
-                for (InformationPoint informationPoint : informationPointService.getInformationPoints(superClass.getName())) {
-                    if (superClass.isInterface()) {
-                        // interface
-                        objective.addInformationPoint(informationPoint);
-                    } else if (Modifier.isAbstract(superClass.getModifiers())) {
-                        // abstract class
-                        long methodsCount = Arrays.stream(superClass.getMethods())
-                                .filter(m -> m.getName().equals(informationPoint.getMethodName())) // methods with name from IP
-                                .filter(m -> Modifier.isAbstract(m.getModifiers())) // only abstract
+
+        List<Class<?>> superIC = ClassUtils.getAllSuperclasses(clazz);
+        superIC.addAll(ClassUtils.getAllInterfaces(clazz));
+        for (Class superClassOrInterface : superIC) {
+            // look for ip
+            if (informationPointService.getInformationPoints(superClassOrInterface.getName()).size() > 0) {
+                // there are ip for given superClassOrInterface
+                for (InformationPoint informationPoint : informationPointService.getInformationPoints(superClassOrInterface.getName())) {
+                    long superClassCheck = Arrays.stream(superClassOrInterface.getDeclaredMethods())
+                            .filter(method -> method.getName().equals(informationPoint.getMethodName()))
+                            .filter(method -> Modifier.isAbstract(method.getModifiers()) || Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
+                            .count();
+                    if (superClassCheck > 0) {
+                        // this IP is defined on interface of abstract method and should be instrumented in clazz
+                        // but first we need to check if there is any non abstract/interface method in clazz
+                        long clazzCheck = Arrays.stream(clazz.getDeclaredMethods())
+                                .filter(method -> method.getName().equals(informationPoint.getMethodName()))
+                                .filter(method -> !Modifier.isAbstract(method.getModifiers()) && !Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
                                 .count();
-                        if (methodsCount > 0) {
+                        if (clazzCheck > 0) {
+                            // there are IP on superClass on abstract/interface method and implemented methods in sublcass
+                            LOG.trace("------------------------------- " + clazz.getName() + " inherited IP : " + informationPoint);
                             objective.addInformationPoint(informationPoint);
                         }
                     }
-                    // else - normal class
                 }
             }
         }
         return objective;
+    }
+
+    private List<JamesObjective> prapareObjectiveForSignleInformationPoint(InformationPoint informationPoint) {
+        List<JamesObjective> objectives = new ArrayList<>();
+        LOG.trace("--------[ip] " + informationPoint);
+        // directrly for given czas ?
+        for(Class clazz : classService.getAllClasses(informationPoint.getClassName())) {
+            LOG.trace("---------------- " + clazz.getName() + " direct IP : " + informationPoint );
+            objectives.add(prepareObjectiveForSingleClass(clazz));
+        }
+
+        // for all children
+        for(Class child : classService.getChildrenOf(informationPoint.getClassName())) {
+            LOG.trace("---------------- " + child.getName() + " child IP : " + informationPoint );
+            objectives.add(prepareObjectiveForSingleClass(child));
+        }
+        return objectives;
     }
 
     private int processNewClass() {
@@ -86,36 +118,7 @@ public class JamesHQ implements Runnable {
                 counter++;
             }
         }
-        return counter;
-    }
-
-    private int prapareObjectiveForSignleInformationPoint(InformationPoint informationPoint) {
-        int counter = 0;
-        LOG.error("----------------------- processing Information Point :  " + informationPoint);
-        // for given classname
-        for (Class clazz : classService.getAllClasses(informationPoint.getClassName())) {
-            LOG.error("------------------------------------------ class : " + clazz.getName());
-            JamesObjective objective = prepareObjectiveForSingleClass(clazz);
-            if (objective.getInformationPoints().size() > 0) { // if there is anything to do
-                jamesObjectives.add(objective);
-            }
-            // removes all duplicates - duplicate is ip on the same class, because 'prepareObjectiveForSingleClass' gathers all ip for all methods in single JamesObjective
-            List<InformationPoint> list = addInformationPointQueue.stream().filter(ip -> objective.getInformationPoints().stream().filter(alreadyProcessed -> ip.getClassName().equals(alreadyProcessed.getClassName())).count() > 0).collect(Collectors.toList());
-            addInformationPointQueue.removeAll(list);
-        }
-        // for all childs
-        Set<Class> classes = classService.getChildrenOf(informationPoint.getClassName()); // there we get all childs of interface
-        for (Class clazz : classes) {
-            LOG.error("------------------------------------------ class : " + clazz.getName());
-            JamesObjective objective = prepareObjectiveForSingleClass(clazz);
-            if (objective.getInformationPoints().size() > 0) { // if there is anything to do
-                jamesObjectives.add(objective);
-            }
-            // removes all duplicates - duplicate is ip on the same class, because 'prepareObjectiveForSingleClass' gathers all ip for all methods in single JamesObjective
-            List<InformationPoint> list = addInformationPointQueue.stream().filter(ip -> objective.getInformationPoints().stream().filter(alreadyProcessed -> ip.getClassName().equals(alreadyProcessed.getClassName())).count() > 0).collect(Collectors.toList());
-            addInformationPointQueue.removeAll(list);
-        }
-
+        LOG.trace("processNewClass add needs redefine " + counter + " classes.");
         return counter;
     }
 
@@ -124,7 +127,9 @@ public class JamesHQ implements Runnable {
         while (!addInformationPointQueue.isEmpty()) {
             InformationPoint informationPoint = addInformationPointQueue.poll();
             if (informationPoint != null) {
-                counter += prapareObjectiveForSignleInformationPoint(informationPoint);
+                List<JamesObjective> objectives = prapareObjectiveForSignleInformationPoint(informationPoint);
+                counter += objectives.size();
+                jamesObjectives.addAll(objectives);
             }
         }
         LOG.trace("processInformationPoints add needs redefine " + counter + " classes.");
@@ -174,7 +179,7 @@ public class JamesHQ implements Runnable {
         while (true) {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
-            LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | removeInformationPoint ["+removeInformationPointQueue.size()+"] | newClassQueue [" + newClassesQueue.size() + "] ");
+            LOG.trace("JamesHQ :: addInformationPointQueue [" + addInformationPointQueue.size() + "] | removeInformationPoint [" + removeInformationPointQueue.size() + "] | newClassQueue [" + newClassesQueue.size() + "] ");
 
             int removedIPCounter = processRemoveInformationPoint();
             int newIPCounter = processAddInformationPoint();
