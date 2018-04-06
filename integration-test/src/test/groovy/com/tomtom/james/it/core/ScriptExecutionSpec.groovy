@@ -84,8 +84,6 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result2 == "methodOfSubclass-value"
     }
 
-// FIXME - this should work - ip on superclass and we call subclass that inherits called method form superclass
-// there is problem with "method" because called method does not exists in called class !!!
     def "Method of superclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(

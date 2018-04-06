@@ -8,6 +8,7 @@ import javassist.*;
 
 import java.util.Queue;
 
+// TODO remove sysouts from strings
 public class GroovyJames extends AbstractJames {
     private static final Logger LOG = Logger.getLogger(GroovyJames.class);
 
@@ -15,7 +16,7 @@ public class GroovyJames extends AbstractJames {
         super(objectives, sleepTime);
     }
 
-    // FIXME !!!!!!!!!!  is it enough to escape this strings or .... are we creating a gap making whole system liable to groovy / java injection ?
+    // TODO check double if that is all chars that we need to escape
     private String escapeScriptString(String script) {
         return script.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
@@ -26,7 +27,7 @@ public class GroovyJames extends AbstractJames {
     protected void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
-        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
+//        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
         s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\"" + informationPoint + "\", System.nanoTime()); ");
         s.append(" ");
         method.insertBefore(s.toString());
@@ -35,7 +36,7 @@ public class GroovyJames extends AbstractJames {
     protected void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" System.out.println(\"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< INSTRUMENTATION AFTER+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\"); ");
+//        s.append(" System.out.println(\"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< INSTRUMENTATION AFTER+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\"); ");
         s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.get(\"" + informationPoint + "\"); \n");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
@@ -50,14 +51,6 @@ public class GroovyJames extends AbstractJames {
             s.append("$0, "); // this
         }
 
-//        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
-//            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-//            s.append("null, "); // this is static method - no instance
-//        } else {
-//            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-//            s.append("$0, "); // this
-//        }
-
         s.append("$args, ");  // arguments
         s.append("($r)$_, "); // result
         s.append("null ");    // exception
@@ -69,7 +62,7 @@ public class GroovyJames extends AbstractJames {
     protected void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
+//        s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
         s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.get(\"" + informationPoint + "\"); ");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
@@ -84,25 +77,17 @@ public class GroovyJames extends AbstractJames {
             s.append("$0, "); // this
         }
 
-
-//        if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
-//            s.append("$class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-//            s.append("null, "); // this is static method - no instance
-//        } else {
-//            s.append("$0.getClass().getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
-//            s.append("$0, "); // this
-//        }
         s.append("$args, ");  // arguments
         s.append("null, "); // result
         s.append("$e");    // exception
         s.append(" ); ");
         s.append(" throw $e; ");
-        CtClass exceptionCtClass = pool.getDefault().getCtClass("java.lang.Exception"); // FIXME static accessed from instance !!!!
+        CtClass exceptionCtClass = ClassPool.getDefault().getCtClass("java.lang.Exception"); // FIXME should here be Exception or Throwable ?????
         method.addCatch(s.toString(), exceptionCtClass);
 
         // finally block
         StringBuilder f = new StringBuilder("");
-        f.append(" System.out.println(\"---------------------------------------------------------------------------- FINALLY ----------------------------------------------------------------------------\"); \n");
+//        f.append(" System.out.println(\"---------------------------------------------------------------------------- FINALLY ----------------------------------------------------------------------------\"); \n");
         f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); \n");
         method.insertAfter(f.toString(),true);
     }

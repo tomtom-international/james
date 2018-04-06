@@ -17,7 +17,7 @@ public class BasicClassStructure implements ClassStructure {
         return (container.get(className) != null) ? container.get(className) : new HashSet<>();
     }
 
-    // FIXME - possible synchronization FUCKUP - think twice ! - current classScanner is single threaded and there is no risk ... but ...
+    // FIXME - if you want to implement multithreaded classScanner there is the point that multithreading pitfall is waiting for you - it's not threadsafe !!!!!
     @Override
     public void addChild(String className, Class<?> clazz) {
         container.computeIfAbsent(className, key -> new HashSet<>());

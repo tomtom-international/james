@@ -143,15 +143,4 @@ public class JamesClassScanner implements Runnable {
         }
     }
 
-
-    // FIXME - only for tests
-    private void printAllClasses(String packageFileter) {
-        for(String clazzname : processedClasses.getMap().keySet()) {
-            if (clazzname.startsWith(packageFileter)) {
-                System.out.println("<parent> " + clazzname);
-                processedClasses.getChildren(clazzname).stream().forEach(c -> System.out.println("               - " + c + " | " + c.getClassLoader()));
-            }
-        }
-    }
-
 }
