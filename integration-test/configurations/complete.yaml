@@ -22,13 +22,13 @@ controllers:
 #      folderPath: james/test/information-points
 
 jamesHQ:
-  initialDelay: 200
-  scanPeriod: 200
-  jamesInterval: 500
+  initialDelayInMs: 200
+  scanPeriodInMs: 200
+  jamesIntervalInMs: 500
 
 classScanner:
-  initialDelay: 500
-  scanPeriod: 500
+  initialDelayInMs: 500
+  scanPeriodInMs: 500
   ignoredPackages:
     - java.
     - com.tomtom.james

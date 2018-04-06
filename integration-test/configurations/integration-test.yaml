@@ -19,13 +19,13 @@ publishers:
   - id: integrationTest.publisher
 
 jamesHQ:
-  initialDelay: 200
-  scanPeriod: 1000
-  jamesInterval: 500
+  initialDelayInMs: 200
+  scanPeriodInMs: 1000
+  jamesIntervalInMs: 500
 
 classScanner:
-  initialDelay: 500
-  scanPeriod: 1000
+  initialDelayInMs: 500
+  scanPeriodInMs: 1000
   ignoredPackages:
     - java.
     - com.tomtom.james
