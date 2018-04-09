@@ -76,8 +76,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: AbstractTestService.name,
                 methodName: "methodOfSuperclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -105,8 +104,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: TestService.name,
                 methodName: "abstractMethodOfSuperclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -134,8 +132,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: AbstractTestService.name,
                 methodName: "abstractMethodOfSuperclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -158,34 +155,12 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "abstractMethodOfSuperclass-valueFromSubclass"
     }
 
-    def "Abstract method of superclass, information point on superclass, useForSuccessors=false"() {
-        given:
-        def ip = new InformationPointDTO(
-                className: AbstractTestService.name,
-                methodName: "abstractMethodOfSuperclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: false
-        )
-        def eventsBefore = TestUtils.readPublishedEvents()
-
-        when:
-        jamesController.createInformationPoint(ip)
-        def result = AppClient.abstractMethodOfSuperclass()
-        def eventsAfter = readPublishedEventsWithWait(0)
-
-        then:
-        eventsBefore.isEmpty()
-        eventsAfter == []
-        result == "abstractMethodOfSuperclass-valueFromSubclass"
-    }
-
     def "Method of superclass overridden in subclass, information point on superclass"() {
         given:
         def ip = new InformationPointDTO(
                 className: AbstractTestService.name,
                 methodName: "methodOfSuperclassOverriddenInSubclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -213,8 +188,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: TestService.name,
                 methodName: "methodOfSuperclassOverriddenInSubclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -242,8 +216,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: AbstractTestService.name,
                 methodName: "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -256,9 +229,9 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsBefore.isEmpty()
         eventsAfter.sort() == [
                 [
-                        result     : "success",
-                        className  : TestService.name,
-                        methodName : "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
+                        result: "success",
+                        className: TestService.name,
+                        methodName: "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
                         "arg(arg0)": "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-arg0",
                         returnValue: "methodOfSuperclassOverriddenInSubclassCalledFromSubclass-valueFromSubclass"
                 ],
@@ -278,8 +251,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: TestService.name,
                 methodName: "methodOfSuperclassOverriddenInSubclassCalledFromSubclass",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -420,8 +392,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: TestService.name,
                 methodName: "methodOfInterface",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -444,34 +415,12 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "methodOfInterface-value"
     }
 
-    def "Method of interface implemented in subclass, information point on interface, useForSuccessors=false"() {
-        given:
-        def ip = new InformationPointDTO(
-                className: IService.name,
-                methodName: "methodOfInterface",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: false
-        )
-        def eventsBefore = TestUtils.readPublishedEvents()
-
-        when:
-        jamesController.createInformationPoint(ip)
-        def result = AppClient.methodOfInterface()
-        def eventsAfter = readPublishedEventsWithWait(0)
-
-        then:
-        eventsBefore.isEmpty()
-        eventsAfter == []
-        result == "methodOfInterface-value"
-    }
-
     def "Method of interface implemented in subclass, information point on interface"() {
         given:
         def ip = new InformationPointDTO(
                 className: IService.name,
                 methodName: "methodOfInterface",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -499,8 +448,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         def ip = new InformationPointDTO(
                 className: IService.name,
                 methodName: "methodOfInterface",
-                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                useForSuccessors: true
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 
@@ -548,14 +496,14 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsBefore.isEmpty()
         eventsAfter == [
                 [
-                        informationPointClassName : TestServiceThrowingExceptions.name,
+                        informationPointClassName: TestServiceThrowingExceptions.name,
                         informationPointMethodName: "doNotThrow",
-                        originDeclaringClassName  : TestServiceThrowingExceptions.name,
-                        originName                : "doNotThrow",
-                        instanceFieldValue        : 7,
-                        "arg(arg0)"               : "arg0-value",
-                        "arg(arg1)"               : 101,
-                        returnValue               : "doNotThrow result"
+                        originDeclaringClassName: TestServiceThrowingExceptions.name,
+                        originName: "doNotThrow",
+                        instanceFieldValue: 7,
+                        "arg(arg0)": "arg0-value",
+                        "arg(arg1)": 101,
+                        returnValue: "doNotThrow result"
                 ]
         ]
         result == "doNotThrow result"
@@ -602,14 +550,14 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsBefore.isEmpty()
         eventsAfter == [
                 [
-                        informationPointClassName : TestServiceThrowingExceptions.name,
+                        informationPointClassName: TestServiceThrowingExceptions.name,
                         informationPointMethodName: "doThrow",
-                        originDeclaringClassName  : TestServiceThrowingExceptions.name,
-                        originName                : "doThrow",
-                        instanceFieldValue        : 7,
-                        "arg(arg0)"               : "arg0-value",
-                        "arg(arg1)"               : 101,
-                        errorCauseMessage         : "from doThrow"
+                        originDeclaringClassName: TestServiceThrowingExceptions.name,
+                        originName: "doThrow",
+                        instanceFieldValue: 7,
+                        "arg(arg0)": "arg0-value",
+                        "arg(arg1)": 101,
+                        errorCauseMessage: "from doThrow"
                 ]
         ]
         result == "from doThrow"
