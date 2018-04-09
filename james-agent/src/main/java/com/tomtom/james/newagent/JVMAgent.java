@@ -32,6 +32,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -48,19 +49,19 @@ public class JVMAgent {
      * do not change this method, don't even think about it !!!
      * @return
      */
-    public static Instrumentation getInstrumentation() {
+    public static Optional<Instrumentation> getInstrumentation() {
         try {
             if (instrumentation == null) {
-                return (Instrumentation) ClassLoader.getSystemClassLoader()
+                return Optional.of((Instrumentation) ClassLoader.getSystemClassLoader()
                         .loadClass(JVMAgent.class.getName())
                         .getDeclaredField("instrumentation")
-                        .get(null);
+                        .get(Optional.empty()));
             } else {
-                return instrumentation;
+                return Optional.of(instrumentation);
             }
         } catch (Exception e) {
             LOG.error("JVMAgent - instrumentation not found in SystemClassLoader, probably JVMAgent is not installed in the JVM.");
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -183,7 +184,7 @@ public class JVMAgent {
     /**
      * Redefines a class.
      */
-    public static void redefine(Class<?> oldClass, CtClass newClass) throws NotFoundException, IOException, CannotCompileException {
+    public static void redefine(Class<?> oldClass, CtClass newClass) throws NotFoundException, IOException, CannotCompileException, InstrumentationNotFoundException {
         Class<?>[] old = {oldClass};
         CtClass[] newClasses = {newClass};
         redefine(old, newClasses);
@@ -192,14 +193,19 @@ public class JVMAgent {
     /**
      * Redefines classes.
      */
-    public static void redefine(Class<?>[] oldClasses, CtClass[] newClasses) throws NotFoundException, IOException, CannotCompileException {
+    public static void redefine(Class<?>[] oldClasses, CtClass[] newClasses) throws NotFoundException, IOException, CannotCompileException, InstrumentationNotFoundException {
         startAgent();
         ClassDefinition[] defs = new ClassDefinition[oldClasses.length];
         for (int i = 0; i < oldClasses.length; i++)
             defs[i] = new ClassDefinition(oldClasses[i], newClasses[i].toBytecode());
 
         try {
-            getInstrumentation().redefineClasses(defs);
+            Optional<Instrumentation> instrumentation = getInstrumentation();
+            if (getInstrumentation().isPresent()){
+                getInstrumentation().get().redefineClasses(defs);
+            } else {
+                throw new InstrumentationNotFoundException("Class redefinition requires instrumentation to be available.");
+            }
         } catch (ClassNotFoundException e) {
             throw new NotFoundException(e.getMessage(), e);
         } catch (UnmodifiableClassException e) {

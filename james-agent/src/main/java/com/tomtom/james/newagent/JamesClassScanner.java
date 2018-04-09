@@ -8,10 +8,7 @@ import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -90,11 +87,11 @@ public class JamesClassScanner implements Runnable {
     }
 
     private Instrumentation getInstrumentation() {
-        Instrumentation instrumentation = JVMAgent.getInstrumentation();
-        if (instrumentation == null) {
-            throw new RuntimeException(" JAMES has found that 'instrumentation' is not ready (null) !!!!");
+        Optional<Instrumentation> inst = JVMAgent.getInstrumentation();
+        if (inst.isPresent()) {
+            return inst.get();
         }
-        return instrumentation;
+        throw new RuntimeException(" JAMES has found that 'instrumentation' is not ready (null) !!!!");
     }
 
     private void waitThere(Long period) {

@@ -3,6 +3,7 @@ package com.tomtom.james.newagent.james;
 import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.InstrumentationNotFoundException;
 import com.tomtom.james.newagent.JVMAgent;
 import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
@@ -64,7 +65,7 @@ public abstract class AbstractJames implements James {
             }
             JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
-        } catch (NotFoundException | CannotCompileException | IOException e) {
+        } catch (NotFoundException | CannotCompileException | IOException | InstrumentationNotFoundException e) {
             e.printStackTrace();
         }
     }

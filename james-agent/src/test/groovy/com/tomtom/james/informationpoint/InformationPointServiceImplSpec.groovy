@@ -26,7 +26,7 @@ import java.lang.instrument.Instrumentation
 class InformationPointServiceImplSpec extends Specification {
 
     def store = Mock(InformationPointStore)
-    def instrumentation = Mock(Instrumentation)
+    def instrumentation = Mock(Optional<Instrumentation>)
     def newInformationPointQueue = Mock(InformationPointQueue)
     def removeInformationPointQueue = Mock(InformationPointQueue)
 
