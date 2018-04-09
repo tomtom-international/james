@@ -16,15 +16,15 @@ public class ClassScannerConfigurationFacade implements ClassScannerConfiguratio
     }
 
     @Override
-    public long getInitialDelay() {
-        return configuration.get("initialDelay")
+    public long getInitialDelayInMs() {
+        return configuration.get("initialDelayInMs")
                 .map(StructuredConfiguration::asLong)
                 .orElse(CLASSSCANNER_DEFAULT_INITIAL_DELAY);
     }
 
     @Override
-    public long getScanPeriod() {
-        return configuration.get("scanPeriod")
+    public long getScanPeriodInMs() {
+        return configuration.get("scanPeriodInMs")
                 .map(StructuredConfiguration::asLong)
                 .orElse(CLASSSCANNER_DEFAULT_SCAN_PERIOD);
     }

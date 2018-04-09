@@ -149,8 +149,8 @@ public class JVMAgent {
             LOG.trace("ClassService init :: ignoredPackages=" + configuration.getClassScannerConfiguration().getIgnoredPackages().stream().collect(Collectors.joining(", ")));
             ClassService classService = new BasicClassService(newClassQueue,
                     configuration.getClassScannerConfiguration().getIgnoredPackages(),
-                    configuration.getClassScannerConfiguration().getInitialDelay(),
-                    configuration.getClassScannerConfiguration().getScanPeriod());
+                    configuration.getClassScannerConfiguration().getInitialDelayInMs(),
+                    configuration.getClassScannerConfiguration().getScanPeriodInMs());
             LOG.trace("classService time=" + stopwatch.elapsed());
 
             LOG.debug("JVMAgent - ClassService is executed.");
@@ -161,9 +161,9 @@ public class JVMAgent {
                                 addInformationPointQueue,
                                 removeInformationPointQueue,
                                 newClassQueue,
-                                configuration.getJamesHQConfiguration().getInitialDelay(),
-                                configuration.getJamesHQConfiguration().getScanPeriod(),
-                                configuration.getJamesHQConfiguration().getJamesInterval()));
+                                configuration.getJamesHQConfiguration().getInitialDelayInMs(),
+                                configuration.getJamesHQConfiguration().getScanPeriodInMs(),
+                                configuration.getJamesHQConfiguration().getJamesIntervalInMs()));
             jamesHQ.setDaemon(true);
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());

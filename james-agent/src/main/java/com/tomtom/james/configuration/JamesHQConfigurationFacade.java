@@ -17,22 +17,22 @@ public class JamesHQConfigurationFacade implements JamesHQConfiguration {
     }
 
     @Override
-    public long getInitialDelay() {
-        return configuration.get("initialDelay")
+    public long getInitialDelayInMs() {
+        return configuration.get("initialDelayInMs")
                 .map(StructuredConfiguration::asLong)
                 .orElse(JAMESHQ_DEFAULT_INITIAL_DELAY);
     }
 
     @Override
-    public long getScanPeriod() {
-        return configuration.get("scanPeriod")
+    public long getScanPeriodInMs() {
+        return configuration.get("scanPeriodInMs")
                 .map(StructuredConfiguration::asLong)
                 .orElse(JAMESHQ_DEFAULT_SCAN_PERIOD);
     }
 
     @Override
-    public long getJamesInterval() {
-        return configuration.get("jamesInterval")
+    public long getJamesIntervalInMs() {
+        return configuration.get("jamesIntervalInMs")
                 .map(StructuredConfiguration::asLong)
                 .orElse(JAMES_DEFAULT_INTERVAL);
     }

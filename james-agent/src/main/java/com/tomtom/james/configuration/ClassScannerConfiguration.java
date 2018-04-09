@@ -4,8 +4,8 @@ import java.util.Collection;
 
 public interface ClassScannerConfiguration {
 
-    long getInitialDelay();
-    long getScanPeriod();
+    long getInitialDelayInMs();
+    long getScanPeriodInMs();
     Collection<String> getIgnoredPackages();
 
 }
