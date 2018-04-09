@@ -32,7 +32,6 @@ jar {
 shadowJar {
     relocate 'com.google', 'com.tomtom.james.repackaged.com.google'
     relocate 'com.fasterxml.jackson', 'com.tomtom.james.repackaged.com.fasterxml.jackson'
-    relocate 'net.bytebuddy', 'com.tomtom.james.repackaged.net.bytebuddy'
     relocate 'org.yaml.snakeyaml', 'com.tomtom.james.repackaged.org.yaml.snakeyaml'
 }
 
@@ -50,11 +49,8 @@ dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddy
     compile group: 'org.javassist', name: 'javassist', version: versions.javassist
     compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonslang
-    //compile group: 'com.sun', name: 'tools', version: versions.suntools
-
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility

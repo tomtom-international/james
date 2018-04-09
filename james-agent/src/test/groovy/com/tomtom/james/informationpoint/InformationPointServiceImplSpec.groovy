@@ -27,7 +27,6 @@ class InformationPointServiceImplSpec extends Specification {
 
     def store = Mock(InformationPointStore)
     def instrumentation = Mock(Instrumentation)
-    def adviceOperations = Mock(AdviceOperations)
     def newInformationPointQueue = Mock(InformationPointQueue)
     def removeInformationPointQueue = Mock(InformationPointQueue)
 
