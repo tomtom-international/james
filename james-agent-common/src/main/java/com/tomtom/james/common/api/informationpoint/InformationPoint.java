@@ -132,7 +132,7 @@ public class InformationPoint {
             return this;
         }
 
-        public Builder withUseForSuccessors(Boolean useForSuccessors) {
+        public Builder withUseFroSuccessors(Boolean useForSuccessors) {
             this.useForSuccessors = useForSuccessors;
             return this;
         }
