@@ -36,7 +36,7 @@ public class CGLibAdviceOperations implements AdviceOperations {
                 superClass = Class.forName(informationPoint.getClassName());
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                return null;
+                return;
             }
 
             Enhancer enhancer = new Enhancer();
