@@ -16,7 +16,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -24,11 +23,10 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 public class CGLibAdviceOperations implements AdviceOperations {
 
     private static final Logger LOG = Logger.getLogger(CGLibAdviceOperations.class);
-    private final ConcurrentHashMap<String, Enhancer> installedInformationPoints = new ConcurrentHashMap<>();
 
     @Override
     public void installAdvice(InformationPoint informationPoint) {
-        installedInformationPoints.computeIfAbsent(informationPoint.getClassName(), key -> {
+        installedInformationPoints.computeIfAbsent(new ByteBuddyAdviceOperations.Key(informationPoint), key -> {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             Class superClass = null;
@@ -49,9 +47,27 @@ public class CGLibAdviceOperations implements AdviceOperations {
                 }
             });
 
+
+
+            ResettableClassFileTransformer transformer =
+                    agentBuilder
+                    .type(named(key.getClassName()).or(hasSuperType(named(key.getClassName()))))
+                    .transform((builder, typeDescription, classLoader, module) -> {
+                        AsmVisitorWrapper visitorWrapper = Advice
+                                .withCustomMapping()
+                                .bind(InformationPointClassName.class, informationPoint.getClassName())
+                                .bind(InformationPointMethodName.class, informationPoint.getMethodName())
+                                .bind(InformationPointSampleRate.class, informationPoint.getSampleRate())
+                                .bind(InformationPointScript.class, informationPoint.getScript().orElseThrow(() ->
+                                        new IllegalStateException("Script is not defined for " + informationPoint)))
+                                .to(ContextAwareAdvice.class)
+                                .on(named(key.getMethodName()));
+                        return builder.visit(visitorWrapper);
+                    })
+                    .installOn(instrumentation);
             stopwatch.stop();
             LOG.trace(() -> "Advice installed at " + key + " in " + stopwatch.elapsed());
-            return enhancer;
+            return transformer;
         });
     }
 
