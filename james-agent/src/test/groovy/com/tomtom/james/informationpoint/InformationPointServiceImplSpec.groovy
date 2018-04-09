@@ -17,6 +17,7 @@
 package com.tomtom.james.informationpoint
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint
+import com.tomtom.james.newagent.tools.InformationPointQueue
 import com.tomtom.james.store.InformationPointStore
 import spock.lang.Specification
 
@@ -25,30 +26,32 @@ import java.lang.instrument.Instrumentation
 class InformationPointServiceImplSpec extends Specification {
 
     def store = Mock(InformationPointStore)
-    def instrumentation = Mock(Instrumentation)
-    def adviceOperations = Mock(AdviceOperations)
+    def instrumentation = Mock(Optional<Instrumentation>)
+    def newInformationPointQueue = Mock(InformationPointQueue)
+    def removeInformationPointQueue = Mock(InformationPointQueue)
 
     def "Should add information point"() {
         given:
         def informationPoint = createInformationPoint()
         store.restore() >> []
-        def service = new InformationPointServiceImpl(store, instrumentation, adviceOperations)
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         service.addInformationPoint(informationPoint)
 
         then:
         true
-        1 * adviceOperations.installAdvice(informationPoint)
+        1 * newInformationPointQueue.add(informationPoint)
         1 * store.store([informationPoint])
         service.getInformationPoint("class-name", "method-name").get() == informationPoint
     }
+
 
     def "Should remove information point"() {
         given:
         def informationPoint = createInformationPoint()
         store.restore() >> [informationPoint]
-        def service = new InformationPointServiceImpl(store, instrumentation, adviceOperations)
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         service.removeInformationPoint(informationPoint)
@@ -64,7 +67,7 @@ class InformationPointServiceImplSpec extends Specification {
         def informationPoint1 = createInformationPoint("-1")
         def informationPoint2 = createInformationPoint("-2")
         store.restore() >> [informationPoint1, informationPoint2]
-        def service = new InformationPointServiceImpl(store, instrumentation, adviceOperations)
+        def service = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         def informationPoints = service.getInformationPoints()

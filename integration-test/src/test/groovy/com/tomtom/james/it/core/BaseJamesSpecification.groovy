@@ -32,7 +32,7 @@ abstract class BaseJamesSpecification extends Specification {
 
     def readPublishedEventsWithWait(int expectedEvents) {
         await().atMost(5, TimeUnit.SECONDS).until { TestUtils.readPublishedEvents().size() >= expectedEvents }
-        sleep(100) // give the producer a bit more time to ensure there are no more events
+        sleep(200) // give the producer a bit more time to ensure there are no more events
         return TestUtils.readPublishedEvents()
     }
 

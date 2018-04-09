@@ -1,0 +1,16 @@
+
+Behavior changes:
+0. There is impossible to set InformationPoint on method in childClass that is inherited from superClass.
+   Example:
+
+   class AAA {
+     public void xxx() {
+
+     }
+   }
+
+   class BBB extends AAA {
+
+   }
+
+   It's not allowed to configure IP on BBB#xxx(), but you can set IP on AAA#xxx() and in groovy script check if origin is instance of required type.

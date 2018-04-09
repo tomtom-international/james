@@ -40,14 +40,15 @@ subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     ext.versions = [
-            bytebuddy : '1.7.8',
-            groovy    : '2.4.12',
-            guava     : '22.0',
-            jackson   : '2.8.7',
-            snakeyaml : '1.18',
-            spock     : '1.1-groovy-2.4',
-            objenesis : '2.5.1',
-            awaitility: '3.0.0'
+            groovy      : '2.4.12',
+            guava       : '22.0',
+            jackson     : '2.8.7',
+            snakeyaml   : '1.18',
+            spock       : '1.1-groovy-2.4',
+            objenesis   : '2.5.1',
+            awaitility  : '3.0.0',
+            commonslang : '3.7',
+            javassist   : '3.22.0-GA'
     ]
 }
 

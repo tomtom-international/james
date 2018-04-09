@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class ControllersManager implements Closeable {
+public class ControllersManager implements Closeable {
 
     private static final Logger LOG = Logger.getLogger(ControllersManager.class);
 
@@ -36,13 +36,13 @@ class ControllersManager implements Closeable {
     private final Collection<JamesControllerConfiguration> controllerConfigurations;
     private Collection<JamesController> initializedControllers;
 
-    ControllersManager(PluginManager pluginManager,
+    public ControllersManager(PluginManager pluginManager,
                        Collection<JamesControllerConfiguration> controllerConfigurations) {
         this.pluginManager = pluginManager;
         this.controllerConfigurations = controllerConfigurations;
     }
 
-    void initializeControllers(InformationPointService informationPointService,
+    public void initializeControllers(InformationPointService informationPointService,
                                ScriptEngine scriptEngine,
                                EventPublisher eventPublisher) {
         initializedControllers = controllerConfigurations.stream()

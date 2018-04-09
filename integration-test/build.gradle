@@ -66,10 +66,31 @@ task shutdownApp(type: ShutdownApp) {
 
 task integrationTest(type: Test) {
     dependsOn prepareConfiguration, runAppWithJames
+    testLogging.showStandardStreams = true
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
     finalizedBy shutdownApp
     doFirst {
         waitForWebservice(8008)
     }
+
+    beforeTest { desc ->
+        println ""
+        println "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        println " START : " + desc
+        println "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        println ""
+    }
+
+    afterTest { desc, result ->
+        println ""
+        println "=========================================================================================================================================================================================="
+        println " FINISHED : " + result + " | " + desc
+        println "=========================================================================================================================================================================================="
+        println ""
+    }
+
 }
 integrationTest.outputs.upToDateWhen { false }
 
