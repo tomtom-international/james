@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BasicClassService implements ClassService {
-    private Thread scanner;
+    private JamesClassScanner scanner;
     private ClassStructure allClassesMap;
     private ClassStructure childrenMap;
 
@@ -16,8 +16,7 @@ public class BasicClassService implements ClassService {
     public BasicClassService(ClassQueue newClassQueue, Collection<String> ignoredPackages, long initDelay, long scanPeriod) {
         this.allClassesMap = new BasicClassStructure();
         this.childrenMap = new BasicClassStructure();
-        scanner = new Thread(new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, ignoredPackages, initDelay, scanPeriod));
-        scanner.setDaemon(true);
+        scanner = new JamesClassScanner(newClassQueue, allClassesMap, childrenMap, ignoredPackages, initDelay, scanPeriod);
         scanner.start();
     }
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * responsible for maintenace of the all class map, and structure of parents and children
  */
-public class JamesClassScanner implements Runnable {
+public class JamesClassScanner extends Thread {
     private static final Logger LOG = Logger.getLogger(JamesClassScanner.class);
     private long initialDelay = 10000;
     private long scanPeriod = 5000;
@@ -31,6 +31,7 @@ public class JamesClassScanner implements Runnable {
         this.scanPeriod = scanPeriod;
         this.ignoredPackages = ignoredPackages;
         this.processedClasses = processedClasses;
+        this.setDaemon(true);
         LOG.trace("JamesClassScanner : initDelay [" + initialDelay + "ms] : scanPeriod [" + scanPeriod + "ms]: ignoredPackages = " + ignoredPackages.stream().collect(Collectors.joining(", ")));
     }
 
@@ -47,7 +48,7 @@ public class JamesClassScanner implements Runnable {
             parentClassesAndInterfaces.addAll(ClassUtils.getAllInterfaces(clazz)); // interfaces
             parentClassesAndInterfaces.addAll(ClassUtils.getAllSuperclasses(clazz)); // superclasses
             parentClassesAndInterfaces.stream()
-                    .filter(c -> ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) == null) // remove ignored packages
+                    .filter(c -> ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) == null) // remove ignored packages // TODO is (.orElse(null) == null) == !.isPresent() ?????????????
                     .forEach(c -> {
                         if (c.isInterface() || Modifier.isAbstract(c.getModifiers())) {
                             classStructure.addChild(c.getName(), clazz);
@@ -75,7 +76,7 @@ public class JamesClassScanner implements Runnable {
                         return false;
                     }
                     // check if it's in ignored packages - from configuration
-                    if (ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) != null) {
+                    if (ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) != null) { // TODO is (.orElse(null) == null) == !.isPresent() ?????????????
                         return false;
                     }
                     return true;
@@ -104,7 +105,7 @@ public class JamesClassScanner implements Runnable {
                 Thread.sleep(scanPeriod - elapsed);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.error("JamesClassScanner thread has been interrupted !");
         }
     }
 

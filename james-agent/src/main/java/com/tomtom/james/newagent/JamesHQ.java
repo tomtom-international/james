@@ -6,6 +6,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.james.GroovyJames;
+import com.tomtom.james.newagent.james.James;
 import com.tomtom.james.newagent.tools.ClassQueue;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import org.apache.commons.lang3.ClassUtils;
@@ -18,7 +19,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class JamesHQ implements Runnable {
+public class JamesHQ extends Thread {
     private static final Logger LOG = Logger.getLogger(JamesHQ.class);
     private long initialDelay = 10000;
     private long scanPeriod = 1000;
@@ -29,8 +30,9 @@ public class JamesHQ implements Runnable {
     private InformationPointQueue addInformationPointQueue;
     private InformationPointQueue removeInformationPointQueue;
     private Queue<JamesObjective> jamesObjectives = new ArrayBlockingQueue<>(10000);
-    private Thread james;
+    private James james;
 
+    // TODO builder
     public JamesHQ(InformationPointService informationPointService, ClassService classService, InformationPointQueue addInformationPointQueue, InformationPointQueue removeInformationPointQueue, ClassQueue newClassQueue, long initialDelay, long scanPeriod, long jamesInterval) {
         this.scanPeriod = scanPeriod;
         this.initialDelay = initialDelay;
@@ -40,10 +42,10 @@ public class JamesHQ implements Runnable {
         this.newClassesQueue = newClassQueue;
         this.addInformationPointQueue = addInformationPointQueue;
         this.removeInformationPointQueue = removeInformationPointQueue;
+        this.setDaemon(true);
     }
 
     private JamesObjective prepareObjectiveForSingleClass(Class clazz) {
-        //LOG.trace("---------------------------[c] " + clazz.getName());
         JamesObjective objective = new JamesObjective(clazz);
         // directly for given clazz
         if (informationPointService.getInformationPoints(clazz.getName()).size() > 0) {
@@ -166,15 +168,10 @@ public class JamesHQ implements Runnable {
         try {
             Thread.sleep(initialDelay);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("Initial delay has been interrupted !!!");
         }
 
-        // FIXME clean this shit
-        //james = new Thread(new OLD_____GroovyJames(jamesObjectives, jamesInterval));
-        //james = new Thread(new TextJames(jamesObjectives, jamesInterval));
-        james = new Thread(new GroovyJames(jamesObjectives, jamesInterval));
-        //james = new Thread(new TimingJames(jamesObjectives, jamesInterval));
-        james.setDaemon(true);
+        james = new GroovyJames(jamesObjectives, jamesInterval);
         james.start();
 
         while (true) {
@@ -193,7 +190,7 @@ public class JamesHQ implements Runnable {
                     Thread.sleep(scanPeriod - stopwatch.elapsed(TimeUnit.MILLISECONDS));
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.warn("ScanPeriod sleep has been interrupted !");
             }
         }
     }

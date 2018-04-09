@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class JVMAgent {
     private static final Logger LOG = Logger.getLogger(JVMAgent.class);
     public static Instrumentation instrumentation = null;
-    private static Thread jamesHQ;
+    private static JamesHQ jamesHQ;
 
     /**
      * do not change this method, don't even think about it !!!
@@ -156,16 +156,15 @@ public class JVMAgent {
 
             LOG.debug("JVMAgent - ClassService is executed.");
 
-            jamesHQ = new Thread(
-                        new JamesHQ(informationPointService,
+            // TODO builder
+            jamesHQ = new JamesHQ(informationPointService,
                                 classService,
                                 addInformationPointQueue,
                                 removeInformationPointQueue,
                                 newClassQueue,
                                 configuration.getJamesHQConfiguration().getInitialDelayInMs(),
                                 configuration.getJamesHQConfiguration().getScanPeriodInMs(),
-                                configuration.getJamesHQConfiguration().getJamesIntervalInMs()));
-            jamesHQ.setDaemon(true);
+                                configuration.getJamesHQConfiguration().getJamesIntervalInMs());
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - JamesHQ is executed.");
@@ -222,6 +221,7 @@ public class JVMAgent {
         if (instrumentation != null)
             return;
         try {
+// TODO if we want to generate jar from this class it requires to add sun.tools (or equivalent in other JVM) to project
 //            LOG.trace("JVMAgent needs to find and connect to VM.");
 //            File agentJar = createJarFile();
 //            String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
@@ -243,47 +243,46 @@ public class JVMAgent {
                 break;
             }
         }
-
         throw new NotFoundException("JVMAgent agent (timeout)");
     }
 
-
-    public static File createAgentJarFile(String fileName) throws IOException, CannotCompileException, NotFoundException {
-        return createJarFile(new File(fileName));
-    }
-
-    private static File createJarFile() throws IOException, CannotCompileException, NotFoundException {
-        File jar = File.createTempFile("jvmagent", ".jar");
-        jar.deleteOnExit();
-        return createJarFile(jar);
-    }
-
-    private static File createJarFile(File jar)
-            throws IOException, CannotCompileException, NotFoundException {
-        Manifest manifest = new Manifest();
-        Attributes attrs = manifest.getMainAttributes();
-        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        attrs.put(new Attributes.Name("Premain-Class"), JVMAgent.class.getName());
-        attrs.put(new Attributes.Name("Agent-Class"), JVMAgent.class.getName());
-        attrs.put(new Attributes.Name("Can-Retransform-Classes"), "true");
-        attrs.put(new Attributes.Name("Can-Redefine-Classes"), "true");
-
-        JarOutputStream jos = null;
-        try {
-            jos = new JarOutputStream(new FileOutputStream(jar), manifest);
-            String cname = JVMAgent.class.getName();
-            JarEntry e = new JarEntry(cname.replace('.', '/') + ".class");
-            jos.putNextEntry(e);
-            ClassPool pool = ClassPool.getDefault();
-            CtClass clazz = pool.get(cname);
-            jos.write(clazz.toBytecode());
-            jos.closeEntry();
-        } finally {
-            if (jos != null)
-                jos.close();
-        }
-
-        return jar;
-    }
+// TODO prepared for jar building
+//    public static File createAgentJarFile(String fileName) throws IOException, CannotCompileException, NotFoundException {
+//        return createJarFile(new File(fileName));
+//    }
+//
+//    private static File createJarFile() throws IOException, CannotCompileException, NotFoundException {
+//        File jar = File.createTempFile("jvmagent", ".jar");
+//        jar.deleteOnExit();
+//        return createJarFile(jar);
+//    }
+//
+//    private static File createJarFile(File jar)
+//            throws IOException, CannotCompileException, NotFoundException {
+//        Manifest manifest = new Manifest();
+//        Attributes attrs = manifest.getMainAttributes();
+//        attrs.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+//        attrs.put(new Attributes.Name("Premain-Class"), JVMAgent.class.getName());
+//        attrs.put(new Attributes.Name("Agent-Class"), JVMAgent.class.getName());
+//        attrs.put(new Attributes.Name("Can-Retransform-Classes"), "true");
+//        attrs.put(new Attributes.Name("Can-Redefine-Classes"), "true");
+//
+//        JarOutputStream jos = null;
+//        try {
+//            jos = new JarOutputStream(new FileOutputStream(jar), manifest);
+//            String cname = JVMAgent.class.getName();
+//            JarEntry e = new JarEntry(cname.replace('.', '/') + ".class");
+//            jos.putNextEntry(e);
+//            ClassPool pool = ClassPool.getDefault();
+//            CtClass clazz = pool.get(cname);
+//            jos.write(clazz.toBytecode());
+//            jos.closeEntry();
+//        } finally {
+//            if (jos != null)
+//                jos.close();
+//        }
+//
+//        return jar;
+//    }
 
 }

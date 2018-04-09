@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
-public abstract class AbstractJames implements James {
+public abstract class AbstractJames extends Thread implements James {
     private long sleepTime = 1000;
     private Queue<JamesObjective> objectives;
     private static final Logger LOG = Logger.getLogger(AbstractJames.class);
@@ -77,7 +77,7 @@ public abstract class AbstractJames implements James {
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warn("James sleep time has been interrupted !");
                 }
             } else {
                 JamesObjective objective = objectives.poll();
