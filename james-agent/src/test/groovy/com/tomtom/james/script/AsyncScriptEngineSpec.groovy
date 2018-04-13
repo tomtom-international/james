@@ -43,8 +43,8 @@ class AsyncScriptEngineSpec extends Specification {
     def origin = null
     def currentThread = Mock(Thread)
 
-    def successCallerThreadNames = new ArrayBlockingQueue<String>()
-    def errorCallerThreadNames = new ArrayBlockingQueue<String>()
+    def successCallerThreadNames = new ArrayBlockingQueue<String>(10000)
+    def errorCallerThreadNames = new ArrayBlockingQueue<String>(10000)
 
     def setup() {
         delegate.invokeSuccessHandler(*_) >> { successCallerThreadNames.add(Thread.currentThread().getName()) }

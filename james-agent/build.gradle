@@ -54,5 +54,6 @@ dependencies {
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testRuntime group: 'org.objenesis',  name: 'objenesis', version: versions.objenesis
+    testRuntime group: 'org.objenesis', name: 'objenesis', version: versions.objenesis
+    testRuntime group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddytests
 }

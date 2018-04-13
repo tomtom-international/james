@@ -28,7 +28,7 @@ import static org.awaitility.Awaitility.await
 class AsyncPublisherSpec extends Specification {
 
     def delegate = Mock(EventPublisher)
-    def callerThreadNames = new ArrayBlockingQueue<String>()
+    def callerThreadNames = new ArrayBlockingQueue<String>(10000)
 
     def setup() {
         delegate.publish(_) >> { evt -> callerThreadNames.add(Thread.currentThread().getName()) }

@@ -21,8 +21,6 @@ import com.tomtom.james.newagent.tools.InformationPointQueue
 import com.tomtom.james.store.InformationPointStore
 import spock.lang.Specification
 
-import java.lang.instrument.Instrumentation
-
 class InformationPointServiceImplSpec extends Specification {
 
     def store = Mock(InformationPointStore)
