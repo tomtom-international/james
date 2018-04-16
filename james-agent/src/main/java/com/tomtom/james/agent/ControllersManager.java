@@ -17,6 +17,7 @@
 package com.tomtom.james.agent;
 
 import com.tomtom.james.common.api.Closeable;
+import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.controller.JamesController;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
@@ -37,17 +38,30 @@ public class ControllersManager implements Closeable {
     private Collection<JamesController> initializedControllers;
 
     public ControllersManager(PluginManager pluginManager,
-                       Collection<JamesControllerConfiguration> controllerConfigurations) {
+                              Collection<JamesControllerConfiguration> controllerConfigurations) {
         this.pluginManager = pluginManager;
         this.controllerConfigurations = controllerConfigurations;
     }
 
     public void initializeControllers(InformationPointService informationPointService,
-                               ScriptEngine scriptEngine,
-                               EventPublisher eventPublisher) {
-        initializedControllers = controllerConfigurations.stream()
+                                      ScriptEngine scriptEngine,
+                                      EventPublisher eventPublisher,
+                                      QueueBacked jamesObjectiveQueue,
+                                      QueueBacked newClassesQueue,
+                                      QueueBacked newInformationPointQueue,
+                                      QueueBacked removeInformationPointQueue) {
+        initializedControllers = controllerConfigurations
+                .stream()
                 .map(configuration -> createAndInitializeController(
-                        pluginManager, configuration, informationPointService, scriptEngine, eventPublisher))
+                        pluginManager,
+                        configuration,
+                        informationPointService,
+                        scriptEngine,
+                        eventPublisher,
+                        jamesObjectiveQueue,
+                        newClassesQueue,
+                        newInformationPointQueue,
+                        removeInformationPointQueue))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -64,12 +78,26 @@ public class ControllersManager implements Closeable {
             JamesControllerConfiguration configuration,
             InformationPointService informationPointService,
             ScriptEngine scriptEngine,
-            EventPublisher eventPublisher) {
+            EventPublisher eventPublisher,
+            QueueBacked jamesObjectiveQueue,
+            QueueBacked newClassesQueue,
+            QueueBacked newInformationPointQueue,
+            QueueBacked removeInformationPointQueue) {
 
         Optional<JamesController> ep = pluginManager.createControllerPluginInstance(configuration);
         if (ep.isPresent()) {
             LOG.trace(() -> "Loaded controller plugin " + configuration.getId());
-            ep.get().initialize(configuration, informationPointService, scriptEngine, eventPublisher);
+            JamesController xxx = ep.get();
+            LOG.trace(() -> "ep " + xxx.getClass().getName());
+            xxx.initialize(configuration,
+                    informationPointService,
+                    scriptEngine,
+                    eventPublisher,
+                    jamesObjectiveQueue,
+                    newClassesQueue,
+                    newInformationPointQueue,
+                    removeInformationPointQueue);
+            LOG.trace("----------------------- DONE ----------------------");
         } else {
             LOG.warn(() -> "Error loading controller " + configuration.getId() + ", plugin not found");
         }

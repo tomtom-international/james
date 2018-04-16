@@ -18,6 +18,7 @@ package com.tomtom.james.common.api.controller;
 
 import com.tomtom.james.common.api.Closeable;
 import com.tomtom.james.common.api.Identifiable;
+import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
@@ -28,6 +29,10 @@ public interface JamesController extends Identifiable, Closeable {
     void initialize(JamesControllerConfiguration configuration,
                     InformationPointService informationPointService,
                     ScriptEngine scriptEngine,
-                    EventPublisher eventPublisher);
+                    EventPublisher eventPublisher,
+                    QueueBacked jamesObjectiveQueue,
+                    QueueBacked newClassesQueue,
+                    QueueBacked newInformationPointQueue,
+                    QueueBacked removeInformationPointQueue);
 
 }

@@ -17,6 +17,7 @@
 package com.tomtom.james.controller.webservice;
 
 import com.sun.net.httpserver.HttpHandler;
+import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.controller.JamesController;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
@@ -49,12 +50,22 @@ public class WebserviceController implements JamesController {
     public void initialize(JamesControllerConfiguration jamesControllerConfiguration,
                            InformationPointService informationPointService,
                            ScriptEngine scriptEngine,
-                           EventPublisher eventPublisher) {
+                           EventPublisher eventPublisher,
+                           QueueBacked jamesObjectiveQueue,
+                           QueueBacked newClassesQueue,
+                           QueueBacked newInformationPointQueue,
+                           QueueBacked removeInformationPointQueue) {
 
+        LOG.trace(" initialization ");
         WebserviceControllerConfiguration configuration = new WebserviceControllerConfiguration(jamesControllerConfiguration);
-
         InetSocketAddress listeningAddress = new InetSocketAddress(configuration.getPort());
-        Map<String, HttpHandler> handlers = createHandlers(informationPointService, scriptEngine, eventPublisher);
+        Map<String, HttpHandler> handlers = createHandlers(informationPointService,
+                scriptEngine,
+                eventPublisher,
+                jamesObjectiveQueue,
+                newClassesQueue,
+                newInformationPointQueue,
+                removeInformationPointQueue);
         Executor executor = createExecutor(configuration);
 
         WebServer webServer = new WebServer(listeningAddress, handlers, executor);
@@ -73,10 +84,14 @@ public class WebserviceController implements JamesController {
 
     private Map<String, HttpHandler> createHandlers(InformationPointService informationPointService,
                                                     ScriptEngine scriptEngine,
-                                                    EventPublisher eventPublisher) {
+                                                    EventPublisher eventPublisher,
+                                                    QueueBacked jamesObjectiveQueue,
+                                                    QueueBacked newClassesQueue,
+                                                    QueueBacked newInformationPointQueue,
+                                                    QueueBacked removeInformationPointQueue) {
         HashMap<String, HttpHandler> handlers = new HashMap<>();
         handlers.put("/v1/information-point", new InformationPointHandler(informationPointService));
-        handlers.put("/v1/queue", new QueueHandler(scriptEngine, eventPublisher));
+        handlers.put("/v1/queue", new QueueHandler(scriptEngine, eventPublisher, jamesObjectiveQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue));
         return handlers;
     }
 

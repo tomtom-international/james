@@ -1,12 +1,12 @@
-package com.tomtom.james.newagent.tools;
+package com.tomtom.james.newagent;
 
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.common.api.QueueBacked;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class BasicInformationPointQueue extends ArrayBlockingQueue<InformationPoint> implements InformationPointQueue {
+public class JamesObjectivesQueue extends ArrayBlockingQueue<JamesObjective> implements QueueBacked {
 
-    public BasicInformationPointQueue(int capacity) {
+    public JamesObjectivesQueue(int capacity) {
         super(capacity);
     }
 

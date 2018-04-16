@@ -21,6 +21,9 @@ import com.tomtom.james.common.api.controller.JamesController
 import com.tomtom.james.common.api.informationpoint.InformationPointService
 import com.tomtom.james.common.api.publisher.EventPublisher
 import com.tomtom.james.common.api.script.ScriptEngine
+import com.tomtom.james.newagent.JamesObjectivesQueue
+import com.tomtom.james.newagent.tools.ClassQueue
+import com.tomtom.james.newagent.tools.InformationPointQueue
 import spock.lang.Specification
 
 class ControllersManagerSpec extends Specification {
@@ -32,6 +35,10 @@ class ControllersManagerSpec extends Specification {
     def informationPointService = Mock(InformationPointService)
     def scriptEngine = Mock(ScriptEngine)
     def eventPublisher = Mock(EventPublisher)
+    def jamesObjectivesQueue = Mock(JamesObjectivesQueue)
+    def newClassesQueue = Mock(ClassQueue)
+    def newInformationPointQueue = Mock(InformationPointQueue)
+    def removeInformationPointQueue = Mock(InformationPointQueue)
     def controller1 = Mock(JamesController)
     def controller2 = Mock(JamesController)
 
@@ -45,17 +52,17 @@ class ControllersManagerSpec extends Specification {
         def controllersManager = new ControllersManager(pluginManager, configurations)
 
         when:
-        controllersManager.initializeControllers(informationPointService, scriptEngine, eventPublisher)
+        controllersManager.initializeControllers(informationPointService, scriptEngine, eventPublisher, jamesObjectivesQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue)
 
         then:
-        1 * controller1.initialize(conf1, informationPointService, scriptEngine, eventPublisher)
-        1 * controller2.initialize(conf2, informationPointService, scriptEngine, eventPublisher)
+        1 * controller1.initialize(conf1, informationPointService, scriptEngine, eventPublisher, jamesObjectivesQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue)
+        1 * controller2.initialize(conf2, informationPointService, scriptEngine, eventPublisher, jamesObjectivesQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue)
     }
 
     def "Should close all initialized controllers"() {
         given:
         def controllersManager = new ControllersManager(pluginManager, configurations)
-        controllersManager.initializeControllers(informationPointService, scriptEngine, eventPublisher)
+        controllersManager.initializeControllers(informationPointService, scriptEngine, eventPublisher, jamesObjectivesQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue)
 
         when:
         controllersManager.close()

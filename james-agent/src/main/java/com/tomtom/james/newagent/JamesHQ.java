@@ -1,6 +1,7 @@
 package com.tomtom.james.newagent;
 
 import com.google.common.base.Stopwatch;
+import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
@@ -29,7 +30,7 @@ public class JamesHQ extends Thread {
     private ClassQueue newClassesQueue;
     private InformationPointQueue addInformationPointQueue;
     private InformationPointQueue removeInformationPointQueue;
-    private Queue<JamesObjective> jamesObjectives = new ArrayBlockingQueue<>(10000);
+    private JamesObjectivesQueue jamesObjectives = new JamesObjectivesQueue(10000);
     private James james;
 
     // TODO builder
@@ -43,6 +44,10 @@ public class JamesHQ extends Thread {
         this.addInformationPointQueue = addInformationPointQueue;
         this.removeInformationPointQueue = removeInformationPointQueue;
         this.setDaemon(true);
+    }
+
+    public JamesObjectivesQueue getJamesObjectivesQueue() {
+        return jamesObjectives;
     }
 
     private JamesObjective prepareObjectiveForSingleClass(Class clazz) {

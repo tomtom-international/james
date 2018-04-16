@@ -29,7 +29,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 
     def cleanup() {
         // cleaning existing ip
-        def ips = jamesController.getInformationPoints();
+        def ips = jamesController.getInformationPoints()
         for (ip in ips) {
             jamesController.removeInformationPoint(ip.getClassName(), ip.getMethodName())
         }

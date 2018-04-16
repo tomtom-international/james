@@ -135,16 +135,13 @@ public class JVMAgent {
             ControllersManager controllersManager = new ControllersManager(pluginManager, configuration.getControllersConfigurations());
             LOG.trace("controllerManager time=" + stopwatch.elapsed());
 
-            InformationPointQueue addInformationPointQueue = new BasicInformationPointQueue(10000); // max 10000 information points in queue
+            InformationPointQueue newInformationPointQueue = new BasicInformationPointQueue(10000); // max 10000 information points in queue
             InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue(10000); // max 10000 information points in queue
             ClassQueue newClassQueue = new BasicClassQueue(10000); // max 10000 new classes in queue
 
             // iformation point provider
-            InformationPointService informationPointService = new InformationPointServiceImpl(store, addInformationPointQueue, removeInformationPointQueue);
+            InformationPointService informationPointService = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue);
             LOG.trace("informationPointService time=" + stopwatch.elapsed());
-
-            controllersManager.initializeControllers(informationPointService, engine, publisher);
-            LOG.trace("initialize controllers time=" + stopwatch.elapsed());
 
             // ClassService - scans JVM loaded classes and put every new class to the newClassQuery
             LOG.trace("ClassService init :: ignoredPackages=" + configuration.getClassScannerConfiguration().getIgnoredPackages().stream().collect(Collectors.joining(", ")));
@@ -159,7 +156,7 @@ public class JVMAgent {
             // TODO builder
             jamesHQ = new JamesHQ(informationPointService,
                                 classService,
-                                addInformationPointQueue,
+                                newInformationPointQueue,
                                 removeInformationPointQueue,
                                 newClassQueue,
                                 configuration.getJamesHQConfiguration().getInitialDelayInMs(),
@@ -168,6 +165,20 @@ public class JVMAgent {
             jamesHQ.start();
             LOG.trace("James HQ time=" + stopwatch.elapsed());
             LOG.debug("JVMAgent - JamesHQ is executed.");
+
+            controllersManager.initializeControllers(
+                    informationPointService,
+                    engine,
+                    publisher,
+                    jamesHQ.getJamesObjectivesQueue(),
+                    newClassQueue,
+                    newInformationPointQueue,
+                    removeInformationPointQueue
+                    );
+            LOG.trace("initialize controllers time=" + stopwatch.elapsed());
+
+
+
 
             ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
