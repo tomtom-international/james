@@ -87,9 +87,7 @@ public class ControllersManager implements Closeable {
         Optional<JamesController> ep = pluginManager.createControllerPluginInstance(configuration);
         if (ep.isPresent()) {
             LOG.trace(() -> "Loaded controller plugin " + configuration.getId());
-            JamesController xxx = ep.get();
-            LOG.trace(() -> "ep " + xxx.getClass().getName());
-            xxx.initialize(configuration,
+            ep.get().initialize(configuration,
                     informationPointService,
                     scriptEngine,
                     eventPublisher,
