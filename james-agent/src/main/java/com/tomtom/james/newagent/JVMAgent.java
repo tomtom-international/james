@@ -137,7 +137,7 @@ public class JVMAgent {
 
             InformationPointQueue newInformationPointQueue = new BasicInformationPointQueue(10000); // max 10000 information points in queue
             InformationPointQueue removeInformationPointQueue = new BasicInformationPointQueue(10000); // max 10000 information points in queue
-            ClassQueue newClassQueue = new BasicClassQueue(10000); // max 10000 new classes in queue
+            ClassQueue newClassQueue = new BasicClassQueue(200000); // max 200000 new classes in queue
 
             // iformation point provider
             InformationPointService informationPointService = new InformationPointServiceImpl(store, newInformationPointQueue, removeInformationPointQueue);
