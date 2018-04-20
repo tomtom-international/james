@@ -21,6 +21,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DynamicWatchedConfiguration;
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.controller.JamesController;
@@ -47,6 +48,7 @@ public class ConsulController implements JamesController {
     @Override
     public void initialize(JamesControllerConfiguration jamesControllerConfiguration,
                            InformationPointService informationPointService,
+                           ClassScanner classScanner,
                            ScriptEngine scriptEngine,
                            EventPublisher eventPublisher,
                            QueueBacked jamesObjectiveQueue,

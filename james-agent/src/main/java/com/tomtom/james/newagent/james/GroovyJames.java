@@ -1,7 +1,6 @@
 package com.tomtom.james.newagent.james;
 
 import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.JamesObjective;
 import javassist.*;
@@ -28,22 +27,20 @@ public class GroovyJames extends AbstractJames {
     protected void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
-//        s.append(" System.out.println(\">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INSTRUMENTATION BEFORE+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\"); ");
-        s.append(" _startTime = System.nanoTime();");
-        s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\"" + informationPoint + "\", _startTime); ");
+        s.append(" _startTime = System.nanoTime();"); // we put nanoTime into local variable ...
+        s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\"" + informationPoint + "\", _startTime); "); // and into the GlobalValueStore in case of Exception, because in finally block local variable is not visible
         method.insertBefore(s.toString());
     }
 
     protected void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-//        s.append(" System.out.println(\"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< INSTRUMENTATION AFTER+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "     [st: \" + _startTime + \" :: \" + System.nanoTime() + \"<<<<<<<<\"); ");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append( informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+        s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
 
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
             s.append("null, "); // this is static method - no instance
@@ -62,14 +59,13 @@ public class GroovyJames extends AbstractJames {
     protected void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-//        s.append(" System.out.println(\"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSTRUMENTATION EXCEPTION+ " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\"); ");
         s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.get(\"" + informationPoint + "\"); ");
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
         s.append(informationPoint.getSampleRate() + ", "); // sample rate
-        s.append( informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+        s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
 
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
             s.append("null, "); // this is static method - no instance
@@ -87,8 +83,7 @@ public class GroovyJames extends AbstractJames {
 
         // finally block
         StringBuilder f = new StringBuilder("");
-//        f.append(" System.out.println(\"---------------------------------------------------------------------------- FINALLY ----------------------------------------------------------------------------\"); \n");
-        f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\""+informationPoint+"\"); \n");
-        method.insertAfter(f.toString(),true);
+        f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\"" + informationPoint + "\"); \n");
+        method.insertAfter(f.toString(), true);
     }
 }

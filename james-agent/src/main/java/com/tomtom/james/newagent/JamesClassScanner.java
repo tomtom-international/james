@@ -1,9 +1,10 @@
 package com.tomtom.james.newagent;
 
 import com.google.common.base.Stopwatch;
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.newagent.tools.ClassStructure;
 import com.tomtom.james.newagent.tools.ClassQueue;
+import com.tomtom.james.newagent.tools.ClassStructure;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * responsible for maintenace of the all class map, and structure of parents and children
  */
-public class JamesClassScanner extends Thread {
+public class JamesClassScanner extends Thread implements ClassScanner {
     private static final Logger LOG = Logger.getLogger(JamesClassScanner.class);
     private long initialDelay = 10000;
     private long scanPeriod = 5000;
@@ -141,4 +142,27 @@ public class JamesClassScanner extends Thread {
         }
     }
 
+    @Override
+    public Collection<String> getIgnoredPackages() {
+        return ignoredPackages;
+    }
+
+    @Override
+    public Collection<String> getClassStructureInfos() {
+        return classStructure.getMap().entrySet().stream().map(e -> e.getKey() + " :: " + e.getValue().size()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Collection<String> getProcessedClassesInfos() {
+        return processedClasses.getMap().entrySet().stream().map(e -> e.getKey() + " :: " + e.getValue().size()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Map<String, String> getStatistics() {
+        Map<String, String> map = new HashMap<>();
+        map.put("processedClassesSize", String.valueOf(processedClasses.getMap().size()));
+        map.put("classStructureSize", String.valueOf(classStructure.getMap().size()));
+        map.put("ignoredPackagesSize", String.valueOf(ignoredPackages.size()));
+        return map;
+    }
 }

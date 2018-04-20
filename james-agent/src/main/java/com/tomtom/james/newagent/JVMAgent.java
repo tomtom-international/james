@@ -168,6 +168,7 @@ public class JVMAgent {
 
             controllersManager.initializeControllers(
                     informationPointService,
+                    classService.getClassScanner(),
                     engine,
                     publisher,
                     jamesHQ.getJamesObjectivesQueue(),

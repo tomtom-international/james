@@ -16,6 +16,7 @@
 
 package com.tomtom.james.common.api.controller;
 
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.api.Closeable;
 import com.tomtom.james.common.api.Identifiable;
 import com.tomtom.james.common.api.QueueBacked;
@@ -28,6 +29,7 @@ public interface JamesController extends Identifiable, Closeable {
 
     void initialize(JamesControllerConfiguration configuration,
                     InformationPointService informationPointService,
+                    ClassScanner classScanner,
                     ScriptEngine scriptEngine,
                     EventPublisher eventPublisher,
                     QueueBacked jamesObjectiveQueue,

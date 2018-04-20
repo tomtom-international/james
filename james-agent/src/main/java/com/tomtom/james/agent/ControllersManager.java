@@ -16,6 +16,7 @@
 
 package com.tomtom.james.agent;
 
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.api.Closeable;
 import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
@@ -44,6 +45,7 @@ public class ControllersManager implements Closeable {
     }
 
     public void initializeControllers(InformationPointService informationPointService,
+                                      ClassScanner classScanner,
                                       ScriptEngine scriptEngine,
                                       EventPublisher eventPublisher,
                                       QueueBacked jamesObjectiveQueue,
@@ -56,6 +58,7 @@ public class ControllersManager implements Closeable {
                         pluginManager,
                         configuration,
                         informationPointService,
+                        classScanner,
                         scriptEngine,
                         eventPublisher,
                         jamesObjectiveQueue,
@@ -77,6 +80,7 @@ public class ControllersManager implements Closeable {
             PluginManager pluginManager,
             JamesControllerConfiguration configuration,
             InformationPointService informationPointService,
+            ClassScanner classScanner,
             ScriptEngine scriptEngine,
             EventPublisher eventPublisher,
             QueueBacked jamesObjectiveQueue,
@@ -89,6 +93,7 @@ public class ControllersManager implements Closeable {
             LOG.trace(() -> "Loaded controller plugin " + configuration.getId());
             ep.get().initialize(configuration,
                     informationPointService,
+                    classScanner,
                     scriptEngine,
                     eventPublisher,
                     jamesObjectiveQueue,

@@ -17,6 +17,7 @@
 package com.tomtom.james.controller.webservice;
 
 import com.sun.net.httpserver.HttpHandler;
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.controller.JamesController;
@@ -24,6 +25,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.controller.webservice.handlers.v1.ClassScannerHandler;
 import com.tomtom.james.controller.webservice.handlers.v1.InformationPointHandler;
 import com.tomtom.james.controller.webservice.handlers.v1.QueueHandler;
 
@@ -49,6 +51,7 @@ public class WebserviceController implements JamesController {
     @Override
     public void initialize(JamesControllerConfiguration jamesControllerConfiguration,
                            InformationPointService informationPointService,
+                           ClassScanner classScanner,
                            ScriptEngine scriptEngine,
                            EventPublisher eventPublisher,
                            QueueBacked jamesObjectiveQueue,
@@ -60,6 +63,7 @@ public class WebserviceController implements JamesController {
         WebserviceControllerConfiguration configuration = new WebserviceControllerConfiguration(jamesControllerConfiguration);
         InetSocketAddress listeningAddress = new InetSocketAddress(configuration.getPort());
         Map<String, HttpHandler> handlers = createHandlers(informationPointService,
+                classScanner,
                 scriptEngine,
                 eventPublisher,
                 jamesObjectiveQueue,
@@ -83,6 +87,7 @@ public class WebserviceController implements JamesController {
     }
 
     private Map<String, HttpHandler> createHandlers(InformationPointService informationPointService,
+                                                    ClassScanner classScanner,
                                                     ScriptEngine scriptEngine,
                                                     EventPublisher eventPublisher,
                                                     QueueBacked jamesObjectiveQueue,
@@ -92,6 +97,7 @@ public class WebserviceController implements JamesController {
         HashMap<String, HttpHandler> handlers = new HashMap<>();
         handlers.put("/v1/information-point", new InformationPointHandler(informationPointService));
         handlers.put("/v1/queue", new QueueHandler(scriptEngine, eventPublisher, jamesObjectiveQueue, newClassesQueue, newInformationPointQueue, removeInformationPointQueue));
+        handlers.put("/v1/class-scanner/", new ClassScannerHandler(classScanner));
         return handlers;
     }
 

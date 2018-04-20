@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent.tools;
 
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.newagent.ClassService;
 import com.tomtom.james.newagent.JamesClassScanner;
 
@@ -33,6 +34,11 @@ public class BasicClassService implements ClassService {
     @Override
     public Set<Class> getChildrenOf(String className) {
         return childrenMap.getChildren(className);
+    }
+
+    @Override
+    public ClassScanner getClassScanner() {
+        return scanner;
     }
 
 }
