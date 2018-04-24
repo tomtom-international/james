@@ -20,7 +20,7 @@ import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.common.api.publisher.EventPublisher
 import spock.lang.Specification
 
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
 
 import static org.awaitility.Awaitility.await
@@ -28,7 +28,7 @@ import static org.awaitility.Awaitility.await
 class AsyncPublisherSpec extends Specification {
 
     def delegate = Mock(EventPublisher)
-    def callerThreadNames = new ConcurrentLinkedQueue<String>()
+    def callerThreadNames = new ArrayBlockingQueue<String>(10000)
 
     def setup() {
         delegate.publish(_) >> { evt -> callerThreadNames.add(Thread.currentThread().getName()) }

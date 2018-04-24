@@ -22,7 +22,7 @@ import spock.lang.Specification
 
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
 
 import static org.awaitility.Awaitility.await
@@ -43,8 +43,8 @@ class AsyncScriptEngineSpec extends Specification {
     def origin = null
     def currentThread = Mock(Thread)
 
-    def successCallerThreadNames = new ConcurrentLinkedQueue<String>()
-    def errorCallerThreadNames = new ConcurrentLinkedQueue<String>()
+    def successCallerThreadNames = new ArrayBlockingQueue<String>(10000)
+    def errorCallerThreadNames = new ArrayBlockingQueue<String>(10000)
 
     def setup() {
         delegate.invokeSuccessHandler(*_) >> { successCallerThreadNames.add(Thread.currentThread().getName()) }

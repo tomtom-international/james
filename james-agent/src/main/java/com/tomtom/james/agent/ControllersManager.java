@@ -16,7 +16,9 @@
 
 package com.tomtom.james.agent;
 
+import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.api.Closeable;
+import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.controller.JamesController;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
@@ -28,7 +30,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class ControllersManager implements Closeable {
+public class ControllersManager implements Closeable {
 
     private static final Logger LOG = Logger.getLogger(ControllersManager.class);
 
@@ -36,18 +38,33 @@ class ControllersManager implements Closeable {
     private final Collection<JamesControllerConfiguration> controllerConfigurations;
     private Collection<JamesController> initializedControllers;
 
-    ControllersManager(PluginManager pluginManager,
-                       Collection<JamesControllerConfiguration> controllerConfigurations) {
+    public ControllersManager(PluginManager pluginManager,
+                              Collection<JamesControllerConfiguration> controllerConfigurations) {
         this.pluginManager = pluginManager;
         this.controllerConfigurations = controllerConfigurations;
     }
 
-    void initializeControllers(InformationPointService informationPointService,
-                               ScriptEngine scriptEngine,
-                               EventPublisher eventPublisher) {
-        initializedControllers = controllerConfigurations.stream()
+    public void initializeControllers(InformationPointService informationPointService,
+                                      ClassScanner classScanner,
+                                      ScriptEngine scriptEngine,
+                                      EventPublisher eventPublisher,
+                                      QueueBacked jamesObjectiveQueue,
+                                      QueueBacked newClassesQueue,
+                                      QueueBacked newInformationPointQueue,
+                                      QueueBacked removeInformationPointQueue) {
+        initializedControllers = controllerConfigurations
+                .stream()
                 .map(configuration -> createAndInitializeController(
-                        pluginManager, configuration, informationPointService, scriptEngine, eventPublisher))
+                        pluginManager,
+                        configuration,
+                        informationPointService,
+                        classScanner,
+                        scriptEngine,
+                        eventPublisher,
+                        jamesObjectiveQueue,
+                        newClassesQueue,
+                        newInformationPointQueue,
+                        removeInformationPointQueue))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -63,13 +80,27 @@ class ControllersManager implements Closeable {
             PluginManager pluginManager,
             JamesControllerConfiguration configuration,
             InformationPointService informationPointService,
+            ClassScanner classScanner,
             ScriptEngine scriptEngine,
-            EventPublisher eventPublisher) {
+            EventPublisher eventPublisher,
+            QueueBacked jamesObjectiveQueue,
+            QueueBacked newClassesQueue,
+            QueueBacked newInformationPointQueue,
+            QueueBacked removeInformationPointQueue) {
 
         Optional<JamesController> ep = pluginManager.createControllerPluginInstance(configuration);
         if (ep.isPresent()) {
             LOG.trace(() -> "Loaded controller plugin " + configuration.getId());
-            ep.get().initialize(configuration, informationPointService, scriptEngine, eventPublisher);
+            ep.get().initialize(configuration,
+                    informationPointService,
+                    classScanner,
+                    scriptEngine,
+                    eventPublisher,
+                    jamesObjectiveQueue,
+                    newClassesQueue,
+                    newInformationPointQueue,
+                    removeInformationPointQueue);
+            LOG.trace("----------------------- DONE ----------------------");
         } else {
             LOG.warn(() -> "Error loading controller " + configuration.getId() + ", plugin not found");
         }

@@ -21,13 +21,36 @@ controllers:
 #      port: 8500
 #      folderPath: james/test/information-points
 
+jamesHQ:
+  initialDelayInMs: 200
+  scanPeriodInMs: 200
+  jamesIntervalInMs: 500
+
+classScanner:
+  initialDelayInMs: 500
+  scanPeriodInMs: 500
+  ignoredPackages:
+    - java.
+    - com.tomtom.james
+    - sun.
+    - org.apache.
+    - javax.servlet.
+    - com.sun.
+    - org.codehaus.
+    - groovy.
+    - javassist.
+    - jdk.
+    - javax.
+    - org.w3c.
+    - org.xml
+
 publishers:
   - id: james.publisher.console
     properties:
       prettifyJSON: true
-#  - id: james.publisher.file
-#    properties:
-#      path: ./filepublisher.out
+  - id: james.publisher.file
+    properties:
+      path: ./filepublisher.out
 #  - id: james.publisher.kinesis
 #    asyncWorkers: 4
 #    maxAsyncJobQueueCapacity: 20000
@@ -69,5 +92,5 @@ scriptEngine:
   maxAsyncJobQueueCapacity: 10000
 
 informationPointStore:
-  persistenceEnabled: false
+  persistenceEnabled: true
   storeFilePath: /tmp/file/informationpoints.json

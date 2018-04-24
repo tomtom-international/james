@@ -28,7 +28,6 @@ class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
-    private Boolean useForSuccessors = false;
 
     // For marshalling
     InformationPointDTO() {
@@ -39,7 +38,6 @@ class InformationPointDTO {
         methodName = informationPoint.getMethodName();
         script = informationPoint.splittedScriptLines();
         sampleRate = informationPoint.getSampleRate();
-        useForSuccessors = informationPoint.getUseForSuccessors();
     }
 
     public InformationPoint toInformationPoint() {
@@ -50,7 +48,6 @@ class InformationPointDTO {
             builder.withScript(String.join("\n", script));
         }
         builder.withSampleRate(sampleRate);
-        builder.withUseForSuccessors(useForSuccessors);
         return builder.build();
     }
 }

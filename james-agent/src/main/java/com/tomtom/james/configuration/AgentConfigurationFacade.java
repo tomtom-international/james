@@ -86,6 +86,20 @@ class AgentConfigurationFacade implements AgentConfiguration {
     }
 
     @Override
+    public ClassScannerConfiguration getClassScannerConfiguration() {
+        return configuration.get("classScanner")
+                .map(ClassScannerConfigurationFacade::new)
+                .orElse(new ClassScannerConfigurationFacade(new StructuredConfiguration.Empty()));
+    }
+
+    @Override
+    public JamesHQConfiguration getJamesHQConfiguration() {
+        return configuration.get("jamesHQ")
+                .map(JamesHQConfigurationFacade::new)
+                .orElse(new JamesHQConfigurationFacade(new StructuredConfiguration.Empty()));
+    }
+
+    @Override
     public InformationPointStoreConfiguration getInformationPointStoreConfiguration() {
         return configuration.get("informationPointStore")
                 .map(InformationPointStoreConfigurationFacade::new)

@@ -22,13 +22,12 @@ import java.util.stream.Collectors;
 
 public class InformationPoint {
 
-    private String className;
-    private String methodName;
-    private String script;
-    private Integer sampleRate;
-    private Boolean useForSuccessors = false;
+    protected String className;
+    protected String methodName;
+    protected String script;
+    protected Integer sampleRate;
 
-    private InformationPoint() {
+    public InformationPoint() {
     }
 
     public String getClassName() {
@@ -47,10 +46,6 @@ public class InformationPoint {
         return Optional.ofNullable(sampleRate).orElse(100);
     }
 
-    public Boolean getUseForSuccessors() {
-        return useForSuccessors;
-    }
-
     public List<String> splittedScriptLines() {
         if (script != null) {
             return Arrays.asList(script.split("\n"));
@@ -61,13 +56,7 @@ public class InformationPoint {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("InformationPoint | ");
-        builder.append(" className=" + className);
-        builder.append(" methodName=" + methodName);
-        builder.append(" sampleRate=" + sampleRate);
-        builder.append(" useForSuccessors=" + useForSuccessors);
-        return builder.toString();
+        return className + '#' + methodName;
     }
 
     @Override
@@ -97,7 +86,6 @@ public class InformationPoint {
         private String methodName;
         private String script;
         private Integer sampleRate;
-        private Boolean useForSuccessors = false;
 
         private Builder() {
         }
@@ -132,11 +120,6 @@ public class InformationPoint {
             return this;
         }
 
-        public Builder withUseForSuccessors(Boolean useForSuccessors) {
-            this.useForSuccessors = useForSuccessors;
-            return this;
-        }
-
         public Builder copyOf(InformationPoint copyFrom) {
             this.className = copyFrom.className;
             this.methodName = copyFrom.methodName;
@@ -151,7 +134,6 @@ public class InformationPoint {
             ip.methodName = Objects.requireNonNull(methodName);
             ip.script = script;
             ip.sampleRate = sampleRate;
-            ip.useForSuccessors = useForSuccessors;
             return ip;
         }
     }

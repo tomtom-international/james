@@ -22,7 +22,8 @@ sourceCompatibility = 1.8
 
 jar {
     manifest {
-        attributes 'Premain-Class': 'com.tomtom.james.agent.Agent',
+        attributes 'Agent-Class': 'com.tomtom.james.newagent.JVMAgent',
+                'Premain-Class': 'com.tomtom.james.newagent.JVMAgent',
                 'Can-Redefine-Classes': true,
                 'Can-Retransform-Classes': true
     }
@@ -31,7 +32,6 @@ jar {
 shadowJar {
     relocate 'com.google', 'com.tomtom.james.repackaged.com.google'
     relocate 'com.fasterxml.jackson', 'com.tomtom.james.repackaged.com.fasterxml.jackson'
-    relocate 'net.bytebuddy', 'com.tomtom.james.repackaged.net.bytebuddy'
     relocate 'org.yaml.snakeyaml', 'com.tomtom.james.repackaged.org.yaml.snakeyaml'
 }
 
@@ -49,9 +49,11 @@ dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
-    compile group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddy
+    compile group: 'org.javassist', name: 'javassist', version: versions.javassist
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonslang
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testRuntime group: 'org.objenesis',  name: 'objenesis', version: versions.objenesis
+    testRuntime group: 'org.objenesis', name: 'objenesis', version: versions.objenesis
+    testRuntime group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddytests
 }
