@@ -38,7 +38,7 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public Collection<JamesControllerConfiguration> getControllersConfigurations() {
         return configuration.get("controllers")
                 .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
+                .orElseGet(Collections::emptyList)
                 .stream()
                 .map(JamesControllerConfigurationFacade::new)
                 .collect(Collectors.toList());
@@ -48,7 +48,7 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public Collection<EventPublisherConfiguration> getPublishersConfigurations() {
         return configuration.get("publishers")
                 .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
+                .orElseGet(Collections::emptyList)
                 .stream()
                 .map(EventPublisherConfigurationFacade::new)
                 .collect(Collectors.toList());
@@ -58,7 +58,7 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public Collection<ToolkitConfiguration> getToolkitsConfigurations() {
         return configuration.get("toolkits")
                 .map(StructuredConfiguration::asMap)
-                .orElse(Collections.emptyMap())
+                .orElseGet(Collections::emptyMap)
                 .entrySet()
                 .stream()
                 .map(entry -> new ToolkitConfigurationFacade(entry.getKey(), entry.getValue()))
@@ -69,7 +69,7 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public Collection<String> getPluginIncludeDirectories() {
         return configuration.get("plugins.includeDirectories")
                 .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
+                .orElseGet(Collections::emptyList)
                 .stream()
                 .map(StructuredConfiguration::asString)
                 .collect(Collectors.toList());
@@ -79,7 +79,7 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public Collection<String> getPluginIncludeFiles() {
         return configuration.get("plugins.includeFiles")
                 .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
+                .orElseGet(Collections::emptyList)
                 .stream()
                 .map(StructuredConfiguration::asString)
                 .collect(Collectors.toList());
@@ -89,28 +89,28 @@ class AgentConfigurationFacade implements AgentConfiguration {
     public ClassScannerConfiguration getClassScannerConfiguration() {
         return configuration.get("classScanner")
                 .map(ClassScannerConfigurationFacade::new)
-                .orElse(new ClassScannerConfigurationFacade(new StructuredConfiguration.Empty()));
+                .orElseGet(() -> new ClassScannerConfigurationFacade(new StructuredConfiguration.Empty()));
     }
 
     @Override
     public JamesHQConfiguration getJamesHQConfiguration() {
         return configuration.get("jamesHQ")
                 .map(JamesHQConfigurationFacade::new)
-                .orElse(new JamesHQConfigurationFacade(new StructuredConfiguration.Empty()));
+                .orElseGet(() -> new JamesHQConfigurationFacade(new StructuredConfiguration.Empty()));
     }
 
     @Override
     public InformationPointStoreConfiguration getInformationPointStoreConfiguration() {
         return configuration.get("informationPointStore")
                 .map(InformationPointStoreConfigurationFacade::new)
-                .orElse(new InformationPointStoreConfigurationFacade(new StructuredConfiguration.Empty()));
+                .orElseGet(() -> new InformationPointStoreConfigurationFacade(new StructuredConfiguration.Empty()));
     }
 
     @Override
     public ScriptEngineConfiguration getScriptEngineConfiguration() {
         return configuration.get("scriptEngine")
                 .map(ScriptEngineConfigurationFacade::new)
-                .orElse(new ScriptEngineConfigurationFacade(new StructuredConfiguration.Empty()));
+                .orElseGet(() -> new ScriptEngineConfigurationFacade(new StructuredConfiguration.Empty()));
     }
 
     @Override

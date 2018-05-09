@@ -31,9 +31,9 @@ public class ClassScannerConfigurationFacade implements ClassScannerConfiguratio
 
     @Override
     public Collection<String> getIgnoredPackages() {
-        return configuration.get("classScanner.ignoredPackages")
+        return configuration.get("ignoredPackages")
                 .map(StructuredConfiguration::asList)
-                .orElse(Collections.emptyList())
+                .orElseGet(Collections::emptyList)
                 .stream()
                 .map(StructuredConfiguration::asString)
                 .collect(Collectors.toList());
