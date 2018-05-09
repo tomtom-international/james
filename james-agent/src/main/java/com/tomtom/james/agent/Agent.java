@@ -17,14 +17,12 @@
 package com.tomtom.james.agent;
 
 import com.google.common.io.Resources;
-import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.configuration.AgentConfiguration;
 import com.tomtom.james.configuration.AgentConfigurationFactory;
 import com.tomtom.james.configuration.ConfigurationInitializationException;
-import com.tomtom.james.informationpoint.InformationPointServiceImpl;
 import com.tomtom.james.publisher.EventPublisherFactory;
 import com.tomtom.james.script.ScriptEngineFactory;
 import com.tomtom.james.store.InformationPointStore;
