@@ -20,12 +20,9 @@ import com.tomtom.james.script.ScriptEngineFactory;
 import com.tomtom.james.store.InformationPointStore;
 import com.tomtom.james.store.InformationPointStoreFactory;
 import javassist.CannotCompileException;
-import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.NotFoundException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
@@ -33,10 +30,6 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 

@@ -16,7 +16,6 @@
 
 package com.tomtom.james.informationpoint.advice;
 
-import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.log.Logger;
 import java.lang.reflect.Method;

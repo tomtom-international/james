@@ -2,10 +2,6 @@ package com.tomtom.james.configuration;
 
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
-
 public class JamesHQConfigurationFacade implements JamesHQConfiguration {
     private static final Long JAMESHQ_DEFAULT_INITIAL_DELAY = 10000L;
     private static final Long JAMES_DEFAULT_INTERVAL = 1000L;

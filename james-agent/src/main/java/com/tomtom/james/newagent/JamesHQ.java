@@ -1,7 +1,6 @@
 package com.tomtom.james.newagent;
 
 import com.google.common.base.Stopwatch;
-import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
@@ -16,8 +15,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class JamesHQ extends Thread {
