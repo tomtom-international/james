@@ -16,7 +16,10 @@
 
 package com.tomtom.james.it.webservice;
 
-public interface IService {
+public interface IService extends IBaseInterface{
+
+    @Override
+    String methodFromInterfaceOverridedByInterfaceImplementedInService(String arg0);
 
     String methodOfInterface(String arg0);
 

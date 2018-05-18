@@ -115,4 +115,15 @@ public class TestServiceController {
     public String privateStaticMethod() {
         return TestService.privateStaticMethodWrapper("privateStaticMethod-arg0");
     }
+
+    @RequestMapping("/methodFromInterfaceOverridedByInterfaceImplementedInService")
+    public String methodFromInterfaceOverridedByInterfaceImplementedInService() {
+        return testService.methodFromInterfaceOverridedByInterfaceImplementedInService("methodFromInterfaceOverridedByInterfaceImplementedInService-arg0");
+    }
+
+    @RequestMapping("/methodFromInterfaceOverridedByInterfaceImplementedInService2")
+    public String methodFromInterfaceOverridedByInterfaceImplementedInService2() {
+        return testService2.methodFromInterfaceOverridedByInterfaceImplementedInService("methodFromInterfaceOverridedByInterfaceImplementedInService-arg0");
+    }
+
 }

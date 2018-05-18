@@ -673,4 +673,36 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         ]
         result == "privateStaticMethod-value"
     }
+
+    def "Method from interface overrided by interface implemented in service with preloading"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: IService.name,
+                methodName: "methodFromInterfaceOverridedByInterfaceImplementedInService",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        AppClient.methodFromInterfaceOverridedByInterfaceImplementedInService()
+        jamesController.createInformationPoint(ip)
+        sleep(2000)
+        def result = AppClient.methodFromInterfaceOverridedByInterfaceImplementedInService()
+        sleep(2000)
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter == [
+                [
+                        result     : "success",
+                        className  : TestService.name,
+                        methodName : "methodFromInterfaceOverridedByInterfaceImplementedInService",
+                        "arg(arg0)": "methodFromInterfaceOverridedByInterfaceImplementedInService-arg0",
+                        returnValue: "methodFromInterfaceOverridedByInterfaceImplementedInService-value"
+                ]
+        ]
+        result == "methodFromInterfaceOverridedByInterfaceImplementedInService-value"
+    }
+    
 }

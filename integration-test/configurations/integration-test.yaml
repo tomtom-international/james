@@ -28,7 +28,6 @@ classScanner:
   scanPeriodInMs: 1000
   ignoredPackages:
     - java.
-    - com.tomtom.james
     - sun.
     - org.apache.
     - javax.servlet.

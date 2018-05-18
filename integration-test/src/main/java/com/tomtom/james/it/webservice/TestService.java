@@ -77,6 +77,11 @@ public class TestService extends AbstractTestService implements IService {
         return ic;
     }
 
+    @Override
+    public String methodFromInterfaceOverridedByInterfaceImplementedInService(String arg0) {
+        return "methodFromInterfaceOverridedByInterfaceImplementedInService-value";
+    }
+
     public class InternalClass {
         public String methodOfInternalClass(String arg0) {
             return "methodOfInternalClass-value";
