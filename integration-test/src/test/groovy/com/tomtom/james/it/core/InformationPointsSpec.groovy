@@ -78,4 +78,5 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ipsAfterRemove.isEmpty()
     }
 
+
 }

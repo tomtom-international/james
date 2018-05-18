@@ -83,4 +83,11 @@ class AppClient {
         return restTemplate.getForObject(baseURL + "/privateStaticMethod", String)
     }
 
+    static def methodFromInterfaceOverridedByInterfaceImplementedInService() {
+        return restTemplate.getForObject(baseURL + "/methodFromInterfaceOverridedByInterfaceImplementedInService", String)
+    }
+
+    static def methodFromInterfaceOverridedByInterfaceImplementedInService2() {
+        return restTemplate.getForObject(baseURL + "/methodFromInterfaceOverridedByInterfaceImplementedInService2", String)
+    }
 }

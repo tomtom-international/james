@@ -20,8 +20,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TestService2 implements IService {
+
     @Override
     public String methodOfInterface(String arg0) {
         return "methodOfInterface-value2";
+    }
+
+    @Override
+    public String methodFromInterfaceOverridedByInterfaceImplementedInService(String arg0) {
+        return "methodFromInterfaceOverridedByInterfaceImplementedInService-value2";
     }
 }

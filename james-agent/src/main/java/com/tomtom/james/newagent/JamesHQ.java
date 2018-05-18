@@ -50,18 +50,18 @@ public class JamesHQ extends Thread {
     private JamesObjective prepareObjectiveForSingleClass(Class clazz) {
         JamesObjective objective = new JamesObjective(clazz);
         // directly for given clazz
-        if (informationPointService.getInformationPoints(clazz.getName()).size() > 0) {
+        if ((!clazz.isInterface())&&(informationPointService.getInformationPoints(clazz.getName()).size() > 0)) {
             LOG.trace("------------------------------- " + clazz.getName() + " direct IP");
             for (InformationPoint informationPoint : informationPointService.getInformationPoints(clazz.getName())) {
-                long clazzCheck = Arrays.stream(clazz.getDeclaredMethods())
-                        .filter(method -> method.getName().equals(informationPoint.getMethodName()))
-                        .filter(method -> !Modifier.isAbstract(method.getModifiers()) && !Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
-                        .count();
-                if (clazzCheck > 0) {
-                    LOG.trace("---------------------------------------[o]" + informationPoint);
-                    objective.addInformationPoint(new ExtendedInformationPoint(informationPoint, clazz.getName()));
-                } // else this is interface or abstract method
-            }
+                    long clazzCheck = Arrays.stream(clazz.getDeclaredMethods())
+                            .filter(method -> method.getName().equals(informationPoint.getMethodName()))
+                            .filter(method -> !Modifier.isAbstract(method.getModifiers()) && !Modifier.isInterface(method.getModifiers())) // FIXME check if method in interface has Modifier.isInterface(..) == true
+                            .count();
+                    if (clazzCheck > 0) {
+                        LOG.trace("---------------------------------------[oc]" + informationPoint);
+                        objective.addInformationPoint(new ExtendedInformationPoint(informationPoint, clazz.getName()));
+                    } // else this is interface or abstract method
+                }
         }
 
         List<Class<?>> superIC = ClassUtils.getAllSuperclasses(clazz);
@@ -84,7 +84,7 @@ public class JamesHQ extends Thread {
                                 .count();
                         if (clazzCheck > 0) {
                             // there are IP on superClass on abstract/interface method and implemented methods in sublcass
-                            LOG.trace("------------------------------[o] " + clazz.getName() + " inherited IP : " + informationPoint);
+                            LOG.trace("------------------------------[oi] " + clazz.getName() + " inherited IP : " + informationPoint);
                             objective.addInformationPoint(new ExtendedInformationPoint(informationPoint, clazz.getName()));
                         }
                     }
@@ -99,13 +99,13 @@ public class JamesHQ extends Thread {
         LOG.trace("--------[ip] " + informationPoint);
         // directrly for given czas ?
         for(Class clazz : classService.getAllClasses(informationPoint.getClassName())) {
-            LOG.trace("---------------[ofc] " + clazz.getName() + " direct IP : " + informationPoint );
+            LOG.trace("---------------[ofc-d] " + clazz.getName() + " direct IP : " + informationPoint );
             objectives.add(prepareObjectiveForSingleClass(clazz));
         }
 
         // for all children
         for(Class child : classService.getChildrenOf(informationPoint.getClassName())) {
-            LOG.trace("---------------[ofc] " + child.getName() + " child IP : " + informationPoint );
+            LOG.trace("---------------[ofc-c] " + child.getName() + " child IP : " + informationPoint );
             objectives.add(prepareObjectiveForSingleClass(child));
         }
         return objectives;
