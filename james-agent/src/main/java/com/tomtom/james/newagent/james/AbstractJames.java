@@ -66,8 +66,7 @@ public abstract class AbstractJames extends Thread implements James {
             JVMAgent.redefine(clazz, ctClass);
             ctClass.detach();
         } catch (Throwable e) {
-            LOG.error("JAMES instrumentation ERROR : " + objective);
-            e.printStackTrace();
+            LOG.error("JAMES instrumentation ERROR : " + objective, e);
         }
     }
 
