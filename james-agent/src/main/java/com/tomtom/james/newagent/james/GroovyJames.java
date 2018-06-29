@@ -49,7 +49,7 @@ public class GroovyJames extends AbstractJames {
         }
 
         s.append("$args, ");  // arguments
-        s.append("($r)$_, "); // result
+        s.append("($w)$_, "); // result
         s.append("null ");    // exception
         s.append(" ); ");
         method.insertAfter(s.toString(), false);
