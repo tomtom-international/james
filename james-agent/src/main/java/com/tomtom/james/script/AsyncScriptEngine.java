@@ -64,16 +64,10 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      Duration executionTime,
                                      String[] callStack,
                                      Object returnValue) {
-        try {
-            if (jobQueue.remainingCapacity() > 0) {
-                jobQueue.put(() ->
-                        delegate.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script,
-                                origin, parameters, instance, currentThread, executionTime, callStack, returnValue));
-            } else {
-                droppedJobsCount.incrementAndGet();
-            }
-        } catch (InterruptedException e) {
-            LOG.trace("Success handler schedule interrupted", e);
+        if (!jobQueue.offer(() ->
+                    delegate.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script,
+                            origin, parameters, instance, currentThread, executionTime, callStack, returnValue))) {
+            droppedJobsCount.incrementAndGet();
         }
     }
 
@@ -88,16 +82,10 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    Duration executionTime,
                                    String[] callStack,
                                    Throwable errorCause) {
-        try {
-            if (jobQueue.remainingCapacity() > 0) {
-                jobQueue.put(() ->
-                        delegate.invokeErrorHandler(informationPointClassName, informationPointMethodName, script,
-                                origin, parameters, instance, currentThread, executionTime, callStack, errorCause));
-            } else {
-                droppedJobsCount.incrementAndGet();
-            }
-        } catch (InterruptedException e) {
-            LOG.trace("Success handler schedule interrupted", e);
+        if (!jobQueue.offer(() ->
+                    delegate.invokeErrorHandler(informationPointClassName, informationPointMethodName, script,
+                            origin, parameters, instance, currentThread, executionTime, callStack, errorCause))) {
+            droppedJobsCount.incrementAndGet();
         }
     }
 

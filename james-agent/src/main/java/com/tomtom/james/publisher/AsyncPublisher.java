@@ -66,14 +66,8 @@ class AsyncPublisher implements EventPublisher, QueueBacked {
 
     @Override
     public void publish(Event evt) {
-        try {
-            if (jobQueue.remainingCapacity() > 0) {
-                jobQueue.put(() -> delegate.publish(evt));
-            } else {
-                droppedJobsCount.incrementAndGet();
-            }
-        } catch (InterruptedException e) {
-            LOG.trace("Publishing interrupted", e);
+        if (!jobQueue.offer(() -> delegate.publish(evt))) {
+            droppedJobsCount.incrementAndGet();
         }
     }
 
