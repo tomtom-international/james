@@ -25,17 +25,15 @@ public class GroovyJames extends AbstractJames {
     }
 
     protected void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
-        method.addLocalVariable("_startTime", CtClass.longType);
         StringBuilder s = new StringBuilder("");
-        s.append(" _startTime = System.nanoTime();"); // we put nanoTime into local variable ...
-        s.append(" com.tomtom.james.newagent.GlobalValueStore.put(\"" + informationPoint + "\", _startTime); "); // and into the GlobalValueStore in case of Exception, because in finally block local variable is not visible
+        s.append(" com.tomtom.james.newagent.MethodExecutionTimeHelper.executionStarted();");
         method.insertBefore(s.toString());
     }
 
     protected void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _startTime, \n");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
@@ -59,8 +57,7 @@ public class GroovyJames extends AbstractJames {
     protected void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
         String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" long _methodStartTime = com.tomtom.james.newagent.GlobalValueStore.get(\"" + informationPoint + "\"); ");
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( _methodStartTime, ");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append("\"" + script + "\", ");
@@ -83,7 +80,7 @@ public class GroovyJames extends AbstractJames {
 
         // finally block
         StringBuilder f = new StringBuilder("");
-        f.append(" com.tomtom.james.newagent.GlobalValueStore.getAndRemove(\"" + informationPoint + "\"); \n");
+        f.append(" com.tomtom.james.newagent.MethodExecutionTimeHelper.executionFinished(); \n");
         method.insertAfter(f.toString(), true);
     }
 }
