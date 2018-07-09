@@ -26,8 +26,10 @@ public class InformationPoint {
     protected String methodName;
     protected String script;
     protected Integer sampleRate;
+    protected Metadata metadata;
 
     public InformationPoint() {
+        metadata = new Metadata();
     }
 
     public String getClassName() {
@@ -52,6 +54,10 @@ public class InformationPoint {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public Metadata getMetadata() {
+        return metadata;
     }
 
     @Override
@@ -86,8 +92,10 @@ public class InformationPoint {
         private String methodName;
         private String script;
         private Integer sampleRate;
+        private Metadata metadata;
 
         private Builder() {
+            metadata = new Metadata();
         }
 
         public Builder withClassName(String className) {
@@ -120,11 +128,18 @@ public class InformationPoint {
             return this;
         }
 
+        public Builder withMetadata(String key, Object value) {
+            if(value != null)
+                metadata.put(key, value);
+            return this;
+        }
+
         public Builder copyOf(InformationPoint copyFrom) {
             this.className = copyFrom.className;
             this.methodName = copyFrom.methodName;
             this.script = copyFrom.script;
             this.sampleRate = copyFrom.sampleRate;
+            this.metadata.putAll(copyFrom.metadata);
             return this;
         }
 
@@ -134,6 +149,7 @@ public class InformationPoint {
             ip.methodName = Objects.requireNonNull(methodName);
             ip.script = script;
             ip.sampleRate = sampleRate;
+            ip.metadata.putAll(metadata);
             return ip;
         }
     }

@@ -17,10 +17,12 @@
 package com.tomtom.james.script
 
 import com.tomtom.james.agent.ToolkitManager
+import com.tomtom.james.common.api.informationpoint.Metadata
 import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.common.api.publisher.EventPublisher
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.log.Logger
+import com.tomtom.james.informationpoint.MetadataStore
 import spock.lang.Specification
 
 import java.time.Duration
@@ -118,6 +120,30 @@ def onError(ErrorHandlerContext context) {
                     methodName        : informationPointMethodName,
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value"
+            ]
+        })
+    }
+
+    def "Should pass metadata to event if present"() {
+        given:
+        def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
+        def metadata = new Metadata();
+        metadata.put("_key", "value");
+        MetadataStore.setMetadata(informationPointClassName, informationPointMethodName, metadata);
+
+        when:
+        engine.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script, origin, [param1, param2],
+                instance, currentThread, duration, callStack, returnValue)
+
+        then:
+        1 * eventPublisher.publish({ Event evt ->
+            evt.content == [
+                    result            : "success",
+                    className         : informationPointClassName,
+                    methodName        : informationPointMethodName,
+                    "arg(param1-name)": "param1-value",
+                    "arg(param2-name)": "param2-value",
+                    "_key"             : "value"
             ]
         })
     }

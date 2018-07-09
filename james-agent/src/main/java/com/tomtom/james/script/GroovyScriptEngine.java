@@ -18,10 +18,12 @@ package com.tomtom.james.script;
 
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.agent.ToolkitManager;
+import com.tomtom.james.common.api.informationpoint.Metadata;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.informationpoint.MetadataStore;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -67,7 +69,7 @@ class GroovyScriptEngine implements ScriptEngine {
         LOG.trace(() -> "Invoking success handler for " + informationPointClassName + "#" + informationPointMethodName);
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            InformationPointHandler handler = createOrGetCachedHandler(script);
+            InformationPointHandler handler = createOrGetCachedHandler(script, informationPointClassName, informationPointMethodName);
             SuccessHandlerContext handlerContext = new SuccessHandlerContext(
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, returnValue);
@@ -100,7 +102,7 @@ class GroovyScriptEngine implements ScriptEngine {
         LOG.trace(() -> "Invoking error handler for " + informationPointClassName + "#" + informationPointMethodName);
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
-            InformationPointHandler handler = createOrGetCachedHandler(script);
+            InformationPointHandler handler = createOrGetCachedHandler(script, informationPointClassName, informationPointMethodName);
             ErrorHandlerContext handlerContext = new ErrorHandlerContext(
                     informationPointClassName, informationPointMethodName, origin, parameters, instance,
                     currentThread, executionTime, callStack, errorCause);
@@ -124,14 +126,16 @@ class GroovyScriptEngine implements ScriptEngine {
         // Do nothing
     }
 
-    private InformationPointHandler createOrGetCachedHandler(String script)
+    private InformationPointHandler createOrGetCachedHandler(String script, String className, String methodName)
             throws CompilationFailedException {
-        return handlersCache.computeIfAbsent(script, scriptTextKey -> {
+        InformationPointHandler handlerFromCache = handlersCache.computeIfAbsent(script, scriptTextKey -> {
             InformationPointHandler handler = (InformationPointHandler) groovyShell.parse(scriptTextKey);
             handler.setEventPublisher(publisher);
             handler.setToolkitManager(toolkitManager);
             return handler;
         });
+        handlerFromCache.setMetadata(MetadataStore.getMetadata(className, methodName));
+        return handlerFromCache;
     }
 
 }

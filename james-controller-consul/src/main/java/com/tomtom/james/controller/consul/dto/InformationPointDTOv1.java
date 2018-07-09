@@ -22,6 +22,8 @@ public class InformationPointDTOv1 extends Versioned {
 
     private List<String> script;
     private Integer sampleRate;
+    private String owner;
+    private String index;
 
     public List<String> getScript() {
         return script;
@@ -29,5 +31,13 @@ public class InformationPointDTOv1 extends Versioned {
 
     public Integer getSampleRate() {
         return sampleRate;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public String getIndex() {
+        return index;
     }
 }

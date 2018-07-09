@@ -15,6 +15,7 @@
  */
 
 apply plugin: 'java'
+apply plugin: 'groovy'
 
 sourceCompatibility = 1.8
 
@@ -32,4 +33,6 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
     compile 'com.ecwid.consul:consul-api:1.2.3'
     compile 'org.irenical.consul:archaius-consul:1.0.0'
+
+    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
 }

@@ -38,7 +38,9 @@ class InformationPointsSpec extends BaseJamesSpecification {
         def informationPoint = new InformationPointDTO(
                 className: "foo.bar.className",
                 methodName: "methodName",
-                script: []
+                script: [],
+                owner: "jenkins",
+                index: "test"
         )
 
         when:
@@ -78,5 +80,53 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ipsAfterRemove.isEmpty()
     }
 
+    def "Should parse original v1 json" () {
+        given:
+        def controller = JamesControllerProvider.get()
+        def json = '''{
+        "className": "foo.bar.className3",
+        "methodName": "methodName3",
+        "script": [
+            "// First line of Information Point script",
+            "// Second line of Information Point script"
+        ],
+        "sampleRate": 5}'''
 
+        when:
+        controller.createInformationPoint(json)
+        def ips = controller.informationPoints
+
+        then:
+        ips.size() == 1
+        ips[0].className == "foo.bar.className3"
+        ips[0].methodName == "methodName3"
+        ips[0].sampleRate == 5
+    }
+
+    def "Should parse v1 json with owner and index" () {
+        given:
+        def controller = JamesControllerProvider.get()
+        def json = '''{
+        "className": "foo.bar.className3",
+        "methodName": "methodName3",
+        "script": [
+            "// First line of Information Point script",
+            "// Second line of Information Point script"
+        ],
+        "sampleRate": 5,
+        "owner": "jenkins",
+        "index": "test" }'''
+
+        when:
+        controller.createInformationPoint(json)
+        def ips = controller.informationPoints
+
+        then:
+        ips.size() == 1
+        ips[0].className == "foo.bar.className3"
+        ips[0].methodName == "methodName3"
+        ips[0].sampleRate == 5
+        ips[0].owner == "jenkins"
+        ips[0].index == "test"
+    }
 }

@@ -25,6 +25,8 @@ public class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
+    private String owner;
+    private String index;
 
     public String getClassName() {
         return className;
@@ -58,6 +60,22 @@ public class InformationPointDTO {
         this.sampleRate = sampleRate;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +89,7 @@ public class InformationPointDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, script, sampleRate);
+        return Objects.hash(className, methodName, script, sampleRate, owner, index);
     }
+
 }

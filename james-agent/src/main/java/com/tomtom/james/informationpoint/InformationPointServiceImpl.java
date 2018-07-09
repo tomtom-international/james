@@ -62,10 +62,12 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     @Override
     public void addInformationPoint(InformationPoint informationPoint) {
+        MetadataStore.setMetadata(informationPoint.getClassName(), informationPoint.getMethodName(), informationPoint.getMetadata());
         informationPoints.add(informationPoint);
         store.store(informationPoints);
         informationPointQueue.add(informationPoint);
         LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + informationPointQueue.size());
+        LOG.trace("Metadata: " + informationPoint.getMetadata().toString());
     }
 
     @Override

@@ -49,13 +49,17 @@ public class JamesControllerClient {
         });
     }
 
-    public void createInformationPoint(InformationPointDTO ip) throws IOException {
+    public void createInformationPoint(String payload) throws IOException {
         Request request = new Request.Builder()
-                .post(RequestBody.create(MEDIA_TYPE_JSON, mapper.writeValueAsString(ip)))
+                .post(RequestBody.create(MEDIA_TYPE_JSON, payload))
                 .url(baseURL + "/v1/information-point")
                 .build();
         Response response = client.newCall(request).execute();
         assertResponseSuccessful(response);
+    }
+
+    public void createInformationPoint(InformationPointDTO ip) throws IOException {
+        createInformationPoint(mapper.writeValueAsString(ip));
     }
 
     public void removeInformationPoint(String className, String methodName) throws IOException {
