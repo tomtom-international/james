@@ -128,9 +128,9 @@ public class InformationPoint {
             return this;
         }
 
-        public Builder withMetadata(String key, Object value) {
-            if(value != null)
-                metadata.put(key, value);
+        public Builder withMetadata(Metadata metadata) {
+            if(metadata != null)
+                this.metadata.putAll(metadata);
             return this;
         }
 

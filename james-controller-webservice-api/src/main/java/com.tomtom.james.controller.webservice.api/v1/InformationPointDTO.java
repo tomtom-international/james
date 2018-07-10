@@ -15,8 +15,9 @@
  */
 
 package com.tomtom.james.controller.webservice.api.v1;
-
+import com.tomtom.james.common.api.informationpoint.Metadata;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class InformationPointDTO {
@@ -25,8 +26,7 @@ public class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
-    private String owner;
-    private String index;
+    private Metadata metadata;
 
     public String getClassName() {
         return className;
@@ -60,20 +60,12 @@ public class InformationPointDTO {
         this.sampleRate = sampleRate;
     }
 
-    public String getOwner() {
-        return owner;
+    public Metadata getMetadata() {
+        return metadata;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public String getIndex() {
-        return index;
-    }
-
-    public void setIndex(String index) {
-        this.index = index;
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
     }
 
     @Override
@@ -89,7 +81,7 @@ public class InformationPointDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, script, sampleRate, owner, index);
+        return Objects.hash(className, methodName, script, sampleRate, metadata);
     }
 
 }

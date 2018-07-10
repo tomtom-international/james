@@ -16,14 +16,15 @@
 
 package com.tomtom.james.controller.consul.dto;
 
+import com.tomtom.james.common.api.informationpoint.Metadata;
+
 import java.util.List;
 
 public class InformationPointDTOv1 extends Versioned {
 
     private List<String> script;
     private Integer sampleRate;
-    private String owner;
-    private String index;
+    private Metadata metadata;
 
     public List<String> getScript() {
         return script;
@@ -33,11 +34,7 @@ public class InformationPointDTOv1 extends Versioned {
         return sampleRate;
     }
 
-    public String getOwner() {
-        return owner;
-    }
-
-    public String getIndex() {
-        return index;
+    public Metadata getMetadata() {
+        return metadata;
     }
 }

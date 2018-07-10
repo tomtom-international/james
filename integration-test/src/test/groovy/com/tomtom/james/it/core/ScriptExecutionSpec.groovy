@@ -711,8 +711,10 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
                 className: AbstractTestService.name,
                 methodName: "methodOfSuperclass",
                 script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
-                owner: "owner",
-                index: "test"
+                "metadata": [
+                        owner : "owner",
+                        esIndex : "test"
+                ]
         )
         def eventsBefore = TestUtils.readPublishedEvents()
 

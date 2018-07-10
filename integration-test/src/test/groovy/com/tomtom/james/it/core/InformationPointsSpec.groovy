@@ -38,9 +38,7 @@ class InformationPointsSpec extends BaseJamesSpecification {
         def informationPoint = new InformationPointDTO(
                 className: "foo.bar.className",
                 methodName: "methodName",
-                script: [],
-                owner: "jenkins",
-                index: "test"
+                script: []
         )
 
         when:
@@ -114,8 +112,11 @@ class InformationPointsSpec extends BaseJamesSpecification {
             "// Second line of Information Point script"
         ],
         "sampleRate": 5,
-        "owner": "jenkins",
-        "index": "test" }'''
+        "metadata": {
+            "owner": "jenkins",
+            "index": "test"
+        }
+        }'''
 
         when:
         controller.createInformationPoint(json)
@@ -126,7 +127,7 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ips[0].className == "foo.bar.className3"
         ips[0].methodName == "methodName3"
         ips[0].sampleRate == 5
-        ips[0].owner == "jenkins"
-        ips[0].index == "test"
+        ips[0].metadata.get("owner") == "jenkins"
+        ips[0].metadata.get("index") == "test"
     }
 }

@@ -53,8 +53,11 @@ class ConsulControllerSpec extends Specification{
         "// First line of Information Point script",
         "// Second line of Information Point script"
     ],
-    "owner": "jenkins",
-    "index": "test" }'''
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
 
         when:
         def ip = InformationPointDTOParser.parse(json, methodRefrence)
