@@ -17,6 +17,7 @@
 package com.tomtom.james.common.api.script;
 
 import com.tomtom.james.common.api.Closeable;
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -24,9 +25,7 @@ import java.util.List;
 
 public interface ScriptEngine extends Closeable {
 
-    void invokeSuccessHandler(String informationPointClassName,
-                              String informationPointMethodName,
-                              String script,
+    void invokeSuccessHandler(InformationPoint informationPoint,
                               Method origin,
                               List<RuntimeInformationPointParameter> parameters,
                               Object instance,
@@ -35,9 +34,7 @@ public interface ScriptEngine extends Closeable {
                               String[] callStack,
                               Object returnValue);
 
-    void invokeErrorHandler(String informationPointClassName,
-                            String informationPointMethodName,
-                            String script,
+    void invokeErrorHandler(InformationPoint informationPoint,
                             Method origin,
                             List<RuntimeInformationPointParameter> parameters,
                             Object instance,

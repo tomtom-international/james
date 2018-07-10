@@ -17,12 +17,12 @@
 package com.tomtom.james.script
 
 import com.tomtom.james.agent.ToolkitManager
+import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.informationpoint.Metadata
 import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.common.api.publisher.EventPublisher
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.log.Logger
-import com.tomtom.james.informationpoint.MetadataStore
 import spock.lang.Specification
 
 import java.time.Duration
@@ -74,6 +74,7 @@ def onError(ErrorHandlerContext context) {
     def callStack = null
     def origin = null
     def currentThread = Mock(Thread)
+    def informationPoint = Mock(InformationPoint)
 
     def setup() {
         Logger.setCurrentLogLevel(Logger.Level.TRACE)
@@ -82,6 +83,11 @@ def onError(ErrorHandlerContext context) {
         param1.getValue() >> "param1-value"
         param2.getName() >> "param2-name"
         param2.getValue() >> "param2-value"
+
+        informationPoint.getClassName() >> informationPointClassName
+        informationPoint.getMethodName() >> informationPointMethodName
+        informationPoint.getScript() >> Optional.of(script)
+        informationPoint.getMetadata() >> new Metadata()
     }
 
     def "Should publish an event when success handler invoked"() {
@@ -89,7 +95,7 @@ def onError(ErrorHandlerContext context) {
         def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
 
         when:
-        engine.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script, origin, [param1, param2],
+        engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
                 instance, currentThread, duration, callStack, returnValue)
 
         then:
@@ -109,7 +115,7 @@ def onError(ErrorHandlerContext context) {
         def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
 
         when:
-        engine.invokeErrorHandler(informationPointClassName, informationPointMethodName, script, origin, [param1, param2],
+        engine.invokeErrorHandler(informationPoint, origin, [param1, param2],
                 instance, currentThread, duration, callStack, errorCause)
 
         then:
@@ -127,12 +133,16 @@ def onError(ErrorHandlerContext context) {
     def "Should pass metadata to event if present"() {
         given:
         def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
-        def metadata = new Metadata();
-        metadata.put("_key", "value");
-        MetadataStore.setMetadata(informationPointClassName, informationPointMethodName, metadata);
+        def metadata = new Metadata()
+        metadata.put("_key", "value")
+        def informationPoint2 = Mock(InformationPoint)
+        informationPoint2.getClassName() >> informationPointClassName
+        informationPoint2.getMethodName() >> informationPointMethodName
+        informationPoint2.getScript() >> Optional.of(script)
+        informationPoint2.getMetadata() >> metadata
 
         when:
-        engine.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script, origin, [param1, param2],
+        engine.invokeSuccessHandler(informationPoint2, origin, [param1, param2],
                 instance, currentThread, duration, callStack, returnValue)
 
         then:
@@ -143,7 +153,7 @@ def onError(ErrorHandlerContext context) {
                     methodName        : informationPointMethodName,
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value",
-                    "_key"             : "value"
+                    "@metadata"  : metadata
             ]
         })
     }

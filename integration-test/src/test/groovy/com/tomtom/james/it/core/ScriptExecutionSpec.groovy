@@ -733,8 +733,10 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
                         methodName : "methodOfSuperclass",
                         "arg(arg0)": "methodOfSuperclass-arg0",
                         returnValue: "methodOfSuperclass-value",
-                        informationPointOwner : "owner",
-                        informationPointIndex      : "test"
+                        "@metadata": [
+                                owner : "owner",
+                                esIndex : "test"
+                        ]
                 ]
         ]
     }

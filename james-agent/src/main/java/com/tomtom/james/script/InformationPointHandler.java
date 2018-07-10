@@ -43,7 +43,9 @@ public abstract class InformationPointHandler extends Script {
 
     @SuppressWarnings("unused")
     public void publishEvent(Event evt) {
-        evt.getContent().putAll(metadata);
+        if(metadata.size() > 0) {
+            evt.getContent().put(Metadata.PREFIX, metadata);
+        }
         publisher.publish(evt);
     }
 

@@ -36,8 +36,6 @@ public class GroovyJames extends AbstractJames {
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
-        s.append("\"" + script + "\", ");
-        s.append(informationPoint.getSampleRate() + ", "); // sample rate
         s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
 
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
@@ -60,8 +58,6 @@ public class GroovyJames extends AbstractJames {
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
-        s.append("\"" + script + "\", ");
-        s.append(informationPoint.getSampleRate() + ", "); // sample rate
         s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
 
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {

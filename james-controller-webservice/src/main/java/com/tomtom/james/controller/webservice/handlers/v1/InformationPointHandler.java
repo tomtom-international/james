@@ -117,7 +117,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
         dto.setSampleRate(informationPoint.getSampleRate());
         Metadata metadata = informationPoint.getMetadata();
         dto.setOwner((String)metadata.get(Metadata.OWNER));
-        dto.setIndex((String)metadata.get(Metadata.INDEX));
+        dto.setIndex((String)metadata.get(Metadata.ELASTIC_SEARCH_INDEX));
         return dto;
     }
 
@@ -128,7 +128,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
                 .withScript(joinedScriptLines(dto.getScript()))
                 .withSampleRate(dto.getSampleRate())
                 .withMetadata(Metadata.OWNER, dto.getOwner())
-                .withMetadata(Metadata.INDEX, dto.getIndex())
+                .withMetadata(Metadata.ELASTIC_SEARCH_INDEX, dto.getIndex())
                 .build();
     }
 

@@ -54,7 +54,7 @@ class InformationPointDTOParser {
                 .withScript(dto.getScript() != null ? String.join("\n", dto.getScript()) : null)
                 .withSampleRate(dto.getSampleRate())
                 .withMetadata(Metadata.OWNER, dto.getOwner())
-                .withMetadata(Metadata.INDEX, dto.getIndex())
+                .withMetadata(Metadata.ELASTIC_SEARCH_INDEX, dto.getIndex())
                 .build();
     }
 

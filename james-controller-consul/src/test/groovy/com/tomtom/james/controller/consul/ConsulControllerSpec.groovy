@@ -53,7 +53,6 @@ class ConsulControllerSpec extends Specification{
         "// First line of Information Point script",
         "// Second line of Information Point script"
     ],
-    "sampleRate": 6,
     "owner": "jenkins",
     "index": "test" }'''
 
@@ -65,7 +64,7 @@ class ConsulControllerSpec extends Specification{
         ip.get().className == "foo.bar.className2"
         ip.get().methodName == "methodName2"
         ip.get().sampleRate == 6
-        ip.get().getMetadata().get("informationPointOwner") == "jenkins"
-        ip.get().getMetadata().get("informationPointIndex") == "test"
+        ip.get().getMetadata().get("owner") == "jenkins"
+        ip.get().getMetadata().get("esIndex") == "test"
     }
 }
