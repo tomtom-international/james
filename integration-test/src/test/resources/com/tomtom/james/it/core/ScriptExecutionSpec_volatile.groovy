@@ -30,4 +30,10 @@ def onSuccess(SuccessHandlerContext context) {
 }
 
 def onError(ErrorHandlerContext context) {
+    def eventMap = [
+            executionTimeNanos: context.executionTime.toNanos(),
+            callStack         : context.callStack,
+            currentThreadName : context.currentThread.name
+    ]
+    publishEvent(new Event(eventMap))
 }

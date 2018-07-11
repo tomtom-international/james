@@ -30,4 +30,22 @@ public class TestServiceThrowingExceptions {
     public String doThrow(String arg0, int arg1) {
         throw new RuntimeException("from doThrow");
     }
+
+    public String anotherDoNotThrow(String arg0, int arg1) { return "anotherDoNotThrow result"; }
+
+    public String anotherDoNotThrow(String arg0, int arg1, String arg2) {
+        return anotherDoNotThrow(arg0, arg1) + ":" + arg2;
+    }
+
+    public String anotherDoThrow(String arg0, int arg1) {
+        throw new RuntimeException("from anotherDoThrow");
+    }
+
+    public String anotherDoThrow(String arg0, int arg1, String arg2) {
+        try {
+            return anotherDoThrow(arg0, arg1);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage() + ":" + arg2, ex);
+        }
+    }
 }

@@ -577,8 +577,93 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsBefore.isEmpty()
         eventsAfter.size() == 1
         (eventsAfter[0]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
         (eventsAfter[0]["callStack"] as List).size() > 0
         (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+    }
+
+    def "Method with information point publishing volatile fields, throwing exception"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestServiceThrowingExceptions.name,
+                methodName: "doThrow",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "volatile")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        AppClient.methodThrowingAnException()
+        jamesController.createInformationPoint(ip)
+        sleep(2000)
+        def result = AppClient.methodThrowingAnException()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsBefore.isEmpty()
+        eventsAfter.size() == 1
+        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
+        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+    }
+
+    def "Method which calls another method with the same name, not throwing exception"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestServiceThrowingExceptions.name,
+                methodName: "anotherDoNotThrow",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "volatile")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        AppClient.anotherMethodNotThrowingAnException()
+        jamesController.createInformationPoint(ip)
+        sleep(5000)
+        def result = AppClient.anotherMethodNotThrowingAnException()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter.size() == 2
+        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
+        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        (eventsAfter[1]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
+        (eventsAfter[1]["callStack"] as List).size() > 0
+        (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+    }
+
+    def "Method which calls another method with the same name, throwing exception"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestServiceThrowingExceptions.name,
+                methodName: "anotherDoThrow",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "volatile")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        AppClient.anotherMethodThrowingAnException()
+        jamesController.createInformationPoint(ip)
+        sleep(5000)
+        def result = AppClient.anotherMethodThrowingAnException()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter.size() == 2
+        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
+        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        (eventsAfter[1]["executionTimeNanos"] as Long) > 0
+        (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
+        (eventsAfter[1]["callStack"] as List).size() > 0
+        (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
     }
 
     def "Method with verbose information point, throwing exception"() {
