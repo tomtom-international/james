@@ -106,6 +106,20 @@ public class TestServiceController {
         }
     }
 
+    @RequestMapping("/anotherMethodNotThrowingAnException")
+    public String anotherMethodNotThrowingAnException() {
+        return testServiceThrowingExceptions.anotherDoNotThrow("arg0-value", 101, "-another");
+    }
+
+    @RequestMapping("/anotherMethodThrowingAnException")
+    public String anotherMethodThrowingAnException() {
+        try {
+            return testServiceThrowingExceptions.anotherDoThrow("arg0-value", 101, "-another");
+        } catch (Throwable t) {
+            return t.getMessage();
+        }
+    }
+
     @RequestMapping("/publicStaticMethod")
     public String publicStaticMethod() {
         return TestService.publicStaticMethod("publicStaticMethod-arg0");
