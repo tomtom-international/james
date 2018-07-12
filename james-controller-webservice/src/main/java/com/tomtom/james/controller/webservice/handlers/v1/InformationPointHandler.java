@@ -55,7 +55,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
             Optional<InformationPointDTO> informationPoint = getInformationPoint(pathParams.get(0), pathParams.get(1));
             if (informationPoint.isPresent()) {
                 ResponseBuilder.forExchange(httpExchange)
-                        .withResponseBody(asJSONBytes(informationPoint), HTTPContentType.APPLICATION_JSON)
+                        .withResponseBody(asJSONBytes(informationPoint.get()), HTTPContentType.APPLICATION_JSON)
                         .sendResponse(HTTPStatus.OK);
             } else {
                 ResponseBuilder.forExchange(httpExchange)
