@@ -16,6 +16,7 @@
 
 package com.tomtom.james.informationpoint.advice;
 
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.log.Logger;
 import java.lang.reflect.Method;
@@ -23,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /*
@@ -56,8 +58,6 @@ public class ContextAwareAdvice {
                        long _startTime,
                        String informationPointClassName,
                        String informationPointMethodName,
-                       String script,
-                       int sampleRate,
                        Method origin,
                        Object instance,
                        Object[] arguments,
@@ -67,13 +67,22 @@ public class ContextAwareAdvice {
         Duration executionTime = Duration.ofNanos(System.nanoTime() - _startTime);
 
         try {
+            Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
+                    .getInformationPoint(informationPointClassName, informationPointMethodName);
+            if(!informationPoint.isPresent()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("onExit: skipping because information point is gone");
+                }
+                return;
+            }
+            int sampleRate = informationPoint.get().getSampleRate();
             if (LOG.isTraceEnabled()) {
                 LOG.trace("onExit: START "
                         + "[origin=" + origin
                         + ", informationPointClassName=" + informationPointClassName
                         + ", informationPointMethodName=" + informationPointMethodName
-                        + ", script=" + (script != null)
-                        + ", sampleRate=" + sampleRate
+                        + ", script=" + (informationPoint.get().getScript().orElse(null) != null)
+                        + ", sampleRate=" + informationPoint.get().getSampleRate()
                         + ", instance=" + instance
                         + ", arguments=" + Arrays.asList(arguments)
                         + ", returned=" + returned
@@ -91,9 +100,7 @@ public class ContextAwareAdvice {
             if (thrown == null) {
                 LOG.trace("onExit: Invoking success handler");
                 ScriptEngineSupplier.get().invokeSuccessHandler(
-                        informationPointClassName,
-                        informationPointMethodName,
-                        script,
+                        informationPoint.get(),
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -105,9 +112,7 @@ public class ContextAwareAdvice {
             } else {
                 LOG.trace("onExit: Invoking error handler");
                 ScriptEngineSupplier.get().invokeErrorHandler(
-                        informationPointClassName,
-                        informationPointMethodName,
-                        script,
+                        informationPoint.get(),
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -159,14 +164,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             byte returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Byte(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Byte(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -174,14 +177,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             short returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Short(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Short(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -189,14 +190,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             int returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Integer(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Integer(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -204,14 +203,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             long returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Long(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Long(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -219,14 +216,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             float returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Float(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Float(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -234,14 +229,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             double returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Double(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Double(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -249,14 +242,12 @@ public class ContextAwareAdvice {
             long _startTime,
             String informationPointClassName,
             String informationPointMethodName,
-            String script,
-            int sampleRate,
             Method origin,
             Object instance,
             Object[] arguments,
             char returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, script, sampleRate, origin, instance, arguments, new Character(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Character(returned), thrown);
     }
 
 }

@@ -18,6 +18,7 @@ package com.tomtom.james.controller.consul;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.common.api.informationpoint.Metadata;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.controller.consul.dto.InformationPointDTOv1;
 import com.tomtom.james.controller.consul.dto.Versioned;
@@ -52,6 +53,8 @@ class InformationPointDTOParser {
                 .withMethodReference(methodReference)
                 .withScript(dto.getScript() != null ? String.join("\n", dto.getScript()) : null)
                 .withSampleRate(dto.getSampleRate())
+                .withMetadata(dto.getMetadata())
                 .build();
     }
+
 }

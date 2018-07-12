@@ -17,6 +17,7 @@
 package com.tomtom.james.script;
 
 import com.tomtom.james.common.api.QueueBacked;
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
@@ -54,9 +55,7 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
     }
 
     @Override
-    public void invokeSuccessHandler(String informationPointClassName,
-                                     String informationPointMethodName,
-                                     String script,
+    public void invokeSuccessHandler(InformationPoint informationPoint,
                                      Method origin,
                                      List<RuntimeInformationPointParameter> parameters,
                                      Object instance,
@@ -65,16 +64,14 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      String[] callStack,
                                      Object returnValue) {
         if (!jobQueue.offer(() ->
-                    delegate.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script,
+                    delegate.invokeSuccessHandler(informationPoint,
                             origin, parameters, instance, currentThread, executionTime, callStack, returnValue))) {
             droppedJobsCount.incrementAndGet();
         }
     }
 
     @Override
-    public void invokeErrorHandler(String informationPointClassName,
-                                   String informationPointMethodName,
-                                   String script,
+    public void invokeErrorHandler(InformationPoint informationPoint,
                                    Method origin,
                                    List<RuntimeInformationPointParameter> parameters,
                                    Object instance,
@@ -83,7 +80,7 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    String[] callStack,
                                    Throwable errorCause) {
         if (!jobQueue.offer(() ->
-                    delegate.invokeErrorHandler(informationPointClassName, informationPointMethodName, script,
+                    delegate.invokeErrorHandler(informationPoint,
                             origin, parameters, instance, currentThread, executionTime, callStack, errorCause))) {
             droppedJobsCount.incrementAndGet();
         }

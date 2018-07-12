@@ -16,6 +16,7 @@
 
 package com.tomtom.james.script
 
+import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
 import spock.lang.Specification
@@ -42,6 +43,7 @@ class AsyncScriptEngineSpec extends Specification {
     def callStack = null
     def origin = null
     def currentThread = Mock(Thread)
+    def informationPoint = Mock(InformationPoint)
 
     def successCallerThreadNames = new ArrayBlockingQueue<String>(10000)
     def errorCallerThreadNames = new ArrayBlockingQueue<String>(10000)
@@ -57,7 +59,7 @@ class AsyncScriptEngineSpec extends Specification {
 
         when:
         10.times {
-            scriptEngine.invokeSuccessHandler(informationPointClassName, informationPointMethodName, script, origin,
+            scriptEngine.invokeSuccessHandler(informationPoint, origin,
                     [param1, param2], instance, currentThread, duration, callStack, returnValue)
         }
         await().atMost(5, TimeUnit.SECONDS).until { successCallerThreadNames.size() == 10 }
@@ -73,7 +75,7 @@ class AsyncScriptEngineSpec extends Specification {
 
         when:
         10.times {
-            scriptEngine.invokeErrorHandler(informationPointClassName, informationPointMethodName, script, origin,
+            scriptEngine.invokeErrorHandler(informationPoint, origin,
                     [param1, param2], instance, currentThread, duration, callStack, errorCause)
         }
         await().atMost(5, TimeUnit.SECONDS).until { errorCallerThreadNames.size() == 10 }

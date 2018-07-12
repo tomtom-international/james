@@ -789,5 +789,42 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         ]
         result == "methodFromInterfaceOverridedByInterfaceImplementedInService-value"
     }
-    
+
+    def "Should pass metadata from information point to event"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: AbstractTestService.name,
+                methodName: "methodOfSuperclass",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple"),
+                "metadata": [
+                        owner : "owner",
+                        esIndex : "test"
+                ]
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        //AppClient.methodOfSuperclass()
+        jamesController.createInformationPoint(ip)
+        sleep(2000)
+        AppClient.methodOfSuperclass()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter.size() == 1
+        eventsAfter == [
+                [
+                        result     : "success",
+                        className  : AbstractTestService.name,
+                        methodName : "methodOfSuperclass",
+                        "arg(arg0)": "methodOfSuperclass-arg0",
+                        returnValue: "methodOfSuperclass-value",
+                        "@metadata": [
+                                owner : "owner",
+                                esIndex : "test"
+                        ]
+                ]
+        ]
+    }
 }

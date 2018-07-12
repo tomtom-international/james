@@ -15,8 +15,9 @@
  */
 
 package com.tomtom.james.controller.webservice.api.v1;
-
+import com.tomtom.james.common.api.informationpoint.Metadata;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class InformationPointDTO {
@@ -25,6 +26,7 @@ public class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
+    private Metadata metadata;
 
     public String getClassName() {
         return className;
@@ -58,6 +60,14 @@ public class InformationPointDTO {
         this.sampleRate = sampleRate;
     }
 
+    public Metadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +81,7 @@ public class InformationPointDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, script, sampleRate);
+        return Objects.hash(className, methodName, script, sampleRate, metadata);
     }
+
 }

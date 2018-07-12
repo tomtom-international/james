@@ -17,6 +17,7 @@
 package com.tomtom.james.script;
 
 import com.tomtom.james.agent.ToolkitManager;
+import com.tomtom.james.common.api.informationpoint.Metadata;
 import com.tomtom.james.common.api.publisher.Event;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.toolkit.Toolkit;
@@ -26,6 +27,7 @@ public abstract class InformationPointHandler extends Script {
 
     private EventPublisher publisher;
     private ToolkitManager toolkitManager;
+    private Metadata metadata;
 
     void setEventPublisher(EventPublisher publisher) {
         this.publisher = publisher;
@@ -35,8 +37,15 @@ public abstract class InformationPointHandler extends Script {
         this.toolkitManager = toolkitManager;
     }
 
+    void setMetadata(Metadata metadata) {
+        this.metadata = metadata;
+    }
+
     @SuppressWarnings("unused")
     public void publishEvent(Event evt) {
+        if(metadata.size() > 0) {
+            evt.getContent().put(Metadata.PREFIX, metadata);
+        }
         publisher.publish(evt);
     }
 

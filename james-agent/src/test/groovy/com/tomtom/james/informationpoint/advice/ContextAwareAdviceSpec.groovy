@@ -16,6 +16,8 @@
 
 package com.tomtom.james.informationpoint.advice
 
+import com.tomtom.james.common.api.informationpoint.InformationPoint
+import com.tomtom.james.common.api.informationpoint.InformationPointService
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
 import spock.lang.Specification
@@ -26,15 +28,20 @@ import java.time.Duration
 class ContextAwareAdviceSpec extends Specification {
 
     def scriptEngine = Mock(ScriptEngine)
+    def ipService = Mock(InformationPointService)
     def originClassName = "originClassName"
     def originMethodName = "originMethodName"
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
     def script = "// script"
     def sampleRate = 100
+    def informationPoint = Mock(InformationPoint)
 
     def setup() {
         ScriptEngineSupplier.register(scriptEngine)
+        InformationPointServiceSupplier.register(ipService)
+        ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
+        informationPoint.getSampleRate() >> sampleRate
     }
 
     def "Should call success handler after successful method execution"() {
@@ -45,14 +52,12 @@ class ContextAwareAdviceSpec extends Specification {
         when:
         def startTime = System.nanoTime()
         ContextAwareAdvice.onEnter(originClassName, originMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName, script, sampleRate,
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
         1 * scriptEngine.invokeSuccessHandler(
-                informationPointClassName,
-                informationPointMethodName,
-                script,
+                informationPoint,
                 _ as Method,
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
@@ -70,16 +75,15 @@ class ContextAwareAdviceSpec extends Specification {
         def currentThread = Thread.currentThread()
 
         when:
+        ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
         def startTime = System.nanoTime()
         ContextAwareAdvice.onEnter(originClassName, originMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName, script, sampleRate,
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
         then:
         1 * scriptEngine.invokeErrorHandler(
-                informationPointClassName,
-                informationPointMethodName,
-                script,
+                informationPoint,
                 _ as Method,
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,

@@ -19,6 +19,7 @@ package com.tomtom.james.informationpoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.informationpoint.advice.InformationPointServiceSupplier;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.store.InformationPointStore;
 
@@ -41,6 +42,7 @@ public class InformationPointServiceImpl implements InformationPointService {
         this.removeInformationPointQueue = removeInformationPointQueue;
         informationPoints = new ArrayList<>(store.restore());
         informationPointQueue.addAll(informationPoints); // put all restored information points to the queue
+        InformationPointServiceSupplier.register(this);
     }
 
     @Override
@@ -66,6 +68,7 @@ public class InformationPointServiceImpl implements InformationPointService {
         store.store(informationPoints);
         informationPointQueue.add(informationPoint);
         LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + informationPointQueue.size());
+        LOG.trace("Metadata: " + informationPoint.getMetadata().toString());
     }
 
     @Override
