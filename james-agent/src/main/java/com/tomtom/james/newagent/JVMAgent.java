@@ -174,7 +174,7 @@ public class JVMAgent {
 
 
 
-            ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration);
+            ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration, () -> MethodExecutionContextHelper.shutdown());
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             LOG.trace("shutdownHook time=" + stopwatch.elapsed());
             stopwatch.stop();

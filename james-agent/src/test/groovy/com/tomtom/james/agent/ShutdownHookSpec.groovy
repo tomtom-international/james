@@ -16,6 +16,7 @@
 
 package com.tomtom.james.agent
 
+import com.tomtom.james.common.api.Closeable
 import com.tomtom.james.common.api.publisher.EventPublisher
 import com.tomtom.james.common.api.script.ScriptEngine
 import com.tomtom.james.configuration.AgentConfiguration
@@ -27,8 +28,9 @@ class ShutdownHookSpec extends Specification {
     def scriptEngine = Mock(ScriptEngine)
     def eventPublisher = Mock(EventPublisher)
     def agentConfiguration = Mock(AgentConfiguration)
+    def methodExecutionHelper = Mock(Closeable)
 
-    def shutdownHook = new ShutdownHook(controllersManager, scriptEngine, eventPublisher, agentConfiguration)
+    def shutdownHook = new ShutdownHook(controllersManager, scriptEngine, eventPublisher, agentConfiguration, methodExecutionHelper)
 
     def "Should close resources on execution"() {
         when:
@@ -38,5 +40,6 @@ class ShutdownHookSpec extends Specification {
         1 * controllersManager.close()
         1 * scriptEngine.close()
         1 * eventPublisher.close()
+        1 * methodExecutionHelper.close()
     }
 }

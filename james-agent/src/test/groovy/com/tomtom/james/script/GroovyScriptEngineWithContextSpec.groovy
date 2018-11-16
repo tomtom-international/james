@@ -29,18 +29,24 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 
-class GroovyScriptEngineSpec extends Specification {
+class GroovyScriptEngineWithContextSpec extends Specification {
 
     def script = '''
 import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.script.ErrorHandlerContext
 import com.tomtom.james.script.SuccessHandlerContext
+import com.tomtom.james.script.PrepareContextHandlerContext
+
+def onPrepareContext(PrepareContextHandlerContext context) {
+    return "Key:" + context.key
+}
 
 def onSuccess(SuccessHandlerContext context) {
     def eventMap = [
             result     : "success",
             className  : context.informationPointClassName,
             methodName : context.informationPointMethodName,
+            initialContext: context.initialContext,
     ]
     context.parameters.each {
         eventMap["arg(${it.name})"] = it.value
@@ -53,6 +59,7 @@ def onError(ErrorHandlerContext context) {
             result     : "error",
             className  : context.informationPointClassName,
             methodName : context.informationPointMethodName,
+            initialContext: context.initialContext,
     ]
     context.parameters.each {
         eventMap["arg(${it.name})"] = it.value
@@ -96,8 +103,9 @@ def onError(ErrorHandlerContext context) {
         def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
 
         when:
+        def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
         engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -105,6 +113,7 @@ def onError(ErrorHandlerContext context) {
                     result            : "success",
                     className         : informationPointClassName,
                     methodName        : informationPointMethodName,
+                    initialContext    : "Key:my_key",
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value"
             ]
@@ -116,8 +125,9 @@ def onError(ErrorHandlerContext context) {
         def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
 
         when:
+        def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
         engine.invokeErrorHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
+                instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(context))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -125,36 +135,9 @@ def onError(ErrorHandlerContext context) {
                     result            : "error",
                     className         : informationPointClassName,
                     methodName        : informationPointMethodName,
+                    initialContext    : "Key:my_key",
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value"
-            ]
-        })
-    }
-
-    def "Should pass metadata to event if present"() {
-        given:
-        def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
-        def metadata = new Metadata()
-        metadata.put("_key", "value")
-        def informationPoint2 = Mock(InformationPoint)
-        informationPoint2.getClassName() >> informationPointClassName
-        informationPoint2.getMethodName() >> informationPointMethodName
-        informationPoint2.getScript() >> Optional.of(script)
-        informationPoint2.getMetadata() >> metadata
-
-        when:
-        engine.invokeSuccessHandler(informationPoint2, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
-
-        then:
-        1 * eventPublisher.publish({ Event evt ->
-            evt.content == [
-                    result            : "success",
-                    className         : informationPointClassName,
-                    methodName        : informationPointMethodName,
-                    "arg(param1-name)": "param1-value",
-                    "arg(param2-name)": "param2-value",
-                    "@metadata"  : metadata
             ]
         })
     }

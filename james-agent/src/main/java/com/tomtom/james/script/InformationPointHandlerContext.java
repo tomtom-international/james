@@ -22,16 +22,11 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 
-public abstract class InformationPointHandlerContext {
+public abstract class InformationPointHandlerContext extends InformationPointContext {
 
-    final String informationPointClassName;
-    final String informationPointMethodName;
-    final Method origin;
-    final Object runtimeInstance;
-    final List<RuntimeInformationPointParameter> runtimeParameters;
-    final Thread currentThread;
     final Duration executionTime;
     final String[] callStack;
+    final Object initialContext;
 
     InformationPointHandlerContext(String informationPointClassName,
                                    String informationPointMethodName,
@@ -40,45 +35,12 @@ public abstract class InformationPointHandlerContext {
                                    Object runtimeInstance,
                                    Thread currentThread,
                                    Duration executionTime,
-                                   String[] callStack) {
-        this.informationPointClassName = informationPointClassName;
-        this.informationPointMethodName = informationPointMethodName;
-        this.origin = origin;
-        this.runtimeParameters = runtimeParameters;
-        this.runtimeInstance = runtimeInstance;
-        this.currentThread = currentThread;
+                                   String[] callStack,
+                                   Object initialContext) {
+        super(informationPointClassName, informationPointMethodName, origin, runtimeInstance, runtimeParameters, currentThread);
         this.executionTime = executionTime;
         this.callStack = callStack;
-    }
-
-    @SuppressWarnings("unused")
-    public String getInformationPointClassName() {
-        return informationPointClassName;
-    }
-
-    @SuppressWarnings("unused")
-    public String getInformationPointMethodName() {
-        return informationPointMethodName;
-    }
-
-    @SuppressWarnings("unused")
-    public Method getOrigin() {
-        return origin;
-    }
-
-    @SuppressWarnings("unused")
-    public List<RuntimeInformationPointParameter> getParameters() {
-        return runtimeParameters;
-    }
-
-    @SuppressWarnings("unused")
-    public Object getInstance() {
-        return runtimeInstance;
-    }
-
-    @SuppressWarnings("unused")
-    public Thread getCurrentThread() {
-        return currentThread;
+        this.initialContext = initialContext;
     }
 
     @SuppressWarnings("unused")
@@ -91,4 +53,8 @@ public abstract class InformationPointHandlerContext {
         return callStack;
     }
 
+    @SuppressWarnings("unused")
+    public Object getInitialContext() {
+        return initialContext;
+    }
 }

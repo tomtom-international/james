@@ -19,6 +19,8 @@ package com.tomtom.james.informationpoint.advice;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.MethodExecutionContextHelper;
+
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 /*
  * Note: advices are inlined so this has to be public.
@@ -37,7 +40,10 @@ public class ContextAwareAdvice {
 
     @SuppressWarnings("unused")
     public static void onEnter(String originTypeName,
-                             String originMethodName) {
+                               String originMethodName,
+                               Method origin,
+                               Object instance,
+                               Object[] arguments) {
         try {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("onEnter: START ["
@@ -45,6 +51,39 @@ public class ContextAwareAdvice {
                         + ", originMethodName=" + originMethodName
                         + "]");
             }
+
+            Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
+                    .getInformationPoint(originTypeName, originMethodName);
+
+            if (!informationPoint.isPresent()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("onEnter: skipping");
+                }
+                return;
+            }
+
+            final InformationPoint ip = informationPoint.get();
+            if (!ip.getRequiresInitialContext()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("onEnter: noInitialContextSupportRequired - skipping");
+                }
+                return;
+            }
+
+            final String key = MethodExecutionContextHelper.createContextKey();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Initializing custom context setup for the call");
+            }
+            final Object callContext = ScriptEngineSupplier.get().invokePrepareContext(
+                    ip,
+                    origin,
+                    createParameterList(origin, arguments),
+                    instance,
+                    Thread.currentThread(),
+                    key);
+
+            MethodExecutionContextHelper.storeContextAsync(key, callContext);
+
         } catch (Throwable t) {
             LOG.error("Error executing onEnter advice", t);
             throw t;
@@ -65,6 +104,7 @@ public class ContextAwareAdvice {
                        Throwable thrown) {
 
         Duration executionTime = Duration.ofNanos(System.nanoTime() - _startTime);
+        boolean requireInitialContextCleanup = false;
 
         try {
             Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
@@ -90,12 +130,18 @@ public class ContextAwareAdvice {
                         + "]");
             }
 
+            requireInitialContextCleanup = informationPoint.get().getRequiresInitialContext();
+
             if ((sampleRate < 100) && (sampleRate < RND.nextDouble() * 100)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("onExit: Sample skipped (sampleRate=" + sampleRate + ")");
                 }
                 return;
             }
+
+            final CompletableFuture<Object> initialContextAsyncProvider = requireInitialContextCleanup
+                    ? MethodExecutionContextHelper.getContextAsync(MethodExecutionContextHelper.getKeyForCurrentFrame())
+                    : CompletableFuture.completedFuture(null);
 
             if (thrown == null) {
                 LOG.trace("onExit: Invoking success handler");
@@ -107,7 +153,8 @@ public class ContextAwareAdvice {
                         Thread.currentThread(),
                         executionTime,
                         getCallStack(),
-                        returned
+                        returned,
+                        initialContextAsyncProvider
                 );
             } else {
                 LOG.trace("onExit: Invoking error handler");
@@ -119,13 +166,17 @@ public class ContextAwareAdvice {
                         Thread.currentThread(),
                         executionTime,
                         getCallStack(),
-                        thrown
+                        thrown,
+                        initialContextAsyncProvider
                 );
             }
         } catch (Throwable t) {
             LOG.error("Error executing onExit advice", t);
             throw t;
         } finally {
+            if (requireInitialContextCleanup) {
+                MethodExecutionContextHelper.removeContextKey();
+            }
             LOG.trace("onExit: END");
         }
     }
@@ -157,6 +208,11 @@ public class ContextAwareAdvice {
         return result;
     }
 
+    @SuppressWarnings("unused")
+    public static void onEnter(String originTypeName,
+                               String originMethodName) {
+        onEnter(originTypeName, originMethodName, null, null, null);
+    }
 
 
     @SuppressWarnings("unused")

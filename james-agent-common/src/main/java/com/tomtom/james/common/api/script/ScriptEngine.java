@@ -22,8 +22,16 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ScriptEngine extends Closeable {
+
+    Object invokePrepareContext(InformationPoint informationPoint,
+                                Method origin,
+                                List<RuntimeInformationPointParameter> parameters,
+                                Object instance,
+                                Thread currentThread,
+                                String contextKey);
 
     void invokeSuccessHandler(InformationPoint informationPoint,
                               Method origin,
@@ -32,7 +40,8 @@ public interface ScriptEngine extends Closeable {
                               Thread currentThread,
                               Duration executionTime,
                               String[] callStack,
-                              Object returnValue);
+                              Object returnValue,
+                              CompletableFuture<Object> initialContextProvider);
 
     void invokeErrorHandler(InformationPoint informationPoint,
                             Method origin,
@@ -41,6 +50,7 @@ public interface ScriptEngine extends Closeable {
                             Thread currentThread,
                             Duration executionTime,
                             String[] callStack,
-                            Throwable errorCause);
+                            Throwable errorCause,
+                            CompletableFuture<Object> initialContextProvider);
 
 }

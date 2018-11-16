@@ -22,6 +22,7 @@ import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.configuration.AgentConfiguration;
+import com.tomtom.james.newagent.MethodExecutionContextHelper;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -36,13 +37,15 @@ public class ShutdownHook extends Thread {
     public ShutdownHook(ControllersManager controllersManager,
                  ScriptEngine scriptEngine,
                  EventPublisher eventPublisher,
-                 AgentConfiguration agentConfiguration) {
+                 AgentConfiguration agentConfiguration,
+                 Closeable methodExecutionContextHelper) {
         super("james-shutdown-thread");
         this.agentConfiguration = Objects.requireNonNull(agentConfiguration);
         closeables = ImmutableList.of(
                 Objects.requireNonNull(controllersManager),
                 Objects.requireNonNull(scriptEngine),
-                Objects.requireNonNull(eventPublisher));
+                Objects.requireNonNull(eventPublisher),
+                Objects.requireNonNull(methodExecutionContextHelper));
     }
 
     @Override

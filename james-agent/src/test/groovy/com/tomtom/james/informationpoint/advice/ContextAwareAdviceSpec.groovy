@@ -24,6 +24,7 @@ import spock.lang.Specification
 
 import java.lang.reflect.Method
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
 
 class ContextAwareAdviceSpec extends Specification {
 
@@ -33,15 +34,21 @@ class ContextAwareAdviceSpec extends Specification {
     def originMethodName = "originMethodName"
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
+    def informationPointMethodNameWithContext = "informationPointClassNameWithContext"
     def script = "// script"
     def sampleRate = 100
     def informationPoint = Mock(InformationPoint)
+    def contextAwareInformationPoint = Mock(InformationPoint)
 
     def setup() {
         ScriptEngineSupplier.register(scriptEngine)
         InformationPointServiceSupplier.register(ipService)
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
+        ipService.getInformationPoint(informationPointClassName, informationPointMethodNameWithContext) >> Optional.of(contextAwareInformationPoint)
         informationPoint.getSampleRate() >> sampleRate
+        informationPoint.getRequiresInitialContext() >> Boolean.FALSE
+        contextAwareInformationPoint.getRequiresInitialContext() >> Boolean.TRUE
+        contextAwareInformationPoint.getSampleRate() >> sampleRate
     }
 
     def "Should call success handler after successful method execution"() {
@@ -51,7 +58,7 @@ class ContextAwareAdviceSpec extends Specification {
 
         when:
         def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(originClassName, originMethodName)
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
         ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
@@ -64,7 +71,8 @@ class ContextAwareAdviceSpec extends Specification {
                 currentThread,
                 _ as Duration,
                 _ as String[],
-                "returned"
+                "returned",
+                _ as CompletableFuture<Object>
         )
     }
 
@@ -77,7 +85,7 @@ class ContextAwareAdviceSpec extends Specification {
         when:
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
         def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(originClassName, originMethodName)
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
         ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
@@ -90,7 +98,42 @@ class ContextAwareAdviceSpec extends Specification {
                 currentThread,
                 _ as Duration,
                 _ as String[],
-                thrown
+                thrown,
+                _ as CompletableFuture<Object>
+        )
+    }
+
+    def "Should initialize context on scripts defining onPrepareContext method"() {
+        given:
+        def method = Object.class.getMethod("equals", Object.class)
+        def currentThread = Thread.currentThread()
+
+        when:
+        def startTime = System.nanoTime()
+
+        def target = new Object()
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodNameWithContext, method, target, ["arg0"])
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodNameWithContext,
+                method, target, ["arg0"] as Object[], "returned", null)
+
+        then:
+        1 * scriptEngine.invokePrepareContext(
+                contextAwareInformationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as String)
+        1 * scriptEngine.invokeSuccessHandler(
+                contextAwareInformationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as Duration,
+                _ as String[],
+                "returned",
+                _ as CompletableFuture<Object>
         )
     }
 

@@ -35,9 +35,10 @@ public final class SuccessHandlerContext extends InformationPointHandlerContext 
                           Thread currentThread,
                           Duration executionTime,
                           String[] callStack,
-                          Object returnValue) {
+                          Object returnValue,
+                          Object initialContext) {
         super(informationPointClassName, informationPointMethodName, origin, runtimeParameters,
-                runtimeInstance, currentThread, executionTime, callStack);
+                runtimeInstance, currentThread, executionTime, callStack, initialContext);
         this.returnValue = returnValue;
     }
 
