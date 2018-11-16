@@ -39,7 +39,6 @@ public class MethodExecutionContextHelper {
             .createNamedDaemonExecutorService("james-context-callback-%d", 5);
 
     public static void shutdown() {
-        /*
         try {
             contextStoreAccessExecutor.shutdown();
             contextStoreAccessExecutor.awaitTermination(5, TimeUnit.SECONDS);
@@ -51,7 +50,7 @@ public class MethodExecutionContextHelper {
             contextStoreAccessExecutor.awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Executor contextCallbackExecutor shutdown interrupted " + e);
-        }*/
+        }
     }
 
     public static String createContextKey() {

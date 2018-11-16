@@ -45,35 +45,27 @@ public class ContextAwareAdvice {
                                Object instance,
                                Object[] arguments) {
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("onEnter: START ["
+            LOG.trace(() -> "onEnter: START ["
                         + "originTypeName=" + originTypeName
                         + ", originMethodName=" + originMethodName
                         + "]");
-            }
 
             Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
                     .getInformationPoint(originTypeName, originMethodName);
 
             if (!informationPoint.isPresent()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("onEnter: skipping");
-                }
+                LOG.trace(() -> "onEnter: skipping");
                 return;
             }
 
             final InformationPoint ip = informationPoint.get();
             if (!ip.getRequiresInitialContext()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("onEnter: noInitialContextSupportRequired - skipping");
-                }
+                LOG.trace(() -> "onEnter: noInitialContextSupportRequired - skipping");
                 return;
             }
 
             final String key = MethodExecutionContextHelper.createContextKey();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Initializing custom context setup for the call");
-            }
+            LOG.trace(() -> "Initializing custom context setup for the call");
             final Object callContext = ScriptEngineSupplier.get().invokePrepareContext(
                     ip,
                     origin,
@@ -110,32 +102,26 @@ public class ContextAwareAdvice {
             Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
                     .getInformationPoint(informationPointClassName, informationPointMethodName);
             if(!informationPoint.isPresent()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("onExit: skipping because information point is gone");
-                }
+                LOG.trace(() -> "onExit: skipping because information point is gone");
                 return;
             }
             int sampleRate = informationPoint.get().getSampleRate();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("onExit: START "
-                        + "[origin=" + origin
-                        + ", informationPointClassName=" + informationPointClassName
-                        + ", informationPointMethodName=" + informationPointMethodName
-                        + ", script=" + (informationPoint.get().getScript().orElse(null) != null)
-                        + ", sampleRate=" + informationPoint.get().getSampleRate()
-                        + ", instance=" + instance
-                        + ", arguments=" + Arrays.asList(arguments)
-                        + ", returned=" + returned
-                        + ", thrown=" + thrown
-                        + "]");
-            }
+            LOG.trace(() -> "onExit: START "
+                    + "[origin=" + origin
+                    + ", informationPointClassName=" + informationPointClassName
+                    + ", informationPointMethodName=" + informationPointMethodName
+                    + ", script=" + (informationPoint.get().getScript().orElse(null) != null)
+                    + ", sampleRate=" + informationPoint.get().getSampleRate()
+                    + ", instance=" + instance
+                    + ", arguments=" + Arrays.asList(arguments)
+                    + ", returned=" + returned
+                    + ", thrown=" + thrown
+                    + "]");
 
             requireInitialContextCleanup = informationPoint.get().getRequiresInitialContext();
 
             if ((sampleRate < 100) && (sampleRate < RND.nextDouble() * 100)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("onExit: Sample skipped (sampleRate=" + sampleRate + ")");
-                }
+                LOG.trace(() -> "onExit: Sample skipped (sampleRate=" + sampleRate + ")");
                 return;
             }
 
@@ -144,7 +130,7 @@ public class ContextAwareAdvice {
                     : CompletableFuture.completedFuture(null);
 
             if (thrown == null) {
-                LOG.trace("onExit: Invoking success handler");
+                LOG.trace(() -> "onExit: Invoking success handler");
                 ScriptEngineSupplier.get().invokeSuccessHandler(
                         informationPoint.get(),
                         origin,
@@ -157,7 +143,7 @@ public class ContextAwareAdvice {
                         initialContextAsyncProvider
                 );
             } else {
-                LOG.trace("onExit: Invoking error handler");
+                LOG.trace(() -> "onExit: Invoking error handler");
                 ScriptEngineSupplier.get().invokeErrorHandler(
                         informationPoint.get(),
                         origin,
