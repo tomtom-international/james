@@ -35,9 +35,10 @@ public final class ErrorHandlerContext extends InformationPointHandlerContext {
                                Thread currentThread,
                                Duration executionTime,
                                String[] callStack,
-                               Throwable errorCause) {
+                               Throwable errorCause,
+                               Object initialContext) {
         super(informationPointClassName, informationPointMethodName, origin, runtimeParameters, runtimeInstance,
-                currentThread, executionTime, callStack);
+                currentThread, executionTime, callStack, initialContext);
         this.errorCause = errorCause;
     }
 

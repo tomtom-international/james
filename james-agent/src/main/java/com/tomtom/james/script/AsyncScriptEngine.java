@@ -28,10 +28,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -55,6 +52,16 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
     }
 
     @Override
+    public Object invokePrepareContext(InformationPoint informationPoint,
+                                       Method origin,
+                                       List<RuntimeInformationPointParameter> parameters,
+                                       Object instance,
+                                       Thread currentThread,
+                                       String contextKey) {
+        return delegate.invokePrepareContext(informationPoint, origin, parameters, instance, currentThread, contextKey);
+    }
+
+    @Override
     public void invokeSuccessHandler(InformationPoint informationPoint,
                                      Method origin,
                                      List<RuntimeInformationPointParameter> parameters,
@@ -62,10 +69,19 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      Thread currentThread,
                                      Duration executionTime,
                                      String[] callStack,
-                                     Object returnValue) {
+                                     Object returnValue,
+                                     CompletableFuture<Object> initialContextProvider) {
         if (!jobQueue.offer(() ->
-                    delegate.invokeSuccessHandler(informationPoint,
-                            origin, parameters, instance, currentThread, executionTime, callStack, returnValue))) {
+                delegate.invokeSuccessHandler(
+                        informationPoint,
+                        origin,
+                        parameters,
+                        instance,
+                        currentThread,
+                        executionTime,
+                        callStack,
+                        returnValue,
+                        initialContextProvider))) {
             droppedJobsCount.incrementAndGet();
         }
     }
@@ -78,10 +94,19 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    Thread currentThread,
                                    Duration executionTime,
                                    String[] callStack,
-                                   Throwable errorCause) {
+                                   Throwable errorCause,
+                                   CompletableFuture<Object> initialContextProvider) {
         if (!jobQueue.offer(() ->
-                    delegate.invokeErrorHandler(informationPoint,
-                            origin, parameters, instance, currentThread, executionTime, callStack, errorCause))) {
+                delegate.invokeErrorHandler(
+                        informationPoint,
+                        origin,
+                        parameters,
+                        instance,
+                        currentThread,
+                        executionTime,
+                        callStack,
+                        errorCause,
+                        initialContextProvider))) {
             droppedJobsCount.incrementAndGet();
         }
     }

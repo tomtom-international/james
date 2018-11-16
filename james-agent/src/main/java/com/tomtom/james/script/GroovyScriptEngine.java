@@ -23,15 +23,18 @@ import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.MethodExecutionContextHelper;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
+import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 class GroovyScriptEngine implements ScriptEngine {
@@ -40,6 +43,7 @@ class GroovyScriptEngine implements ScriptEngine {
 
     private static final String SUCCESS_HANDLER_FUNCTION = "onSuccess";
     private static final String ERROR_HANDLER_FUNCTION = "onError";
+    private static final String PREPARE_CONTEXT = "onPrepareContext";
 
     private final EventPublisher publisher;
     private final ToolkitManager toolkitManager;
@@ -55,6 +59,43 @@ class GroovyScriptEngine implements ScriptEngine {
     }
 
     @Override
+    public Object invokePrepareContext(InformationPoint informationPoint,
+                                       Method origin,
+                                       List<RuntimeInformationPointParameter> parameters,
+                                       Object instance,
+                                       Thread currentThread,
+                                       String contextKey) {
+        LOG.trace(() -> "Invoking prepareContext handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
+
+        try {
+            InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
+            PrepareContextHandlerContext contextPrepareArgs = new PrepareContextHandlerContext(
+                    informationPoint.getClassName(),
+                    informationPoint.getMethodName(),
+                    origin,
+                    instance,
+                    parameters,
+                    currentThread,
+                    contextKey);
+
+            final Object result = handler.invokeMethod(PREPARE_CONTEXT, new Object[]{contextPrepareArgs});
+            LOG.trace(() -> "Context preparation " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + " completed!");
+            return result;
+        } catch (CompilationFailedException e) {
+            LOG.error(() -> "Script compilation failed when calling prepareContext handler for "
+                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), e);
+        } catch (MissingMethodException mme) {
+            LOG.error(() -> "Success handler function missing for "
+                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), mme);
+        } catch (Throwable t) {
+            LOG.error(() -> "Success handler invocation failed for "
+                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), t);
+        }
+        return null;
+
+    }
+
+    @Override
     public void invokeSuccessHandler(InformationPoint informationPoint,
                                      Method origin,
                                      List<RuntimeInformationPointParameter> parameters,
@@ -62,14 +103,15 @@ class GroovyScriptEngine implements ScriptEngine {
                                      Thread currentThread,
                                      Duration executionTime,
                                      String[] callStack,
-                                     Object returnValue) {
+                                     Object returnValue,
+                                     CompletableFuture<Object> initialContextProvider) {
         LOG.trace(() -> "Invoking success handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
             SuccessHandlerContext handlerContext = new SuccessHandlerContext(
                     informationPoint.getClassName(), informationPoint.getMethodName(), origin, parameters, instance,
-                    currentThread, executionTime, callStack, returnValue);
+                    currentThread, executionTime, callStack, returnValue, initialContextProvider.get());
             handler.invokeMethod(SUCCESS_HANDLER_FUNCTION, new Object[]{handlerContext});
             stopwatch.stop();
             LOG.trace(() -> "Success handler invocation took " + stopwatch.elapsed());
@@ -93,14 +135,15 @@ class GroovyScriptEngine implements ScriptEngine {
                                    Thread currentThread,
                                    Duration executionTime,
                                    String[] callStack,
-                                   Throwable errorCause) {
+                                   Throwable errorCause,
+                                   CompletableFuture<Object> initialContextProvider) {
         LOG.trace(() -> "Invoking error handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
             ErrorHandlerContext handlerContext = new ErrorHandlerContext(
                     informationPoint.getClassName(), informationPoint.getMethodName(), origin, parameters, instance,
-                    currentThread, executionTime, callStack, errorCause);
+                    currentThread, executionTime, callStack, errorCause, initialContextProvider.get());
             handler.invokeMethod(ERROR_HANDLER_FUNCTION, new Object[]{handlerContext});
             stopwatch.stop();
             LOG.trace(() -> "Error handler invocation took " + stopwatch.elapsed());

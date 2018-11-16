@@ -27,6 +27,7 @@ public class InformationPoint {
     protected String script;
     protected Integer sampleRate;
     protected Metadata metadata;
+    protected Boolean requiresInitialContext;
 
     public InformationPoint() {
         metadata = new Metadata();
@@ -54,6 +55,10 @@ public class InformationPoint {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public Boolean getRequiresInitialContext() {
+        return requiresInitialContext;
     }
 
     public Metadata getMetadata() {
@@ -93,6 +98,7 @@ public class InformationPoint {
         private String script;
         private Integer sampleRate;
         private Metadata metadata;
+        private Boolean requireInitialContext;
 
         private Builder() {
             metadata = new Metadata();
@@ -120,6 +126,9 @@ public class InformationPoint {
 
         public Builder withScript(String script) {
             this.script = script;
+            if (script.contains(" onPrepareContext")) {
+                this.requireInitialContext = true;
+            }
             return this;
         }
 
@@ -140,6 +149,7 @@ public class InformationPoint {
             this.script = copyFrom.script;
             this.sampleRate = copyFrom.sampleRate;
             this.metadata.putAll(copyFrom.metadata);
+            this.requireInitialContext = copyFrom.requiresInitialContext;
             return this;
         }
 
@@ -150,6 +160,7 @@ public class InformationPoint {
             ip.script = script;
             ip.sampleRate = sampleRate;
             ip.metadata.putAll(metadata);
+            ip.requiresInitialContext = requireInitialContext;
             return ip;
         }
     }
