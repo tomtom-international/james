@@ -30,13 +30,13 @@ public class GroovyJames extends AbstractJames {
         s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter(");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
-        s.append(", " + informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
+        s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
         if (Modifier.isStatic(method.getModifiers()) || method.isEmpty()) {
             s.append("null"); // this is static method - no instance
         } else {
             s.append("$0"); // this
         }
-        s.append(");\n");
+        s.append(", $args);\n");
         method.insertBefore(s.toString());
     }
 

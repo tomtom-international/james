@@ -27,7 +27,7 @@ public class InformationPoint {
     protected String script;
     protected Integer sampleRate;
     protected Metadata metadata;
-    protected Boolean requiresInitialContext;
+    protected Boolean requiresInitialContext = Boolean.FALSE;
 
     public InformationPoint() {
         metadata = new Metadata();
@@ -98,7 +98,7 @@ public class InformationPoint {
         private String script;
         private Integer sampleRate;
         private Metadata metadata;
-        private Boolean requireInitialContext;
+        private Boolean requireInitialContext = Boolean.FALSE;
 
         private Builder() {
             metadata = new Metadata();
@@ -161,7 +161,7 @@ public class InformationPoint {
             ip.sampleRate = sampleRate;
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
-            return ip;
+           return ip;
         }
     }
 }
