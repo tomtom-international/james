@@ -23,12 +23,10 @@ import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.newagent.MethodExecutionContextHelper;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
