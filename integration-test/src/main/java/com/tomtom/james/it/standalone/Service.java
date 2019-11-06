@@ -16,11 +16,10 @@
 
 package com.tomtom.james.it.standalone;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 class Service {
 
-    private static final Random rnd = new Random();
     private int fieldValue = 10;
 
     int doSomething(String arg) {
@@ -38,7 +37,8 @@ class Service {
     }
 
     private static void throwAtRandom(double probability) {
-        double v = rnd.nextDouble();
+        double v = ThreadLocalRandom.current()
+                .nextDouble();
         if (v < probability) {
             throw new RuntimeException(v + " < " + probability);
         }
@@ -46,7 +46,8 @@ class Service {
 
     private static void sleep() {
         try {
-            Thread.sleep(rnd.nextInt(500));
+            Thread.sleep(ThreadLocalRandom.current()
+                    .nextInt(500));
         } catch (InterruptedException e) {
         }
     }

@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CompletableFuture;
 
 /*
@@ -36,7 +36,6 @@ import java.util.concurrent.CompletableFuture;
 public class ContextAwareAdvice {
 
     public static final Logger LOG = Logger.getLogger(ContextAwareAdvice.class);
-    public static final Random RND = new Random();
 
     @SuppressWarnings("unused")
     public static void onEnter(String originTypeName,
@@ -120,7 +119,7 @@ public class ContextAwareAdvice {
 
             requireInitialContextCleanup = informationPoint.get().getRequiresInitialContext();
 
-            if ((sampleRate < 100) && (sampleRate < RND.nextDouble() * 100)) {
+            if ((sampleRate < 100) && (sampleRate < ThreadLocalRandom.current().nextDouble() * 100)) {
                 LOG.trace(() -> "onExit: Sample skipped (sampleRate=" + sampleRate + ")");
                 return;
             }
