@@ -34,6 +34,13 @@ class ScriptEngineConfigurationFacade implements ScriptEngineConfiguration {
     }
 
     @Override
+    public boolean useDisruptor() {
+        return configuration.get("useDisruptor")
+                .map(StructuredConfiguration::asBoolean)
+                .orElse(false);
+    }
+
+    @Override
     public int getMaxAsyncJobQueueCapacity() {
         return configuration.get("maxAsyncJobQueueCapacity")
                 .map(StructuredConfiguration::asInteger)

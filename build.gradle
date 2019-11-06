@@ -49,7 +49,8 @@ subprojects {
             awaitility  : '3.0.0',
             commonslang : '3.7',
             javassist   : '3.22.0-GA',
-            bytebuddytests: '1.6.4'
+            bytebuddytests: '1.6.4',
+            disruptor: '3.4.2'
     ]
 }
 

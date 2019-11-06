@@ -52,6 +52,15 @@ class EventPublisherConfigurationFacade implements EventPublisherConfiguration {
     }
 
     @Override
+    public boolean useDisruptor() {
+
+        return structuredConfiguration.get("useDisruptor")
+                .map(StructuredConfiguration::asBoolean)
+                .orElse(false);
+
+    }
+
+    @Override
     public Optional<StructuredConfiguration> getProperties() {
         return structuredConfiguration.get("properties");
     }
