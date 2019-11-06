@@ -70,4 +70,111 @@ class ConsulControllerSpec extends Specification{
         ip.get().getMetadata().get("owner") == "jenkins"
         ip.get().getMetadata().get("esIndex") == "test"
     }
+
+    def "Should parse v1 json with old sample rate property" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "sampleRate": 6, 
+    "version": 1, 
+    "script": [
+        "// First line of Information Point script",
+        "// Second line of Information Point script"
+    ],
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        ip.isPresent()
+        ip.get().className == "foo.bar.className2"
+        ip.get().methodName == "methodName2"
+        ip.get().successSampleRate == 6
+        ip.get().errorSampleRate == 6
+        ip.get().getMetadata().get("owner") == "jenkins"
+        ip.get().getMetadata().get("esIndex") == "test"
+    }
+
+
+    def "Should parse v1 json with success and error sampleRates" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "successSampleRate": 50, 
+    "errorSampleRate": 90, 
+    "version": 1, 
+    "script": [
+        "// First line of Information Point script",
+        "// Second line of Information Point script"
+    ],
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        ip.isPresent()
+        ip.get().className == "foo.bar.className2"
+        ip.get().methodName == "methodName2"
+        ip.get().successSampleRate == 50
+        ip.get().errorSampleRate == 90
+    }
+
+
+    def "Should fail to parse v1 json when sampleRate and errorSampleRate are defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "sampleRate": 100, 
+    "errorSampleRate": 90, 
+    "version": 1, 
+    "script": [
+        "// First line of Information Point script",
+        "// Second line of Information Point script"
+    ],
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        thrown(IllegalStateException)
+    }
+
+    def "Should fail to parse v1 json when sampleRate and successSample are defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "sampleRate": 100, 
+    "successSampleRate": 90, 
+    "version": 1, 
+    "script": [
+        "// First line of Information Point script",
+        "// Second line of Information Point script"
+    ],
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        thrown(IllegalStateException)
+    }
 }

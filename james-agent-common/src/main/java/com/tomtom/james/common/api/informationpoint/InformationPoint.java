@@ -16,7 +16,11 @@
 
 package com.tomtom.james.common.api.informationpoint;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -25,7 +29,10 @@ public class InformationPoint {
     protected String className;
     protected String methodName;
     protected String script;
+    //unused left for backward compatibility
     protected Integer sampleRate;
+    protected Integer successSampleRate;
+    protected Integer errorSampleRate;
     protected Metadata metadata;
     protected Boolean requiresInitialContext = Boolean.FALSE;
 
@@ -47,6 +54,14 @@ public class InformationPoint {
 
     public int getSampleRate() {
         return Optional.ofNullable(sampleRate).orElse(100);
+    }
+
+    public int getSuccessSampleRate() {
+        return Optional.ofNullable(successSampleRate).orElseGet(this::getSampleRate);
+    }
+
+    public int getErrorSampleRate() {
+        return Optional.ofNullable(errorSampleRate).orElseGet(this::getSampleRate);
     }
 
     public List<String> splittedScriptLines() {
@@ -72,8 +87,12 @@ public class InformationPoint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         InformationPoint that = (InformationPoint) o;
         return Objects.equals(className, that.className) &&
                 Objects.equals(methodName, that.methodName);
@@ -97,6 +116,8 @@ public class InformationPoint {
         private String methodName;
         private String script;
         private Integer sampleRate;
+        private Integer successSampleRate;
+        private Integer errorSampleRate;
         private Metadata metadata;
         private Boolean requireInitialContext = Boolean.FALSE;
 
@@ -137,9 +158,26 @@ public class InformationPoint {
             return this;
         }
 
+        public Builder withSuccessSampleRate(Integer successSampleRate) {
+            if(sampleRate != null && successSampleRate != null &&  !sampleRate.equals(successSampleRate)){
+                throw new IllegalStateException("Cannot set successSampleRate when sampleRate is set.");
+            }
+            this.successSampleRate = successSampleRate;
+            return this;
+        }
+
+        public Builder withErrorSampleRate(Integer errorSampleRate) {
+            if(sampleRate != null && errorSampleRate != null && !sampleRate.equals(errorSampleRate)){
+                throw new IllegalStateException("Cannot set errorSampleRate when sampleRate is set.");
+            }
+            this.errorSampleRate = errorSampleRate;
+            return this;
+        }
+
         public Builder withMetadata(Metadata metadata) {
-            if(metadata != null)
+            if(metadata != null) {
                 this.metadata.putAll(metadata);
+            }
             return this;
         }
 
@@ -148,6 +186,8 @@ public class InformationPoint {
             this.methodName = copyFrom.methodName;
             this.script = copyFrom.script;
             this.sampleRate = copyFrom.sampleRate;
+            this.successSampleRate = copyFrom.successSampleRate;
+            this.errorSampleRate = copyFrom.errorSampleRate;
             this.metadata.putAll(copyFrom.metadata);
             this.requireInitialContext = copyFrom.requiresInitialContext;
             return this;
@@ -159,6 +199,8 @@ public class InformationPoint {
             ip.methodName = Objects.requireNonNull(methodName);
             ip.script = script;
             ip.sampleRate = sampleRate;
+            ip.successSampleRate = successSampleRate;
+            ip.errorSampleRate = errorSampleRate;
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
            return ip;

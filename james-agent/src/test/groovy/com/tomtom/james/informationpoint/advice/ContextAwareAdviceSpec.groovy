@@ -45,10 +45,12 @@ class ContextAwareAdviceSpec extends Specification {
         InformationPointServiceSupplier.register(ipService)
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
         ipService.getInformationPoint(informationPointClassName, informationPointMethodNameWithContext) >> Optional.of(contextAwareInformationPoint)
-        informationPoint.getSampleRate() >> sampleRate
+        informationPoint.getSuccessSampleRate() >> sampleRate
+        informationPoint.getErrorSampleRate() >> sampleRate
         informationPoint.getRequiresInitialContext() >> Boolean.FALSE
         contextAwareInformationPoint.getRequiresInitialContext() >> Boolean.TRUE
-        contextAwareInformationPoint.getSampleRate() >> sampleRate
+        contextAwareInformationPoint.getSuccessSampleRate() >> sampleRate
+        contextAwareInformationPoint.getErrorSampleRate() >> sampleRate
     }
 
     def "Should call success handler after successful method execution"() {
@@ -99,6 +101,60 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as Duration,
                 _ as String[],
                 thrown,
+                _ as CompletableFuture<Object>
+        )
+    }
+
+    def "Should not call error handler after method throws exception when error sample rate to low"() {
+        given:
+        def method = Object.class.getMethod("equals", Object.class)
+        def thrown = new RuntimeException("message")
+        def currentThread = Thread.currentThread()
+
+        when:
+        ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+                method, new Object(), ["arg0"] as Object[], null, thrown)
+
+        then:
+        1 * informationPoint.getErrorSampleRate() >> 0
+        0 * scriptEngine.invokeErrorHandler(
+                informationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as Duration,
+                _ as String[],
+                thrown,
+                _ as CompletableFuture<Object>
+        )
+    }
+
+    def "Should not call success handler after successful method execution when error sample rate to low"() {
+        given:
+        def method = Object.class.getMethod("equals", Object.class)
+        def currentThread = Thread.currentThread()
+
+        when:
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+                method, new Object(), ["arg0"] as Object[], "returned", null)
+
+        then:
+        1 * informationPoint.getSuccessSampleRate() >> 0
+        0 * scriptEngine.invokeSuccessHandler(
+                informationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as Duration,
+                _ as String[],
+                "returned",
                 _ as CompletableFuture<Object>
         )
     }
