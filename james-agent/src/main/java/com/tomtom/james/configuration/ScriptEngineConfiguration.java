@@ -19,7 +19,6 @@ package com.tomtom.james.configuration;
 public interface ScriptEngineConfiguration {
 
     int getAsyncWorkers();
-    boolean useDisruptor();
     int getMaxAsyncJobQueueCapacity();
 
 }

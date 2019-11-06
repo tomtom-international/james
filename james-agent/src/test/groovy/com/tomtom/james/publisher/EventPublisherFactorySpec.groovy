@@ -39,7 +39,6 @@ class EventPublisherFactorySpec extends Specification {
         config2.getMaxAsyncJobQueueCapacity() >> 10_000
         disruptorConfig.getAsyncWorkers() >> 4
         disruptorConfig.getMaxAsyncJobQueueCapacity() >> 10_000
-        disruptorConfig.useDisruptor() >> true
         pluginManager.createEventPublisherPluginInstance(config1) >> Optional.of(publisher1)
         pluginManager.createEventPublisherPluginInstance(config2) >> Optional.of(publisher2)
         pluginManager.createEventPublisherPluginInstance(disruptorConfig) >> Optional.of(disruptorPublisher)
@@ -58,17 +57,8 @@ class EventPublisherFactorySpec extends Specification {
         def publisher = EventPublisherFactory.create(pluginManager, [config1])
 
         then:
-        publisher instanceof AsyncPublisher
-        (publisher as AsyncPublisher).delegate.is(publisher1)
-    }
-
-    def "Should create disruptor publisher when given single publisher configuration"() {
-        when:
-        def publisher = EventPublisherFactory.create(pluginManager, [disruptorConfig])
-
-        then:
         publisher instanceof DisruptorAsyncPublisher
-        (publisher as DisruptorAsyncPublisher).delegate.is(disruptorPublisher)
+        (publisher as DisruptorAsyncPublisher).delegate.is(publisher1)
     }
 
 
@@ -79,8 +69,8 @@ class EventPublisherFactorySpec extends Specification {
         then:
         publisher instanceof CompositePublisher
         (publisher as CompositePublisher).delegates.size() == 2
-        (publisher as CompositePublisher).delegates.each { it instanceof AsyncPublisher }
-        ((publisher as CompositePublisher).delegates[0] as AsyncPublisher).delegate.is(publisher1)
-        ((publisher as CompositePublisher).delegates[1] as AsyncPublisher).delegate.is(publisher2)
+        (publisher as CompositePublisher).delegates.each { it instanceof DisruptorAsyncPublisher }
+        ((publisher as CompositePublisher).delegates[0] as DisruptorAsyncPublisher).delegate.is(publisher1)
+        ((publisher as CompositePublisher).delegates[1] as DisruptorAsyncPublisher).delegate.is(publisher2)
     }
 }
