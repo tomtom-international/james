@@ -55,9 +55,9 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
 
     DisruptorAsyncScriptEngine(ScriptEngine delegate, int numberOfWorkers, int jobQueueSize) {
 
-        bufferSize = nextPowerOf2(jobQueueSize);
 
         // Specify the size of the ring buffer, must be power of 2.
+        bufferSize = nextPowerOf2(jobQueueSize);
 
         // Construct the Disruptor
         this.executor = MoreExecutors.createNamedDaemonExecutorService(
@@ -93,7 +93,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      Object returnValue,
                                      CompletableFuture<Object> initialContextProvider) {
 
-        if (isRunning.get() && ! disruptor.getRingBuffer().tryPublishEvent((
+        if (isRunning.get() && !disruptor.getRingBuffer().tryPublishEvent((
                 JobEvent event,
                 long sequence) -> event.setJob(() ->
                 delegate.invokeSuccessHandler(
@@ -122,7 +122,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    CompletableFuture<Object> initialContextProvider) {
 
 
-        if (isRunning.get() && ! disruptor.getRingBuffer().tryPublishEvent((
+        if (isRunning.get() && !disruptor.getRingBuffer().tryPublishEvent((
                 JobEvent event,
                 long sequence) -> event.setJob(() ->
                 delegate.invokeErrorHandler(

@@ -45,14 +45,13 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
         int numberOfWorkers,
         int maxQueueCapacity) {
 
+        // Specify the size of the ring buffer, must be power of 2.
         bufferSize = nextPowerOf2(maxQueueCapacity);
 
-        // Specify the size of the ring buffer, must be power of 2.
 
         // Construct the Disruptor
         executor = MoreExecutors.createNamedDaemonExecutorService(threadPoolNameFormat, numberOfWorkers);
-        disruptor =
-                new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
+        disruptor = new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
         // Start the Disruptor, starts all threads running
         disruptor.handleEventsWith(new JobEventHandler());
         disruptor.start();
@@ -87,7 +86,7 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
     public void publish(
         Event evt) {
 
-        if (isRunning.get() && ! disruptor.getRingBuffer().tryPublishEvent(translateEvent(evt))) {
+        if (isRunning.get() && !disruptor.getRingBuffer().tryPublishEvent(translateEvent(evt))) {
             droppedJobsCount.incrementAndGet();
         }
     }

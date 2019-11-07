@@ -29,7 +29,7 @@ public class InformationPoint {
     protected String className;
     protected String methodName;
     protected String script;
-    //unused left for backward compatibility
+    //unused. left for backward compatibility
     protected int sampleRate = 100;
     protected double successSampleRate = 100;
     protected double errorSampleRate = 100;
