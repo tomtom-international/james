@@ -42,20 +42,11 @@ class InformationPointDTOSpec extends Specification {
     "className": "class-name-value",
     "methodName": "method-name-value",
     "script": ["line1", "line2"],
-    "successSampleRate": 50,
+    "successSampleRate": 0.5,
     "errorSampleRate": 100
 }]
 '''
-    def updatedJsonIdenticalSampleRates = '''
-[{
-    "className": "class-name-value",
-    "methodName": "method-name-value",
-    "script": ["line1", "line2"],
-    "sampleRate": 70,
-    "successSampleRate": 70,
-    "errorSampleRate": 70
-}]
-'''
+
     def invalidJson = '''
 [{
     "className": "class-name-value",
@@ -103,23 +94,9 @@ class InformationPointDTOSpec extends Specification {
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
         ip.script.get() == "line1\nline2"
-        ip.successSampleRate == 50
+        ip.successSampleRate == 0.5
         ip.errorSampleRate == 100
         ip.sampleRate == 100
-    }
-
-    def "Should parse updated JSON to DTO with all sample rates identical for backward compatibility"() {
-        when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(updatedJsonIdenticalSampleRates, type)
-        def ip = ipsDTOs[0].toInformationPoint()
-
-        then:
-        ip.className == "class-name-value"
-        ip.methodName == "method-name-value"
-        ip.script.get() == "line1\nline2"
-        ip.successSampleRate == 70
-        ip.errorSampleRate == 70
-        ip.sampleRate == 70
     }
 
     def "Should error out on parsing invalid JSON to DTO"() {

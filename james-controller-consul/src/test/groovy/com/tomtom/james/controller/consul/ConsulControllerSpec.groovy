@@ -154,6 +154,30 @@ class ConsulControllerSpec extends Specification{
         thrown(IllegalStateException)
     }
 
+    def "Should fail to parse v1 json when sampleRate and successSampleRate are defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "sampleRate": 100, 
+    "successSampleRate": 90, 
+    "version": 1, 
+    "script": [
+        "// First line of Information Point script",
+        "// Second line of Information Point script"
+    ],
+    "metadata": {
+        "owner": "jenkins",
+        "esIndex": "test"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        thrown(IllegalStateException)
+    }
+
     def "Should fail to parse v1 json when sampleRate and successSample are defined" () {
         given:
         def methodRefrence = "foo.bar.className2#methodName2"

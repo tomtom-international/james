@@ -30,9 +30,9 @@ public class InformationPoint {
     protected String methodName;
     protected String script;
     //unused left for backward compatibility
-    protected Integer sampleRate;
-    protected Integer successSampleRate;
-    protected Integer errorSampleRate;
+    protected int sampleRate = 100;
+    protected double successSampleRate = 100;
+    protected double errorSampleRate = 100;
     protected Metadata metadata;
     protected Boolean requiresInitialContext = Boolean.FALSE;
 
@@ -53,15 +53,15 @@ public class InformationPoint {
     }
 
     public int getSampleRate() {
-        return Optional.ofNullable(sampleRate).orElse(100);
+        return sampleRate;
     }
 
-    public int getSuccessSampleRate() {
-        return Optional.ofNullable(successSampleRate).orElseGet(this::getSampleRate);
+    public double getSuccessSampleRate() {
+        return successSampleRate;
     }
 
-    public int getErrorSampleRate() {
-        return Optional.ofNullable(errorSampleRate).orElseGet(this::getSampleRate);
+    public double getErrorSampleRate() {
+        return errorSampleRate;
     }
 
     public List<String> splittedScriptLines() {
@@ -116,8 +116,8 @@ public class InformationPoint {
         private String methodName;
         private String script;
         private Integer sampleRate;
-        private Integer successSampleRate;
-        private Integer errorSampleRate;
+        private Double successSampleRate;
+        private Double errorSampleRate;
         private Metadata metadata;
         private Boolean requireInitialContext = Boolean.FALSE;
 
@@ -154,20 +154,23 @@ public class InformationPoint {
         }
 
         public Builder withSampleRate(Integer sampleRate) {
+            if(sampleRate!=null && errorSampleRate != null && successSampleRate!= null){
+                throw new IllegalStateException("Cannot set sampleRate when successSampleRate or errorSampleRate is set.");
+            }
             this.sampleRate = sampleRate;
             return this;
         }
 
-        public Builder withSuccessSampleRate(Integer successSampleRate) {
-            if(sampleRate != null && successSampleRate != null &&  !sampleRate.equals(successSampleRate)){
+        public Builder withSuccessSampleRate(Double successSampleRate) {
+            if(sampleRate != null && successSampleRate!= null){
                 throw new IllegalStateException("Cannot set successSampleRate when sampleRate is set.");
             }
             this.successSampleRate = successSampleRate;
             return this;
         }
 
-        public Builder withErrorSampleRate(Integer errorSampleRate) {
-            if(sampleRate != null && errorSampleRate != null && !sampleRate.equals(errorSampleRate)){
+        public Builder withErrorSampleRate(Double errorSampleRate) {
+            if(sampleRate != null && errorSampleRate!= null){
                 throw new IllegalStateException("Cannot set errorSampleRate when sampleRate is set.");
             }
             this.errorSampleRate = errorSampleRate;
@@ -198,9 +201,9 @@ public class InformationPoint {
             ip.className = Objects.requireNonNull(className);
             ip.methodName = Objects.requireNonNull(methodName);
             ip.script = script;
-            ip.sampleRate = sampleRate;
-            ip.successSampleRate = successSampleRate;
-            ip.errorSampleRate = errorSampleRate;
+            ip.sampleRate = Optional.ofNullable(sampleRate).orElse(100);
+            ip.successSampleRate = Optional.ofNullable(successSampleRate).orElse((double)ip.sampleRate);
+            ip.errorSampleRate = Optional.ofNullable(errorSampleRate).orElse((double)ip.sampleRate);
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
            return ip;

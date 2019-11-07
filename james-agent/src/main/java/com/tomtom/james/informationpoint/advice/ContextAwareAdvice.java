@@ -108,7 +108,7 @@ public final class ContextAwareAdvice {
                 return;
             }
             final InformationPoint informationPoint = optionalInformationPoint.get();
-            final int sampleRate = getSampleRate(thrown, informationPoint);
+            final double sampleRate = getSampleRate(thrown, informationPoint);
 
             LOG.trace(() -> "onExit: START "
                     + "[origin=" + origin
@@ -173,7 +173,7 @@ public final class ContextAwareAdvice {
         }
     }
 
-    private static int getSampleRate(
+    private static double getSampleRate(
         Throwable thrown,
         InformationPoint informationPoint) {
 

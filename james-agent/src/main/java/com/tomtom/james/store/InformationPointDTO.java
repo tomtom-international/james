@@ -28,8 +28,8 @@ class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
-    private Integer successSampleRate;
-    private Integer errorSampleRate;
+    private Double successSampleRate;
+    private Double errorSampleRate;
 
     // For marshalling
     InformationPointDTO() {
