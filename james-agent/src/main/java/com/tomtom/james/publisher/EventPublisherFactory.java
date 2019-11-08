@@ -59,10 +59,10 @@ public class EventPublisherFactory {
             LOG.trace(() -> "Loaded event publisher plugin " + configuration.getId());
             eventPublisher.get().initialize(configuration);
             String threadPoolNameFormat = configuration.getId() + "-thread-pool-%d";
-            EventPublisher asyncWrapper = new AsyncPublisher(eventPublisher.get(),
-                    threadPoolNameFormat,
-                    configuration.getAsyncWorkers(),
-                    configuration.getMaxAsyncJobQueueCapacity());
+            EventPublisher asyncWrapper = new DisruptorAsyncPublisher(eventPublisher.get(),
+                        threadPoolNameFormat,
+                        configuration.getAsyncWorkers(),
+                        configuration.getMaxAsyncJobQueueCapacity());
             return Optional.of(asyncWrapper);
         } else {
             LOG.warn(() -> "Error loading event publisher " + configuration.getId() + ", plugin not found");

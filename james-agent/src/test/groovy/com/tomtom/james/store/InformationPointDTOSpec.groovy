@@ -35,6 +35,27 @@ class InformationPointDTOSpec extends Specification {
     "script": ["line1", "line2"],
     "sampleRate": 70
 }]
+
+'''
+    def updatedJson = '''
+[{
+    "className": "class-name-value",
+    "methodName": "method-name-value",
+    "script": ["line1", "line2"],
+    "successSampleRate": 0.5,
+    "errorSampleRate": 100
+}]
+'''
+
+    def invalidJson = '''
+[{
+    "className": "class-name-value",
+    "methodName": "method-name-value",
+    "script": ["line1", "line2"],
+    "sampleRate": 100,
+    "successSampleRate": 50,
+    "errorSampleRate": 40
+}]
 '''
 
     def objectMapper = new ObjectMapper();
@@ -62,5 +83,28 @@ class InformationPointDTOSpec extends Specification {
         ip.methodName == "method-name-value"
         ip.script.get() == "line1\nline2"
         ip.sampleRate == 70
+    }
+
+    def "Should parse update JSON to DTO (with new sample rates)"() {
+        when:
+        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(updatedJson, type)
+        def ip = ipsDTOs[0].toInformationPoint()
+
+        then:
+        ip.className == "class-name-value"
+        ip.methodName == "method-name-value"
+        ip.script.get() == "line1\nline2"
+        ip.successSampleRate == 0.5
+        ip.errorSampleRate == 100
+        ip.sampleRate == 100
+    }
+
+    def "Should error out on parsing invalid JSON to DTO"() {
+        when:
+        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(invalidJson, type)
+        def ip = ipsDTOs[0].toInformationPoint()
+
+        then:
+        thrown(IllegalStateException)
     }
 }

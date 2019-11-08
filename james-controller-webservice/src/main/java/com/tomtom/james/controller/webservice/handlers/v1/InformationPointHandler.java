@@ -19,7 +19,6 @@ package com.tomtom.james.controller.webservice.handlers.v1;
 import com.sun.net.httpserver.HttpExchange;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
-import com.tomtom.james.common.api.informationpoint.Metadata;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.controller.webservice.HTTPContentType;
 import com.tomtom.james.controller.webservice.HTTPStatus;
@@ -115,6 +114,9 @@ public class InformationPointHandler extends AbstractHttpHandler {
         dto.setMethodName(informationPoint.getMethodName());
         dto.setScript(informationPoint.splittedScriptLines());
         dto.setSampleRate(informationPoint.getSampleRate());
+        dto.setSuccessSampleRate(informationPoint.getSuccessSampleRate());
+        dto.setErrorSampleRate(informationPoint.getErrorSampleRate());
+        dto.setSampleRate(informationPoint.getSampleRate());
         dto.setMetadata(informationPoint.getMetadata());
         return dto;
     }
@@ -125,6 +127,8 @@ public class InformationPointHandler extends AbstractHttpHandler {
                 .withMethodName(dto.getMethodName())
                 .withScript(joinedScriptLines(dto.getScript()))
                 .withSampleRate(dto.getSampleRate())
+                .withSuccessSampleRate(dto.getSuccessSampleRate())
+                .withErrorSampleRate(dto.getErrorSampleRate())
                 .withMetadata(dto.getMetadata())
                 .build();
     }
