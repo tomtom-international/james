@@ -18,7 +18,7 @@ class DisruptorAsyncPublisherSpec extends Specification {
 
     private final int WORKER_COUNT = 2
 
-    private int PUBLISHER_SIZE = Runtime.getRuntime().availableProcessors() - WORKER_COUNT
+    private int PUBLISHER_SIZE = Math.max(2 * WORKER_COUNT, Runtime.getRuntime().availableProcessors() - WORKER_COUNT)
 
     ExecutorService eventCreator = Executors.newFixedThreadPool(PUBLISHER_SIZE)
     CountingPublisher sleepingPublisher = new CountingPublisher( { it-> sleep(10)})
