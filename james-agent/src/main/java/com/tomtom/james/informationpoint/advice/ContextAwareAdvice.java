@@ -27,16 +27,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CompletableFuture;
 
 /*
  * Note: advices are inlined so this has to be public.
  */
-public class ContextAwareAdvice {
+public final class ContextAwareAdvice {
 
     public static final Logger LOG = Logger.getLogger(ContextAwareAdvice.class);
-    public static final Random RND = new Random();
+
+    private ContextAwareAdvice() {
+    }
 
     @SuppressWarnings("unused")
     public static void onEnter(String originTypeName,
@@ -99,28 +101,32 @@ public class ContextAwareAdvice {
         boolean requireInitialContextCleanup = false;
 
         try {
-            Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
+            Optional<InformationPoint> optionalInformationPoint = InformationPointServiceSupplier.get()
                     .getInformationPoint(informationPointClassName, informationPointMethodName);
-            if(!informationPoint.isPresent()) {
+            if(!optionalInformationPoint.isPresent()) {
                 LOG.trace(() -> "onExit: skipping because information point is gone");
                 return;
             }
-            int sampleRate = informationPoint.get().getSampleRate();
+            final InformationPoint informationPoint = optionalInformationPoint.get();
+            final double sampleRate = getSampleRate(thrown, informationPoint);
+
             LOG.trace(() -> "onExit: START "
                     + "[origin=" + origin
                     + ", informationPointClassName=" + informationPointClassName
                     + ", informationPointMethodName=" + informationPointMethodName
-                    + ", script=" + (informationPoint.get().getScript().orElse(null) != null)
-                    + ", sampleRate=" + informationPoint.get().getSampleRate()
+                    + ", script=" + (informationPoint.getScript().orElse(null) != null)
+                    + ", sampleRate=" + informationPoint.getSampleRate()
+                    + ", successSampleRate=" + informationPoint.getSuccessSampleRate()
+                    + ", errorSampleRate=" + informationPoint.getErrorSampleRate()
                     + ", instance=" + instance
                     + ", arguments=" + Arrays.asList(arguments)
                     + ", returned=" + returned
                     + ", thrown=" + thrown
                     + "]");
 
-            requireInitialContextCleanup = informationPoint.get().getRequiresInitialContext();
+            requireInitialContextCleanup = informationPoint.getRequiresInitialContext();
 
-            if ((sampleRate < 100) && (sampleRate < RND.nextDouble() * 100)) {
+            if ((sampleRate < 100) && (sampleRate < ThreadLocalRandom.current().nextDouble() * 100)) {
                 LOG.trace(() -> "onExit: Sample skipped (sampleRate=" + sampleRate + ")");
                 return;
             }
@@ -132,7 +138,7 @@ public class ContextAwareAdvice {
             if (thrown == null) {
                 LOG.trace(() -> "onExit: Invoking success handler");
                 ScriptEngineSupplier.get().invokeSuccessHandler(
-                        informationPoint.get(),
+                        informationPoint,
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -145,7 +151,7 @@ public class ContextAwareAdvice {
             } else {
                 LOG.trace(() -> "onExit: Invoking error handler");
                 ScriptEngineSupplier.get().invokeErrorHandler(
-                        informationPoint.get(),
+                        informationPoint,
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -164,6 +170,17 @@ public class ContextAwareAdvice {
                 MethodExecutionContextHelper.removeContextKey();
             }
             LOG.trace("onExit: END");
+        }
+    }
+
+    private static double getSampleRate(
+        Throwable thrown,
+        InformationPoint informationPoint) {
+
+        if (thrown == null) {
+            return informationPoint.getSuccessSampleRate();
+        } else {
+            return informationPoint.getErrorSampleRate();
         }
     }
 

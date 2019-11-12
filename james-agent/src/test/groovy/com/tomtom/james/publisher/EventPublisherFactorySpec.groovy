@@ -27,16 +27,21 @@ class EventPublisherFactorySpec extends Specification {
     def pluginManager = Mock(PluginManager)
     def config1 = Mock(EventPublisherConfiguration)
     def config2 = Mock(EventPublisherConfiguration)
+    def disruptorConfig = Mock(EventPublisherConfiguration)
     def publisher1 = Mock(EventPublisher)
     def publisher2 = Mock(EventPublisher)
+    def disruptorPublisher = Mock(EventPublisher)
 
     def setup() {
         config1.getAsyncWorkers() >> 4
         config1.getMaxAsyncJobQueueCapacity() >> 10_000
         config2.getAsyncWorkers() >> 4
         config2.getMaxAsyncJobQueueCapacity() >> 10_000
+        disruptorConfig.getAsyncWorkers() >> 4
+        disruptorConfig.getMaxAsyncJobQueueCapacity() >> 10_000
         pluginManager.createEventPublisherPluginInstance(config1) >> Optional.of(publisher1)
         pluginManager.createEventPublisherPluginInstance(config2) >> Optional.of(publisher2)
+        pluginManager.createEventPublisherPluginInstance(disruptorConfig) >> Optional.of(disruptorPublisher)
     }
 
     def "Should raise an exception when given no publishers in configuration"() {
@@ -47,13 +52,13 @@ class EventPublisherFactorySpec extends Specification {
         thrown(ConfigurationStructureException)
     }
 
-    def "Should create async publisher when given single publisher configuration"() {
+    def "Should create async publisher by default when given single publisher configuration"() {
         when:
         def publisher = EventPublisherFactory.create(pluginManager, [config1])
 
         then:
-        publisher instanceof AsyncPublisher
-        (publisher as AsyncPublisher).delegate.is(publisher1)
+        publisher instanceof DisruptorAsyncPublisher
+        (publisher as DisruptorAsyncPublisher).delegate.is(publisher1)
     }
 
 
@@ -64,8 +69,8 @@ class EventPublisherFactorySpec extends Specification {
         then:
         publisher instanceof CompositePublisher
         (publisher as CompositePublisher).delegates.size() == 2
-        (publisher as CompositePublisher).delegates.each { it instanceof AsyncPublisher }
-        ((publisher as CompositePublisher).delegates[0] as AsyncPublisher).delegate.is(publisher1)
-        ((publisher as CompositePublisher).delegates[1] as AsyncPublisher).delegate.is(publisher2)
+        (publisher as CompositePublisher).delegates.each { it instanceof DisruptorAsyncPublisher }
+        ((publisher as CompositePublisher).delegates[0] as DisruptorAsyncPublisher).delegate.is(publisher1)
+        ((publisher as CompositePublisher).delegates[1] as DisruptorAsyncPublisher).delegate.is(publisher2)
     }
 }

@@ -16,7 +16,11 @@
 
 package com.tomtom.james.common.api.informationpoint;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -25,7 +29,10 @@ public class InformationPoint {
     protected String className;
     protected String methodName;
     protected String script;
-    protected Integer sampleRate;
+    //unused. left for backward compatibility
+    protected int sampleRate = 100;
+    protected double successSampleRate = 100;
+    protected double errorSampleRate = 100;
     protected Metadata metadata;
     protected Boolean requiresInitialContext = Boolean.FALSE;
 
@@ -46,7 +53,15 @@ public class InformationPoint {
     }
 
     public int getSampleRate() {
-        return Optional.ofNullable(sampleRate).orElse(100);
+        return sampleRate;
+    }
+
+    public double getSuccessSampleRate() {
+        return successSampleRate;
+    }
+
+    public double getErrorSampleRate() {
+        return errorSampleRate;
     }
 
     public List<String> splittedScriptLines() {
@@ -72,8 +87,12 @@ public class InformationPoint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         InformationPoint that = (InformationPoint) o;
         return Objects.equals(className, that.className) &&
                 Objects.equals(methodName, that.methodName);
@@ -97,6 +116,8 @@ public class InformationPoint {
         private String methodName;
         private String script;
         private Integer sampleRate;
+        private Double successSampleRate;
+        private Double errorSampleRate;
         private Metadata metadata;
         private Boolean requireInitialContext = Boolean.FALSE;
 
@@ -133,13 +154,33 @@ public class InformationPoint {
         }
 
         public Builder withSampleRate(Integer sampleRate) {
+            if(sampleRate!=null && errorSampleRate != null && successSampleRate!= null){
+                throw new IllegalStateException("Cannot set sampleRate when successSampleRate or errorSampleRate is set.");
+            }
             this.sampleRate = sampleRate;
             return this;
         }
 
+        public Builder withSuccessSampleRate(Double successSampleRate) {
+            if(sampleRate != null && successSampleRate!= null){
+                throw new IllegalStateException("Cannot set successSampleRate when sampleRate is set.");
+            }
+            this.successSampleRate = successSampleRate;
+            return this;
+        }
+
+        public Builder withErrorSampleRate(Double errorSampleRate) {
+            if(sampleRate != null && errorSampleRate!= null){
+                throw new IllegalStateException("Cannot set errorSampleRate when sampleRate is set.");
+            }
+            this.errorSampleRate = errorSampleRate;
+            return this;
+        }
+
         public Builder withMetadata(Metadata metadata) {
-            if(metadata != null)
+            if(metadata != null) {
                 this.metadata.putAll(metadata);
+            }
             return this;
         }
 
@@ -148,6 +189,8 @@ public class InformationPoint {
             this.methodName = copyFrom.methodName;
             this.script = copyFrom.script;
             this.sampleRate = copyFrom.sampleRate;
+            this.successSampleRate = copyFrom.successSampleRate;
+            this.errorSampleRate = copyFrom.errorSampleRate;
             this.metadata.putAll(copyFrom.metadata);
             this.requireInitialContext = copyFrom.requiresInitialContext;
             return this;
@@ -158,7 +201,9 @@ public class InformationPoint {
             ip.className = Objects.requireNonNull(className);
             ip.methodName = Objects.requireNonNull(methodName);
             ip.script = script;
-            ip.sampleRate = sampleRate;
+            ip.sampleRate = Optional.ofNullable(sampleRate).orElse(100);
+            ip.successSampleRate = Optional.ofNullable(successSampleRate).orElse((double)ip.sampleRate);
+            ip.errorSampleRate = Optional.ofNullable(errorSampleRate).orElse((double)ip.sampleRate);
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
            return ip;

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 
 import static org.awaitility.Awaitility.await
 
-class AsyncPublisherSpec extends Specification {
+class DisruptorAsyncPublisherThreadNameSpec extends Specification {
 
     def delegate = Mock(EventPublisher)
     def callerThreadNames = new ArrayBlockingQueue<String>(10000)
@@ -36,7 +36,7 @@ class AsyncPublisherSpec extends Specification {
 
     def "Should publish events via the delegate in the background"() {
         given:
-        def publisher = new AsyncPublisher(delegate, "bgthread-%d", 5, 1000)
+        def publisher = new DisruptorAsyncPublisher(delegate, "bgthread-%d", 5, 1000)
 
         when:
         10.times {

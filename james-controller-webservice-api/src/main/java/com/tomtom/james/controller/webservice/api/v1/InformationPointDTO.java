@@ -26,6 +26,8 @@ public class InformationPointDTO {
     private String methodName;
     private List<String> script;
     private Integer sampleRate;
+    private Double successSampleRate;
+    private Double errorSampleRate;
     private Metadata metadata;
 
     public String getClassName() {
@@ -68,6 +70,22 @@ public class InformationPointDTO {
         this.metadata = metadata;
     }
 
+    public Double getSuccessSampleRate() {
+        return successSampleRate;
+    }
+
+    public void setSuccessSampleRate(final Double successSampleRate) {
+        this.successSampleRate = successSampleRate;
+    }
+
+    public Double getErrorSampleRate() {
+        return errorSampleRate;
+    }
+
+    public void setErrorSampleRate(final Double errorSampleRate) {
+        this.errorSampleRate = errorSampleRate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,12 +94,14 @@ public class InformationPointDTO {
         return Objects.equals(className, that.className) &&
                 Objects.equals(methodName, that.methodName) &&
                 Objects.equals(script, that.script) &&
-                Objects.equals(sampleRate, that.sampleRate);
+                Objects.equals(sampleRate, that.sampleRate) &&
+                Objects.equals(successSampleRate, that.successSampleRate) &&
+                Objects.equals(errorSampleRate, that.errorSampleRate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, script, sampleRate, metadata);
+        return Objects.hash(className, methodName, script, sampleRate, successSampleRate, errorSampleRate, metadata);
     }
 
 }

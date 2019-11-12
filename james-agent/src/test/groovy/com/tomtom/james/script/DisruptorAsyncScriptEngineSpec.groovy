@@ -21,6 +21,7 @@ import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
 import com.tomtom.james.newagent.MethodExecutionContextHelper
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -29,9 +30,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 import static org.awaitility.Awaitility.await
-import static org.awaitility.Awaitility.given
 
-class AsyncScriptEngineSpec extends Specification {
+class DisruptorAsyncScriptEngineSpec extends Specification {
 
     def delegate = Mock(ScriptEngine)
     def informationPointClassName = "informationPointClassName"
@@ -66,7 +66,7 @@ class AsyncScriptEngineSpec extends Specification {
 
     def "Should invoke success handler via the delegate in the background"() {
         given:
-        def scriptEngine = new AsyncScriptEngine(delegate, 5, 100)
+        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
 
         when:
         10.times {
@@ -80,9 +80,29 @@ class AsyncScriptEngineSpec extends Specification {
         successCallerThreadNames.findAll({ it.contains("async-script-engine-thread-pool") }).size() == 10
     }
 
+    @Unroll
+    def "Should accept any queue size and make it a power of 2 #queueSize -> #expectedSize"(int queueSize, int expectedSize) {
+        given:
+        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, queueSize)
+
+        when:
+        def actualQueSize =scriptEngine.getJobQueueRemainingCapacity()
+
+
+        then:
+        actualQueSize == expectedSize
+
+        where:
+        queueSize | expectedSize
+        99        | 128
+        3         | 4
+        255       | 256
+        257       | 512
+    }
+
     def "Should invoke error handler via the delegate in the background"() {
         given:
-        def scriptEngine = new AsyncScriptEngine(delegate, 5, 100)
+        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
 
         when:
         10.times {
@@ -98,7 +118,7 @@ class AsyncScriptEngineSpec extends Specification {
 
     def "Shoud invoke prepare context in current thread and allow access to it in background thread handler"() {
         given:
-        def scriptEngine = new AsyncScriptEngine(delegate, 5, 100)
+        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
 
         when:
         threadData.set("greetings from " + currentThread.getId())

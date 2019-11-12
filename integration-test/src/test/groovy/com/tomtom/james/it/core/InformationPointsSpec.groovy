@@ -50,6 +50,8 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ips[0].className == "foo.bar.className"
         ips[0].methodName == "methodName"
         ips[0].sampleRate == 100
+        ips[0].successSampleRate == 100
+        ips[0].errorSampleRate == 100
 
     }
 
@@ -74,6 +76,8 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ipsBeforeRemove[0].className == "foo.bar.className2"
         ipsBeforeRemove[0].methodName == "methodName2"
         ipsBeforeRemove[0].sampleRate == 100
+        ipsBeforeRemove[0].successSampleRate == 100
+        ipsBeforeRemove[0].errorSampleRate == 100
 
         ipsAfterRemove.isEmpty()
     }
@@ -99,6 +103,8 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ips[0].className == "foo.bar.className3"
         ips[0].methodName == "methodName3"
         ips[0].sampleRate == 5
+        ips[0].successSampleRate == 5
+        ips[0].errorSampleRate == 5
     }
 
     def "Should parse v1 json with owner and index" () {
@@ -127,7 +133,66 @@ class InformationPointsSpec extends BaseJamesSpecification {
         ips[0].className == "foo.bar.className3"
         ips[0].methodName == "methodName3"
         ips[0].sampleRate == 5
+        ips[0].successSampleRate == 5
+        ips[0].errorSampleRate == 5
         ips[0].metadata.get("owner") == "jenkins"
         ips[0].metadata.get("index") == "test"
+    }
+
+    def "Should create information point with default errorSampleRate" () {
+        given:
+        def controller = JamesControllerProvider.get()
+        def json = '''{
+        "className": "foo.bar.className3",
+        "methodName": "methodName3",
+        "script": [
+            "// First line of Information Point script",
+            "// Second line of Information Point script"
+        ],
+        "successSampleRate": 5,
+        "metadata": {
+            "owner": "jenkins",
+            "index": "test"
+        }
+        }'''
+
+        when:
+        controller.createInformationPoint(json)
+        def ips = controller.informationPoints
+
+        then:
+        ips.size() == 1
+        ips[0].className == "foo.bar.className3"
+        ips[0].methodName == "methodName3"
+        ips[0].successSampleRate == 5
+        ips[0].errorSampleRate == 100
+    }
+    def "Should create information point with default successSampleRate" () {
+        given:
+        def controller = JamesControllerProvider.get()
+        def json = '''{
+        "className": "foo.bar.className3",
+        "methodName": "methodName3",
+        "script": [
+            "// First line of Information Point script",
+            "// Second line of Information Point script"
+        ],
+        "errorSampleRate": 5,
+        "metadata": {
+            "owner": "jenkins",
+            "index": "test"
+        }
+        }'''
+
+        when:
+        controller.createInformationPoint(json)
+        def ips = controller.informationPoints
+
+        then:
+        ips.size() == 1
+        ips[0].className == "foo.bar.className3"
+        ips[0].methodName == "methodName3"
+        ips[0].successSampleRate == 100
+        ips[0].errorSampleRate == 5
     }
 }

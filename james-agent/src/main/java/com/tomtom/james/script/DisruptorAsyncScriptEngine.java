@@ -16,39 +16,60 @@
 
 package com.tomtom.james.script;
 
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+
+import com.lmax.disruptor.TimeoutException;
+import com.lmax.disruptor.dsl.Disruptor;
 import com.tomtom.james.common.api.QueueBacked;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.publisher.disruptor.JobEvent;
+import com.tomtom.james.publisher.disruptor.JobEventHandler;
 import com.tomtom.james.util.AsyncRunner;
 import com.tomtom.james.util.MoreExecutors;
 
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
 
-class AsyncScriptEngine implements ScriptEngine, QueueBacked {
+    private static final Logger LOG = Logger.getLogger(DisruptorAsyncScriptEngine.class);
 
-    private static final Logger LOG = Logger.getLogger(AsyncScriptEngine.class);
-
-    private final BlockingQueue<Runnable> jobQueue;
     private final ScriptEngine delegate;
-    private final ExecutorService executorService;
     private final AtomicInteger droppedJobsCount = new AtomicInteger();
 
-    AsyncScriptEngine(ScriptEngine delegate, int numberOfWorkers, int jobQueueSize) {
-        this.delegate = Objects.requireNonNull(delegate);
-        this.executorService = MoreExecutors.createNamedDaemonExecutorService(
+    private final Disruptor<JobEvent> disruptor;
+    private final int bufferSize;
+    private final ExecutorService executor;
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
+
+    DisruptorAsyncScriptEngine(ScriptEngine delegate, int numberOfWorkers, int jobQueueSize) {
+
+
+        // Specify the size of the ring buffer, must be power of 2.
+        bufferSize = nextPowerOf2(jobQueueSize);
+
+        // Construct the Disruptor
+        this.executor = MoreExecutors.createNamedDaemonExecutorService(
                 "async-script-engine-thread-pool-%d", numberOfWorkers);
-        this.jobQueue = new ArrayBlockingQueue<>(jobQueueSize, true);
+        disruptor =
+                new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
+        // Start the Disruptor, starts all threads running
+        disruptor.handleEventsWith(new JobEventHandler());
+        disruptor.start();
+
+        this.delegate = Objects.requireNonNull(delegate);
         LOG.trace(() -> "Script engine worker pool created with " + numberOfWorkers + " threads");
-        IntStream.range(0, numberOfWorkers).forEach(i ->
-                executorService.submit(new AsyncRunner<>(jobQueue)));
     }
 
     @Override
@@ -71,17 +92,20 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      String[] callStack,
                                      Object returnValue,
                                      CompletableFuture<Object> initialContextProvider) {
-        if (!jobQueue.offer(() ->
+
+        if (isRunning.get() && !disruptor.getRingBuffer().tryPublishEvent((
+                JobEvent event,
+                long sequence) -> event.setJob(() ->
                 delegate.invokeSuccessHandler(
-                        informationPoint,
-                        origin,
-                        parameters,
-                        instance,
-                        currentThread,
-                        executionTime,
-                        callStack,
-                        returnValue,
-                        initialContextProvider))) {
+                informationPoint,
+                origin,
+                parameters,
+                instance,
+                currentThread,
+                executionTime,
+                callStack,
+                returnValue,
+                initialContextProvider)))) {
             droppedJobsCount.incrementAndGet();
         }
     }
@@ -96,7 +120,11 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    String[] callStack,
                                    Throwable errorCause,
                                    CompletableFuture<Object> initialContextProvider) {
-        if (!jobQueue.offer(() ->
+
+
+        if (isRunning.get() && !disruptor.getRingBuffer().tryPublishEvent((
+                JobEvent event,
+                long sequence) -> event.setJob(() ->
                 delegate.invokeErrorHandler(
                         informationPoint,
                         origin,
@@ -106,40 +134,50 @@ class AsyncScriptEngine implements ScriptEngine, QueueBacked {
                         executionTime,
                         callStack,
                         errorCause,
-                        initialContextProvider))) {
+                        initialContextProvider)))) {
             droppedJobsCount.incrementAndGet();
         }
+
     }
 
     @Override
     public void close() {
-        LOG.trace("Shutting down script engine executor...");
+        LOG.trace("Shutting down executor...");
+        isRunning.set(false);
         try {
-            executorService.shutdownNow();
-            executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+            disruptor.shutdown(5, TimeUnit.SECONDS);
+            executor.shutdownNow();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException e) {
             LOG.trace("Executor shutdown interrupted", e);
         } finally {
-            if (jobQueue.isEmpty()) {
-                LOG.trace("Executor shutdown completed.");
-            } else {
-                LOG.warn(() -> "Executor shutdown completed with " + jobQueue.size() + " jobs left in the queue");
-            }
+
+            LOG.trace("Executor shutdown completed.");
+            delegate.close();
         }
     }
 
     @Override
     public int getJobQueueSize() {
-        return jobQueue.size();
+        return bufferSize - getJobQueueRemainingCapacity();
     }
 
     @Override
     public int getJobQueueRemainingCapacity() {
-        return jobQueue.remainingCapacity();
+        return (int) disruptor.getRingBuffer().remainingCapacity();
     }
 
     @Override
     public int getDroppedJobsCount() {
         return droppedJobsCount.get();
+    }
+
+
+    private int nextPowerOf2(int maxQueueCapacity) {
+        int adjustedCapacity = maxQueueCapacity == 1 ? 1 : Integer.highestOneBit(maxQueueCapacity - 1) * 2;
+        if(adjustedCapacity!=maxQueueCapacity){
+            LOG.warn(String.format("Adjusting %d to nearest power of 2 ->  %d", maxQueueCapacity, adjustedCapacity));
+        }
+        return adjustedCapacity;
     }
 }

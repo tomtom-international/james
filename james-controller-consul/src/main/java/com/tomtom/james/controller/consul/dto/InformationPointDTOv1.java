@@ -24,6 +24,8 @@ public class InformationPointDTOv1 extends Versioned {
 
     private List<String> script;
     private Integer sampleRate;
+    private Double successSampleRate;
+    private Double errorSampleRate;
     private Metadata metadata;
 
     public List<String> getScript() {
@@ -32,6 +34,14 @@ public class InformationPointDTOv1 extends Versioned {
 
     public Integer getSampleRate() {
         return sampleRate;
+    }
+
+    public Double getSuccessSampleRate() {
+        return successSampleRate;
+    }
+
+    public Double getErrorSampleRate() {
+        return errorSampleRate;
     }
 
     public Metadata getMetadata() {
