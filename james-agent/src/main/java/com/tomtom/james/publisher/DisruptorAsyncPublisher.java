@@ -22,8 +22,8 @@ import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.publisher.Event;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.publisher.disruptor.JobEvent;
-import com.tomtom.james.publisher.disruptor.JobEventHandler;
+import com.tomtom.james.disruptor.JobEvent;
+import com.tomtom.james.disruptor.JobEventHandler;
 import com.tomtom.james.util.MoreExecutors;
 
 class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
