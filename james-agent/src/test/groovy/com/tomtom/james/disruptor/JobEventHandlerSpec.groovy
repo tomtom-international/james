@@ -1,6 +1,8 @@
-package com.tomtom.james.publisher.disruptor
+package com.tomtom.james.disruptor
 
 import spock.lang.Specification
+
+import java.util.concurrent.atomic.AtomicBoolean
 
 class JobEventHandlerSpec extends Specification {
 
@@ -23,5 +25,26 @@ class JobEventHandlerSpec extends Specification {
 
         then:
         noExceptionThrown()
+    }
+
+    def "Should clear runnable after job is handled"() {
+        given:
+        AtomicBoolean jobWasRun = new AtomicBoolean(false)
+        def job = new Runnable() {
+            @Override
+            void run() {
+                jobWasRun.set(true)
+            }
+        }
+
+        def event = new JobEvent()
+        event.setJob(job)
+
+        when:
+        hanlderUnterTest.onEvent(event, 1, false)
+
+        then:
+        event.job == null
+        jobWasRun.get()
     }
 }

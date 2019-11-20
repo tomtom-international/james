@@ -1,4 +1,4 @@
-package com.tomtom.james.publisher.disruptor;
+package com.tomtom.james.disruptor;
 
 import com.lmax.disruptor.EventFactory;
 

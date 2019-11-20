@@ -20,14 +20,11 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 import com.lmax.disruptor.TimeoutException;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -36,9 +33,8 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.publisher.disruptor.JobEvent;
-import com.tomtom.james.publisher.disruptor.JobEventHandler;
-import com.tomtom.james.util.AsyncRunner;
+import com.tomtom.james.disruptor.JobEvent;
+import com.tomtom.james.disruptor.JobEventHandler;
 import com.tomtom.james.util.MoreExecutors;
 
 class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
