@@ -114,7 +114,8 @@ public final class ContextAwareAdvice {
                     + "[origin=" + origin
                     + ", informationPointClassName=" + informationPointClassName
                     + ", informationPointMethodName=" + informationPointMethodName
-                    + ", script=" + (informationPoint.getScript().orElse(null) != null)
+                    + ", baseScript=" + (informationPoint.getBaseScript().isPresent())
+                    + ", script=" + (informationPoint.getScript().isPresent())
                     + ", sampleRate=" + informationPoint.getSampleRate()
                     + ", successSampleRate=" + informationPoint.getSuccessSampleRate()
                     + ", errorSampleRate=" + informationPoint.getErrorSampleRate()

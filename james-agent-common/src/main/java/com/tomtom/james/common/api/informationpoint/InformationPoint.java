@@ -17,7 +17,6 @@
 package com.tomtom.james.common.api.informationpoint;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +27,7 @@ public class InformationPoint {
 
     protected String className;
     protected String methodName;
+    protected String baseScript;
     protected String script;
     //unused. left for backward compatibility
     protected int sampleRate = 100;
@@ -40,6 +40,18 @@ public class InformationPoint {
         metadata = new Metadata();
     }
 
+    public InformationPoint(InformationPoint informationPoint) {
+        this.className = informationPoint.className;
+        this.methodName = informationPoint.methodName;
+        this.baseScript = informationPoint.baseScript;
+        this.script = informationPoint.script;
+        this.sampleRate = informationPoint.sampleRate;
+        this.successSampleRate = informationPoint.successSampleRate;
+        this.errorSampleRate = informationPoint.errorSampleRate;
+        this.metadata = informationPoint.metadata;
+        this.requiresInitialContext = informationPoint.requiresInitialContext;
+    }
+
     public String getClassName() {
         return className;
     }
@@ -48,8 +60,20 @@ public class InformationPoint {
         return methodName;
     }
 
+    public Optional<String> getBaseScript() {
+        return Optional.ofNullable(baseScript);
+    }
+
+    public List<String> splittedBaseScriptLines() {
+        return getBaseScript().map(s -> Arrays.asList(s.split("\n"))).orElse(null);
+    }
+
     public Optional<String> getScript() {
         return Optional.ofNullable(script);
+    }
+
+    public List<String> splittedScriptLines() {
+        return getScript().map(s -> Arrays.asList(s.split("\n"))).orElse(null);
     }
 
     public int getSampleRate() {
@@ -62,14 +86,6 @@ public class InformationPoint {
 
     public double getErrorSampleRate() {
         return errorSampleRate;
-    }
-
-    public List<String> splittedScriptLines() {
-        if (script != null) {
-            return Arrays.asList(script.split("\n"));
-        } else {
-            return Collections.emptyList();
-        }
     }
 
     public Boolean getRequiresInitialContext() {
@@ -115,6 +131,7 @@ public class InformationPoint {
         private String className;
         private String methodName;
         private String script;
+        private String baseScript;
         private Integer sampleRate;
         private Double successSampleRate;
         private Double errorSampleRate;
@@ -145,16 +162,37 @@ public class InformationPoint {
             return this;
         }
 
+        public Builder withBaseScript(List<String> baseScript) {
+            return withBaseScript(joinedScriptLines(baseScript));
+        }
+
+        public Builder withBaseScript(String baseScript) {
+            this.baseScript = baseScript;
+            return doesRequireInitialContext(baseScript);
+        }
+
+        public Builder withScript(List<String> script) {
+            return withScript(joinedScriptLines(script));
+        }
+
         public Builder withScript(String script) {
             this.script = script;
-            if (script.contains(" onPrepareContext")) {
+            return doesRequireInitialContext(script);
+        }
+
+        private String joinedScriptLines(List<String> scriptLines) {
+            return scriptLines != null ? String.join("\n", scriptLines) : null;
+        }
+
+        private Builder doesRequireInitialContext(String script) {
+            if (script != null && script.contains(" onPrepareContext")) {
                 this.requireInitialContext = true;
             }
             return this;
         }
 
         public Builder withSampleRate(Integer sampleRate) {
-            if(sampleRate!=null && errorSampleRate != null && successSampleRate!= null){
+            if (sampleRate != null && errorSampleRate != null && successSampleRate != null) {
                 throw new IllegalStateException("Cannot set sampleRate when successSampleRate or errorSampleRate is set.");
             }
             this.sampleRate = sampleRate;
@@ -162,7 +200,7 @@ public class InformationPoint {
         }
 
         public Builder withSuccessSampleRate(Double successSampleRate) {
-            if(sampleRate != null && successSampleRate!= null){
+            if (sampleRate != null && successSampleRate != null) {
                 throw new IllegalStateException("Cannot set successSampleRate when sampleRate is set.");
             }
             this.successSampleRate = successSampleRate;
@@ -170,7 +208,7 @@ public class InformationPoint {
         }
 
         public Builder withErrorSampleRate(Double errorSampleRate) {
-            if(sampleRate != null && errorSampleRate!= null){
+            if (sampleRate != null && errorSampleRate != null) {
                 throw new IllegalStateException("Cannot set errorSampleRate when sampleRate is set.");
             }
             this.errorSampleRate = errorSampleRate;
@@ -178,7 +216,7 @@ public class InformationPoint {
         }
 
         public Builder withMetadata(Metadata metadata) {
-            if(metadata != null) {
+            if (metadata != null) {
                 this.metadata.putAll(metadata);
             }
             return this;
@@ -200,13 +238,14 @@ public class InformationPoint {
             InformationPoint ip = new InformationPoint();
             ip.className = Objects.requireNonNull(className);
             ip.methodName = Objects.requireNonNull(methodName);
+            ip.baseScript = baseScript;
             ip.script = script;
             ip.sampleRate = Optional.ofNullable(sampleRate).orElse(100);
-            ip.successSampleRate = Optional.ofNullable(successSampleRate).orElse((double)ip.sampleRate);
-            ip.errorSampleRate = Optional.ofNullable(errorSampleRate).orElse((double)ip.sampleRate);
+            ip.successSampleRate = Optional.ofNullable(successSampleRate).orElse((double) ip.sampleRate);
+            ip.errorSampleRate = Optional.ofNullable(errorSampleRate).orElse((double) ip.sampleRate);
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
-           return ip;
+            return ip;
         }
     }
 }

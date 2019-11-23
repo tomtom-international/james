@@ -112,6 +112,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
         InformationPointDTO dto = new InformationPointDTO();
         dto.setClassName(informationPoint.getClassName());
         dto.setMethodName(informationPoint.getMethodName());
+        dto.setBaseScript(informationPoint.splittedBaseScriptLines());
         dto.setScript(informationPoint.splittedScriptLines());
         dto.setSampleRate(informationPoint.getSampleRate());
         dto.setSuccessSampleRate(informationPoint.getSuccessSampleRate());
@@ -125,7 +126,8 @@ public class InformationPointHandler extends AbstractHttpHandler {
         return InformationPoint.builder()
                 .withClassName(dto.getClassName())
                 .withMethodName(dto.getMethodName())
-                .withScript(joinedScriptLines(dto.getScript()))
+                .withBaseScript(dto.getBaseScript())
+                .withScript(dto.getScript())
                 .withSampleRate(dto.getSampleRate())
                 .withSuccessSampleRate(dto.getSuccessSampleRate())
                 .withErrorSampleRate(dto.getErrorSampleRate())
@@ -133,7 +135,4 @@ public class InformationPointHandler extends AbstractHttpHandler {
                 .build();
     }
 
-    private String joinedScriptLines(List<String> scriptLines) {
-        return scriptLines != null ? String.join("\n", scriptLines) : null;
-    }
 }

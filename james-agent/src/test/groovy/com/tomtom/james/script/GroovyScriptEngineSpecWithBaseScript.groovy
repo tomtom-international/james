@@ -29,37 +29,52 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 
-class GroovyScriptEngineSpec extends Specification {
+class GroovyScriptEngineSpecWithBaseScript extends Specification {
 
-    def script = '''
+    def script = """
 import com.tomtom.james.common.api.publisher.Event
-import com.tomtom.james.script.ErrorHandlerContext
-import com.tomtom.james.script.SuccessHandlerContext
+import com.tomtom.james.script.*
 
 def onSuccess(SuccessHandlerContext context) {
-    def eventMap = [
-            result     : "success",
-            className  : context.informationPointClassName,
-            methodName : context.informationPointMethodName,
-    ]
-    context.parameters.each {
-        eventMap["arg(${it.name})"] = it.value
-    }
-    publishEvent(new Event(eventMap))
+    publishEvent(new Event(event(context)))
 }
 
 def onError(ErrorHandlerContext context) {
-    def eventMap = [
-            result     : "error",
+    publishEvent(new Event(event(context)))
+}
+"""
+
+    def baseScript = """
+import com.tomtom.james.common.api.publisher.Event;
+import com.tomtom.james.script.*
+
+abstract class CustomInformationPointHandler extends InformationPointHandler {
+
+    def onPrepareContext(PrepareContextHandlerContext context) {
+        return "Key:" + context.key
+    }
+
+    void publishEvent(Event evt) {
+        evt.getContent().put("custom", "value");
+        super.publishEvent(evt);
+    }
+    
+    def event(context) {
+        def eventMap = [
+            result     : context instanceof ErrorHandlerContext ? "error" : "success",
             className  : context.informationPointClassName,
             methodName : context.informationPointMethodName,
-    ]
-    context.parameters.each {
-        eventMap["arg(${it.name})"] = it.value
+        ]
+        context.parameters.each {
+            eventMap["arg(\${it.name})"] = it.value
+        }
+        if (context.initialContext != null) {
+            eventMap['initialContext'] = context.initialContext
+        }
+        return eventMap
     }
-    publishEvent(new Event(eventMap))
 }
-'''
+"""
 
     def eventPublisher = Mock(EventPublisher)
     def toolkitManager = Mock(ToolkitManager)
@@ -87,8 +102,8 @@ def onError(ErrorHandlerContext context) {
 
         informationPoint.getClassName() >> informationPointClassName
         informationPoint.getMethodName() >> informationPointMethodName
+        informationPoint.getBaseScript() >> Optional.of(baseScript)
         informationPoint.getScript() >> Optional.of(script)
-        informationPoint.getBaseScript() >> Optional.empty()
         informationPoint.getMetadata() >> new Metadata()
     }
 
@@ -107,6 +122,7 @@ def onError(ErrorHandlerContext context) {
         then:
         1 * eventPublisher.publish({ Event evt ->
             evt.content == [
+                    custom            : "value",
                     result            : "success",
                     className         : informationPointClassName,
                     methodName        : informationPointMethodName,
@@ -127,6 +143,7 @@ def onError(ErrorHandlerContext context) {
         then:
         1 * eventPublisher.publish({ Event evt ->
             evt.content == [
+                    custom            : "value",
                     result            : "error",
                     className         : informationPointClassName,
                     methodName        : informationPointMethodName,
@@ -144,8 +161,8 @@ def onError(ErrorHandlerContext context) {
         def informationPoint2 = Mock(InformationPoint)
         informationPoint2.getClassName() >> informationPointClassName
         informationPoint2.getMethodName() >> informationPointMethodName
+        informationPoint2.getBaseScript() >> Optional.of(baseScript)
         informationPoint2.getScript() >> Optional.of(script)
-        informationPoint2.getBaseScript() >> Optional.empty()
         informationPoint2.getMetadata() >> metadata
 
         when:
@@ -155,13 +172,38 @@ def onError(ErrorHandlerContext context) {
         then:
         1 * eventPublisher.publish({ Event evt ->
             evt.content == [
+                    custom            : "value",
                     result            : "success",
                     className         : informationPointClassName,
                     methodName        : informationPointMethodName,
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value",
-                    "@metadata"  : metadata
+                    "@metadata"       : metadata
             ]
         })
     }
+
+    def "Should publish an event with context"() {
+        given:
+        def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
+
+        when:
+        def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
+        engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
+                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
+
+        then:
+        1 * eventPublisher.publish({ Event evt ->
+            evt.content == [
+                    custom            : "value",
+                    result            : "success",
+                    className         : informationPointClassName,
+                    methodName        : informationPointMethodName,
+                    initialContext    : "Key:my_key",
+                    "arg(param1-name)": "param1-value",
+                    "arg(param2-name)": "param2-value"
+            ]
+        })
+    }
+
 }

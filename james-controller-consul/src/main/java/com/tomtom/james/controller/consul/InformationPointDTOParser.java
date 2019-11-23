@@ -53,7 +53,8 @@ class InformationPointDTOParser {
         InformationPointDTOv1 dto = MAPPER.readValue(json, InformationPointDTOv1.class);
         return InformationPoint.builder()
                 .withMethodReference(methodReference)
-                .withScript(dto.getScript() != null ? String.join("\n", dto.getScript()) : null)
+                .withBaseScript(dto.getBaseScript())
+                .withScript(dto.getScript())
                 .withSampleRate(dto.getSampleRate())
                 .withSuccessSampleRate(dto.getSuccessSampleRate())
                 .withErrorSampleRate(dto.getErrorSampleRate())

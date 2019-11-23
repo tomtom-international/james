@@ -58,6 +58,15 @@ class InformationPointDTOSpec extends Specification {
 }]
 '''
 
+    def baseScriptJson = '''
+[{
+    "className": "class-name-value",
+    "methodName": "method-name-value",
+    "baseScript": ["baseline1", "baseline2"],
+    "script": ["line1", "line2"]
+}]
+'''
+
     def objectMapper = new ObjectMapper();
     def type = objectMapper.getTypeFactory().constructCollectionType(Collection, InformationPointDTO)
 
@@ -97,6 +106,18 @@ class InformationPointDTOSpec extends Specification {
         ip.successSampleRate == 0.5
         ip.errorSampleRate == 100
         ip.sampleRate == 100
+    }
+
+    def "Should parse JSON with base script"() {
+        when:
+        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(baseScriptJson, type)
+        def ip = ipsDTOs[0].toInformationPoint()
+
+        then:
+        ip.className == "class-name-value"
+        ip.methodName == "method-name-value"
+        ip.baseScript.get() == "baseline1\nbaseline2"
+        ip.script.get() == "line1\nline2"
     }
 
     def "Should error out on parsing invalid JSON to DTO"() {

@@ -20,6 +20,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.informationpoint.InformationPointService
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
+import com.tomtom.james.common.log.Logger
 import spock.lang.Specification
 
 import java.lang.reflect.Method
@@ -41,6 +42,7 @@ class ContextAwareAdviceSpec extends Specification {
     def contextAwareInformationPoint = Mock(InformationPoint)
 
     def setup() {
+        Logger.setCurrentLogLevel(Logger.Level.TRACE)
         ScriptEngineSupplier.register(scriptEngine)
         InformationPointServiceSupplier.register(ipService)
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
@@ -48,9 +50,17 @@ class ContextAwareAdviceSpec extends Specification {
         informationPoint.getSuccessSampleRate() >> sampleRate
         informationPoint.getErrorSampleRate() >> sampleRate
         informationPoint.getRequiresInitialContext() >> Boolean.FALSE
+        informationPoint.getBaseScript() >> Optional.empty()
+        informationPoint.getScript() >> Optional.of("script")
         contextAwareInformationPoint.getRequiresInitialContext() >> Boolean.TRUE
         contextAwareInformationPoint.getSuccessSampleRate() >> sampleRate
         contextAwareInformationPoint.getErrorSampleRate() >> sampleRate
+        contextAwareInformationPoint.getBaseScript() >> Optional.empty()
+        contextAwareInformationPoint.getScript() >> Optional.of("script")
+    }
+
+    void cleanup() {
+        Logger.setCurrentLogLevel(Logger.Level.WARN)
     }
 
     def "Should call success handler after successful method execution"() {
@@ -119,7 +129,7 @@ class ContextAwareAdviceSpec extends Specification {
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
         then:
-        1 * informationPoint.getErrorSampleRate() >> 0
+        (1.._) * informationPoint.getErrorSampleRate() >> 0
         0 * scriptEngine.invokeErrorHandler(
                 informationPoint,
                 _ as Method,
@@ -145,7 +155,7 @@ class ContextAwareAdviceSpec extends Specification {
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
-        1 * informationPoint.getSuccessSampleRate() >> 0
+        (1.._) * informationPoint.getSuccessSampleRate() >> 0
         0 * scriptEngine.invokeSuccessHandler(
                 informationPoint,
                 _ as Method,
