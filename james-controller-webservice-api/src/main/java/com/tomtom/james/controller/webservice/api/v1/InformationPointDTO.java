@@ -24,6 +24,7 @@ public class InformationPointDTO {
 
     private String className;
     private String methodName;
+    private List<String> baseScript;
     private List<String> script;
     private Integer sampleRate;
     private Double successSampleRate;
@@ -44,6 +45,14 @@ public class InformationPointDTO {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
+    }
+
+    public List<String> getBaseScript() {
+        return baseScript;
+    }
+
+    public void setBaseScript(List<String> baseScript) {
+        this.baseScript = baseScript;
     }
 
     public List<String> getScript() {
@@ -93,6 +102,7 @@ public class InformationPointDTO {
         InformationPointDTO that = (InformationPointDTO) o;
         return Objects.equals(className, that.className) &&
                 Objects.equals(methodName, that.methodName) &&
+                Objects.equals(baseScript, that.baseScript) &&
                 Objects.equals(script, that.script) &&
                 Objects.equals(sampleRate, that.sampleRate) &&
                 Objects.equals(successSampleRate, that.successSampleRate) &&
@@ -101,7 +111,7 @@ public class InformationPointDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, script, sampleRate, successSampleRate, errorSampleRate, metadata);
+        return Objects.hash(className, methodName, baseScript, script, sampleRate, successSampleRate, errorSampleRate, metadata);
     }
 
 }

@@ -26,6 +26,7 @@
     * [Complete configuration example](#conf-example)
 * [Information Point scripts](#scripts)
     * [Script example](#scripts-example)
+    * [Script example using base script](#scripts-example-with-base)
 * [Contributions](#contribs)
 
 
@@ -614,7 +615,38 @@ def onError(ErrorHandlerContext context) {
     publishEvent(new Event(eventMap))
 }
 ```
+<a id='scripts-example-with-base'></a>
+### Script example with base script
 
+In complex deployment it could be beneficial to share common base implementation for you script, it can be done using concept of base script present in groovy.
+
+Base script need to extend InformationPointHandler - if not specified InformationPointHandler is used as default
+
+```groovy
+abstract class CustomInformationPointHandler extends InformationPointHandler {
+    def event(context) {
+        def eventMap = [
+                result     : context instanceof ErrorHandlerContext ? "error" : "success",
+                className  : context.informationPointClassName,
+                methodName : context.informationPointMethodName,
+        ]
+        context.parameters.each {
+            eventMap["arg(${it.name})"] = it.value
+        }
+        return eventMap
+    }
+}
+```
+
+Using above base you can reuse part from base
+```groovy
+import com.tomtom.james.common.api.publisher.Event
+import com.tomtom.james.script.SuccessHandlerContext
+
+def onSuccess(SuccessHandlerContext context) {
+    publishEvent(new Event(event(context)))
+}
+```
 
 <a id='contribs'></a>
 ## Contributions

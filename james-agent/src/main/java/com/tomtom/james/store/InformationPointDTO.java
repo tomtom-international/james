@@ -26,6 +26,7 @@ class InformationPointDTO {
 
     private String className;
     private String methodName;
+    private List<String> baseScript;
     private List<String> script;
     private Integer sampleRate;
     private Double successSampleRate;
@@ -38,6 +39,7 @@ class InformationPointDTO {
     InformationPointDTO(InformationPoint informationPoint) {
         className = informationPoint.getClassName();
         methodName = informationPoint.getMethodName();
+        baseScript = informationPoint.splittedBaseScriptLines();
         script = informationPoint.splittedScriptLines();
         sampleRate = informationPoint.getSampleRate();
         successSampleRate = informationPoint.getErrorSampleRate();
@@ -48,9 +50,8 @@ class InformationPointDTO {
         InformationPoint.Builder builder = InformationPoint.builder()
                 .withClassName(className)
                 .withMethodName(methodName);
-        if (script != null) {
-            builder.withScript(String.join("\n", script));
-        }
+        builder.withBaseScript(baseScript);
+        builder.withScript(script);
         builder.withSampleRate(sampleRate);
         builder.withSuccessSampleRate(successSampleRate);
         builder.withErrorSampleRate(errorSampleRate);

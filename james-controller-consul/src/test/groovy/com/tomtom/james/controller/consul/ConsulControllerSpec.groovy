@@ -201,4 +201,31 @@ class ConsulControllerSpec extends Specification{
         then:
         thrown(IllegalStateException)
     }
+
+    def "Should parse v1 json when baseScript is defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "version": 1, 
+    "baseScript": [
+        "baseline"
+    ],
+    "script": [
+        "scriptline"
+    ],
+    "metadata": {
+        "owner": "jenkins"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        ip.isPresent()
+        ip.get().className == "foo.bar.className2"
+        ip.get().methodName == "methodName2"
+        ip.get().baseScript == Optional.of("baseline")
+        ip.get().script == Optional.of("scriptline")
+    }
 }

@@ -94,8 +94,13 @@ def onError(ErrorHandlerContext context) {
 
         informationPoint.getClassName() >> informationPointClassName
         informationPoint.getMethodName() >> informationPointMethodName
+        informationPoint.getBaseScript() >> Optional.empty()
         informationPoint.getScript() >> Optional.of(script)
         informationPoint.getMetadata() >> new Metadata()
+    }
+
+    void cleanup() {
+        Logger.setCurrentLogLevel(Logger.Level.WARN)
     }
 
     def "Should publish an event when success handler invoked"() {

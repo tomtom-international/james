@@ -11,13 +11,7 @@ public class ExtendedInformationPoint extends InformationPoint {
     }
 
     public ExtendedInformationPoint(InformationPoint informationPoint, String methodBodyClassName) {
-        this();
-        this.methodName = informationPoint.getMethodName();
-        this.className = informationPoint.getClassName();
-        this.sampleRate = informationPoint.getSampleRate();
-        this.successSampleRate = informationPoint.getSuccessSampleRate();
-        this.errorSampleRate = informationPoint.getErrorSampleRate();
-        this.script = informationPoint.getScript().orElse("");
+        super(informationPoint);
         this.methodBodyClassName = methodBodyClassName;
     }
 

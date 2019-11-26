@@ -827,4 +827,43 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
                 ]
         ]
     }
+
+    def "Should work with custom base script"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: AbstractTestService.name,
+                methodName: "methodOfSuperclass",
+                baseScript: TestUtils.scriptLines(ScriptExecutionSpec, "base"),
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "usingBase"),
+                "metadata": [
+                        owner : "owner",
+                        esIndex : "test"
+                ]
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        //AppClient.methodOfSuperclass()
+        jamesController.createInformationPoint(ip)
+        sleep(2000)
+        AppClient.methodOfSuperclass()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter.size() == 1
+        eventsAfter == [
+                [
+                        custom     : "value",
+                        result     : "success",
+                        className  : AbstractTestService.name,
+                        methodName : "methodOfSuperclass",
+                        "arg(arg0)": "methodOfSuperclass-arg0",
+                        "@metadata": [
+                                owner : "owner",
+                                esIndex : "test"
+                        ]
+                ]
+        ]
+    }
 }

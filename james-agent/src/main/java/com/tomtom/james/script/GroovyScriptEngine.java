@@ -23,6 +23,7 @@ import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -32,6 +33,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,13 +49,14 @@ class GroovyScriptEngine implements ScriptEngine {
     private final ToolkitManager toolkitManager;
     private final GroovyShell groovyShell;
     private final ConcurrentHashMap<String, InformationPointHandler> handlersCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, GroovyShell> shellsCache = new ConcurrentHashMap<>();
+    private final ClassLoader contextClassLoader;
 
     GroovyScriptEngine(EventPublisher publisher, ToolkitManager toolkitManager) {
         this.publisher = Objects.requireNonNull(publisher);
         this.toolkitManager = Objects.requireNonNull(toolkitManager);
-        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-        compilerConfiguration.setScriptBaseClass(InformationPointHandler.class.getName());
-        this.groovyShell = new GroovyShell(Thread.currentThread().getContextClassLoader(), compilerConfiguration);
+        this.contextClassLoader = Thread.currentThread().getContextClassLoader();
+        this.groovyShell = createGroovyShell(contextClassLoader, InformationPointHandler.class);
     }
 
     @Override
@@ -165,13 +168,33 @@ class GroovyScriptEngine implements ScriptEngine {
     private InformationPointHandler createOrGetCachedHandler(InformationPoint informationPoint)
             throws CompilationFailedException {
         InformationPointHandler handlerFromCache = handlersCache.computeIfAbsent(informationPoint.getScript().get(), scriptTextKey -> {
-            InformationPointHandler handler = (InformationPointHandler) groovyShell.parse(scriptTextKey);
+            InformationPointHandler handler = (InformationPointHandler) getOrCreateShell(informationPoint.getBaseScript()).parse(scriptTextKey);
             handler.setEventPublisher(publisher);
             handler.setToolkitManager(toolkitManager);
             return handler;
         });
         handlerFromCache.setMetadata(informationPoint.getMetadata());
         return handlerFromCache;
+    }
+
+    private GroovyShell getOrCreateShell(Optional<String> baseScript) {
+        if (baseScript.isPresent()) {
+            return shellsCache.computeIfAbsent(baseScript.get(), baseScriptTextKey -> createGroovyShell(contextClassLoader, baseScriptTextKey));
+        } else {
+            return groovyShell;
+        }
+    }
+
+    private GroovyShell createGroovyShell(ClassLoader classLoader, String baseClassScript) {
+        GroovyClassLoader groovyClassLoader = new GroovyClassLoader(classLoader);
+        Class baseClass = groovyClassLoader.parseClass(baseClassScript);
+        return createGroovyShell(groovyClassLoader, baseClass);
+    }
+
+    private GroovyShell createGroovyShell(ClassLoader classLoader, Class baseClass) {
+        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+        compilerConfiguration.setScriptBaseClass(baseClass.getName());
+        return new GroovyShell(classLoader, compilerConfiguration);
     }
 
 }

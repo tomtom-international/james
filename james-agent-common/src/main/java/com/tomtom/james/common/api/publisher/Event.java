@@ -63,4 +63,13 @@ public class Event {
     public int hashCode() {
         return Objects.hash(timestamp, content);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Event{");
+        sb.append("timestamp=").append(timestamp);
+        sb.append(", content=").append(content);
+        sb.append('}');
+        return sb.toString();
+    }
 }

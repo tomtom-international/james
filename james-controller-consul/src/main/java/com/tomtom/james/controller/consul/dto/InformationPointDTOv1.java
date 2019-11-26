@@ -22,11 +22,16 @@ import java.util.List;
 
 public class InformationPointDTOv1 extends Versioned {
 
+    private List<String> baseScript;
     private List<String> script;
     private Integer sampleRate;
     private Double successSampleRate;
     private Double errorSampleRate;
     private Metadata metadata;
+
+    public List<String> getBaseScript() {
+        return baseScript;
+    }
 
     public List<String> getScript() {
         return script;
