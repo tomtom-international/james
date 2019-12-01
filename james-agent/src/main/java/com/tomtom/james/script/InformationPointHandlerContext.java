@@ -20,10 +20,12 @@ import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 public abstract class InformationPointHandlerContext extends InformationPointContext {
 
+    final Instant eventTime;
     final Duration executionTime;
     final String[] callStack;
     final Object initialContext;
@@ -34,13 +36,20 @@ public abstract class InformationPointHandlerContext extends InformationPointCon
                                    List<RuntimeInformationPointParameter> runtimeParameters,
                                    Object runtimeInstance,
                                    Thread currentThread,
+                                   Instant eventTime,
                                    Duration executionTime,
                                    String[] callStack,
                                    Object initialContext) {
         super(informationPointClassName, informationPointMethodName, origin, runtimeInstance, runtimeParameters, currentThread);
+        this.eventTime = eventTime;
         this.executionTime = executionTime;
         this.callStack = callStack;
         this.initialContext = initialContext;
+    }
+
+    @SuppressWarnings("unused")
+    public Instant getEventTime() {
+        return eventTime;
     }
 
     @SuppressWarnings("unused")

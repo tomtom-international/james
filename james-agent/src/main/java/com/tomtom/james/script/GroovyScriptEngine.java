@@ -31,6 +31,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -102,6 +103,7 @@ class GroovyScriptEngine implements ScriptEngine {
                                      List<RuntimeInformationPointParameter> parameters,
                                      Object instance,
                                      Thread currentThread,
+                                     Instant eventTime,
                                      Duration executionTime,
                                      String[] callStack,
                                      Object returnValue,
@@ -112,7 +114,7 @@ class GroovyScriptEngine implements ScriptEngine {
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
             SuccessHandlerContext handlerContext = new SuccessHandlerContext(
                     informationPoint.getClassName(), informationPoint.getMethodName(), origin, parameters, instance,
-                    currentThread, executionTime, callStack, returnValue, initialContextProvider.get());
+                    currentThread, eventTime, executionTime, callStack, returnValue, initialContextProvider.get());
             handler.invokeMethod(SUCCESS_HANDLER_FUNCTION, new Object[]{handlerContext});
             stopwatch.stop();
             LOG.trace(() -> "Success handler invocation took " + stopwatch.elapsed());
@@ -134,6 +136,7 @@ class GroovyScriptEngine implements ScriptEngine {
                                    List<RuntimeInformationPointParameter> parameters,
                                    Object instance,
                                    Thread currentThread,
+                                   Instant eventTime,
                                    Duration executionTime,
                                    String[] callStack,
                                    Throwable errorCause,
@@ -144,7 +147,7 @@ class GroovyScriptEngine implements ScriptEngine {
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
             ErrorHandlerContext handlerContext = new ErrorHandlerContext(
                     informationPoint.getClassName(), informationPoint.getMethodName(), origin, parameters, instance,
-                    currentThread, executionTime, callStack, errorCause, initialContextProvider.get());
+                    currentThread, eventTime, executionTime, callStack, errorCause, initialContextProvider.get());
             handler.invokeMethod(ERROR_HANDLER_FUNCTION, new Object[]{handlerContext});
             stopwatch.stop();
             LOG.trace(() -> "Error handler invocation took " + stopwatch.elapsed());

@@ -26,6 +26,7 @@ import com.tomtom.james.common.log.Logger
 import spock.lang.Specification
 
 import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 
@@ -73,6 +74,7 @@ def onError(ErrorHandlerContext context) {
 
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
+    def instant = Instant.ofEpochSecond(1)
     def duration = Duration.of(1, ChronoUnit.SECONDS)
     def instance = Mock(Object)
     def param1 = Mock(RuntimeInformationPointParameter)
@@ -110,7 +112,7 @@ def onError(ErrorHandlerContext context) {
         when:
         def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
         engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -132,7 +134,7 @@ def onError(ErrorHandlerContext context) {
         when:
         def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
         engine.invokeErrorHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(context))
+                instance, currentThread, instant, duration, callStack, errorCause, CompletableFuture.completedFuture(context))
 
         then:
         1 * eventPublisher.publish({ Event evt ->

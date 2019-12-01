@@ -18,6 +18,7 @@ package com.tomtom.james.script;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -84,6 +85,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                                      List<RuntimeInformationPointParameter> parameters,
                                      Object instance,
                                      Thread currentThread,
+                                     Instant eventTime,
                                      Duration executionTime,
                                      String[] callStack,
                                      Object returnValue,
@@ -98,6 +100,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                 parameters,
                 instance,
                 currentThread,
+                eventTime,
                 executionTime,
                 callStack,
                 returnValue,
@@ -112,6 +115,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                                    List<RuntimeInformationPointParameter> parameters,
                                    Object instance,
                                    Thread currentThread,
+                                   Instant eventTime,
                                    Duration executionTime,
                                    String[] callStack,
                                    Throwable errorCause,
@@ -127,6 +131,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                         parameters,
                         instance,
                         currentThread,
+                        eventTime,
                         executionTime,
                         callStack,
                         errorCause,

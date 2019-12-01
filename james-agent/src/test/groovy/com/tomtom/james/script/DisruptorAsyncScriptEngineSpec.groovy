@@ -24,6 +24,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CompletableFuture
@@ -37,6 +38,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
     def script = "// script"
+    def instant = Instant.ofEpochSecond(1)
     def duration = Duration.of(1, ChronoUnit.SECONDS)
     def instance = Mock(Object)
     def param1 = Mock(RuntimeInformationPointParameter)
@@ -57,7 +59,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         delegate.invokeSuccessHandler(*_) >> {
             args ->
                 successCallerThreadNames.add(Thread.currentThread().getName())
-                contextValue = args[8].get()
+                contextValue = args[9].get()
         }
         delegate.invokeErrorHandler(*_) >> { errorCallerThreadNames.add(Thread.currentThread().getName()) }
         delegate.invokePrepareContext(_, _, _, _, _, _) >> {
@@ -71,7 +73,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         when:
         10.times {
             scriptEngine.invokeSuccessHandler(informationPoint, origin,
-                    [param1, param2], instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                    [param1, param2], instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
         }
         await().atMost(5, TimeUnit.SECONDS).until { successCallerThreadNames.size() == 10 }
 
@@ -107,7 +109,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         when:
         10.times {
             scriptEngine.invokeErrorHandler(informationPoint, origin,
-                    [param1, param2], instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
+                    [param1, param2], instance, currentThread, instant, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
         }
         await().atMost(5, TimeUnit.SECONDS).until { errorCallerThreadNames.size() == 10 }
 
@@ -116,7 +118,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         errorCallerThreadNames.findAll({ it.contains("async-script-engine-thread-pool") }).size() == 10
     }
 
-    def "Shoud invoke prepare context in current thread and allow access to it in background thread handler"() {
+    def "Should invoke prepare context in current thread and allow access to it in background thread handler"() {
         given:
         def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
 
@@ -125,7 +127,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         def key = MethodExecutionContextHelper.createContextKey()
         def context = scriptEngine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, key)
         MethodExecutionContextHelper.storeContextAsync(key, context)
-        scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread, duration, callStack, returnValue, MethodExecutionContextHelper.getContextAsync(key))
+        scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread, instant, duration, callStack, returnValue, MethodExecutionContextHelper.getContextAsync(key))
         await().atMost(5, TimeUnit.SECONDS).until{ successCallerThreadNames.size() == 1 }
 
         then:

@@ -26,6 +26,7 @@ import com.tomtom.james.common.log.Logger
 import spock.lang.Specification
 
 import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 
@@ -81,6 +82,7 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
 
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
+    def instant = Instant.ofEpochSecond(1)
     def duration = Duration.of(1, ChronoUnit.SECONDS)
     def instance = Mock(Object)
     def param1 = Mock(RuntimeInformationPointParameter)
@@ -117,7 +119,7 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
 
         when:
         engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -138,7 +140,7 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
 
         when:
         engine.invokeErrorHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -167,7 +169,7 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
 
         when:
         engine.invokeSuccessHandler(informationPoint2, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -190,7 +192,7 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
         when:
         def context = engine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, "my_key")
         engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
