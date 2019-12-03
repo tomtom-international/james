@@ -535,6 +535,7 @@ Context property             | Type                                     |  Avail
 `runtimeInstance`            | `java.lang.Object`                       | InformationPointHandlerContext
 `runtimeParameters`          | `List<RuntimeInformationPointParameter>` | InformationPointHandlerContext
 `currentThread`              | `java.lang.Thread`                       | InformationPointHandlerContext
+`eventTime`                  | `java.time.Instant`                      | InformationPointHandlerContext
 `executionTime`              | `java.time.Duration`                     | InformationPointHandlerContext
 `callStack`                  | `java.lang.String[]`                     | InformationPointHandlerContext
 `returnValue`                | `java.lang.Object`                       | SuccessHandlerContext
@@ -555,6 +556,8 @@ Property `runtimeParameters` has a list of all parameters of the method, element
 type and name.
 
 Property `currentThread` contains a reference to a thead that executed the method. 
+
+Property `eventTime` contains a time when event happened with precision of nanoseconds. 
 
 Property `executionTime` contains a time of method's execution, with precision of nanoseconds. 
 

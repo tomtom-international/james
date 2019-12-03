@@ -25,6 +25,7 @@ import spock.lang.Specification
 
 import java.lang.reflect.Method
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.CompletableFuture
 
 class ContextAwareAdviceSpec extends Specification {
@@ -81,6 +82,7 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
                 currentThread,
+                _ as Instant,
                 _ as Duration,
                 _ as String[],
                 "returned",
@@ -108,6 +110,7 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
                 currentThread,
+                _ as Instant,
                 _ as Duration,
                 _ as String[],
                 thrown,
@@ -136,6 +139,7 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
                 currentThread,
+                _ as Instant,
                 _ as Duration,
                 _ as String[],
                 thrown,
@@ -162,6 +166,7 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
                 currentThread,
+                _ as Instant,
                 _ as Duration,
                 _ as String[],
                 "returned",
@@ -196,6 +201,7 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,
                 currentThread,
+                _ as Instant,
                 _ as Duration,
                 _ as String[],
                 "returned",

@@ -21,6 +21,7 @@ import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 public final class SuccessHandlerContext extends InformationPointHandlerContext {
@@ -33,12 +34,13 @@ public final class SuccessHandlerContext extends InformationPointHandlerContext 
                           List<RuntimeInformationPointParameter> runtimeParameters,
                           Object runtimeInstance,
                           Thread currentThread,
+                          Instant eventTime,
                           Duration executionTime,
                           String[] callStack,
                           Object returnValue,
                           Object initialContext) {
         super(informationPointClassName, informationPointMethodName, origin, runtimeParameters,
-                runtimeInstance, currentThread, executionTime, callStack, initialContext);
+                runtimeInstance, currentThread, eventTime, executionTime, callStack, initialContext);
         this.returnValue = returnValue;
     }
 
@@ -56,6 +58,7 @@ public final class SuccessHandlerContext extends InformationPointHandlerContext 
                 .add("runtimeInstance", runtimeInstance)
                 .add("runtimeParameters", runtimeParameters)
                 .add("currentThread", currentThread)
+                .add("eventTime", eventTime)
                 .add("executionTime", executionTime)
                 .add("callStack", callStack)
                 .add("returnValue", returnValue)

@@ -21,6 +21,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,6 +39,7 @@ public interface ScriptEngine extends Closeable {
                               List<RuntimeInformationPointParameter> parameters,
                               Object instance,
                               Thread currentThread,
+                              Instant eventTime,
                               Duration executionTime,
                               String[] callStack,
                               Object returnValue,
@@ -48,6 +50,7 @@ public interface ScriptEngine extends Closeable {
                             List<RuntimeInformationPointParameter> parameters,
                             Object instance,
                             Thread currentThread,
+                            Instant eventTime,
                             Duration executionTime,
                             String[] callStack,
                             Throwable errorCause,

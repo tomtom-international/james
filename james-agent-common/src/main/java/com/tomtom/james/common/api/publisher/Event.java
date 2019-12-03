@@ -27,9 +27,13 @@ public class Event {
     private final Instant timestamp;
     private final Map<String, Object> content;
 
-    public Event(Map<String, Object> content) {
-        this.timestamp = Instant.now();
+    public Event(Map<String, Object> content, Instant timestamp) {
+        this.timestamp = timestamp;
         this.content = Objects.requireNonNull(content);
+    }
+
+    public Event(Map<String, Object> content) {
+        this(content, Instant.now());
     }
 
     public Event(String message) {

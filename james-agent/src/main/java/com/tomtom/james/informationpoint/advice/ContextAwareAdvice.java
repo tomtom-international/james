@@ -23,6 +23,7 @@ import com.tomtom.james.newagent.MethodExecutionContextHelper;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,7 +97,7 @@ public final class ContextAwareAdvice {
                        Object[] arguments,
                        Object returned,
                        Throwable thrown) {
-
+        Instant eventTime = Instant.now();
         Duration executionTime = Duration.ofNanos(System.nanoTime() - _startTime);
         boolean requireInitialContextCleanup = false;
 
@@ -144,6 +145,7 @@ public final class ContextAwareAdvice {
                         createParameterList(origin, arguments),
                         instance,
                         Thread.currentThread(),
+                        eventTime,
                         executionTime,
                         getCallStack(),
                         returned,
@@ -157,6 +159,7 @@ public final class ContextAwareAdvice {
                         createParameterList(origin, arguments),
                         instance,
                         Thread.currentThread(),
+                        eventTime,
                         executionTime,
                         getCallStack(),
                         thrown,

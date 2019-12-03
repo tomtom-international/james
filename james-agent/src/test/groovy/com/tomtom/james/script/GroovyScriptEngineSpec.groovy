@@ -26,6 +26,7 @@ import com.tomtom.james.common.log.Logger
 import spock.lang.Specification
 
 import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 
@@ -66,6 +67,7 @@ def onError(ErrorHandlerContext context) {
 
     def informationPointClassName = "informationPointClassName"
     def informationPointMethodName = "informationPointClassName"
+    def instant = Instant.ofEpochSecond(1)
     def duration = Duration.of(1, ChronoUnit.SECONDS)
     def instance = Mock(Object)
     def param1 = Mock(RuntimeInformationPointParameter)
@@ -102,7 +104,7 @@ def onError(ErrorHandlerContext context) {
 
         when:
         engine.invokeSuccessHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -122,7 +124,7 @@ def onError(ErrorHandlerContext context) {
 
         when:
         engine.invokeErrorHandler(informationPoint, origin, [param1, param2],
-                instance, currentThread, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, errorCause, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -150,7 +152,7 @@ def onError(ErrorHandlerContext context) {
 
         when:
         engine.invokeSuccessHandler(informationPoint2, origin, [param1, param2],
-                instance, currentThread, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
 
         then:
         1 * eventPublisher.publish({ Event evt ->
@@ -160,8 +162,48 @@ def onError(ErrorHandlerContext context) {
                     methodName        : informationPointMethodName,
                     "arg(param1-name)": "param1-value",
                     "arg(param2-name)": "param2-value",
-                    "@metadata"  : metadata
+                    "@metadata"       : metadata
             ]
+        })
+    }
+
+    def "Should keep event time"() {
+        given:
+        def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
+        def metadata = new Metadata()
+        metadata.put("_key", "value")
+        def informationPoint2 = Mock(InformationPoint)
+        informationPoint2.getClassName() >> informationPointClassName
+        informationPoint2.getMethodName() >> informationPointMethodName
+        informationPoint2.getScript() >> Optional.of("""
+import com.tomtom.james.common.api.publisher.Event
+import com.tomtom.james.script.SuccessHandlerContext
+    def onSuccess(SuccessHandlerContext context) {
+        publishEvent(new Event([type: "eventTime"], context.eventTime))
+        publishEvent(new Event([type: "publishTime"]))
+    }
+""")
+        informationPoint2.getBaseScript() >> Optional.empty()
+        informationPoint2.getMetadata() >> metadata
+
+        when:
+        engine.invokeSuccessHandler(informationPoint2, origin, [param1, param2],
+                instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+
+        then:
+        1 * eventPublisher.publish({ Event evt ->
+            evt.content == [
+                    type            : "eventTime",
+                    "@metadata"       : metadata
+            ]
+            evt.timestamp == instant
+        })
+        1 * eventPublisher.publish({ Event evt ->
+            evt.content == [
+                    type            : "publishTime",
+                    "@metadata"       : metadata
+            ]
+            evt.timestamp != instant
         })
     }
 }
