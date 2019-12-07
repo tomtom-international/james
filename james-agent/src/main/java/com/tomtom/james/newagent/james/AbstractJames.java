@@ -46,8 +46,10 @@ public abstract class AbstractJames extends Thread implements James {
                     CtMethod[] methods = ctClass.getDeclaredMethods(informationPoint.getMethodName()); // we need instrument aaa(String s) and aaa(Integer i) and aaa() ....
                     ctMethodList.addAll(Arrays.asList(methods));
                     for(CtMethod method : methods) {
-                        if (method == null || method.isEmpty()) {
-                            LOG.error(" ERROR !!!! Method is empty or null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
+                        if (method == null) {
+                            LOG.error("!!!! Method is null [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
+                        } else if (method.isEmpty()) {
+                            LOG.warn("Method is empty [" + clazz.getName() + "#" + informationPoint.getMethodName() + "]");
                         } else {
                             LOG.trace(" JAMES INSTRUMENTATION :: " + clazz.getName() + " : " + informationPoint);
                             // before method
