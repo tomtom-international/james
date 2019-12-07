@@ -39,7 +39,7 @@ class InformationPointServiceImplSpec extends Specification {
         then:
         true
         1 * newInformationPointQueue.add(informationPoint)
-        1 * store.store([informationPoint])
+        1 * store.store({ it.contains(informationPoint) })
         service.getInformationPoint("class-name", "method-name").get() == informationPoint
     }
 
@@ -55,7 +55,7 @@ class InformationPointServiceImplSpec extends Specification {
 
         then:
         true
-        1 * store.store([])
+        1 * store.store({ it.isEmpty() })
         !service.getInformationPoint("class-name", "method-name").isPresent()
     }
 
