@@ -120,6 +120,24 @@ class InformationPointDTOSpec extends Specification {
         ip.script.get() == "line1\nline2"
     }
 
+
+    def "Should parse JSON with successExecutionThreshold"() {
+        when:
+        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue("""
+[{
+    "className": "class-name-value",
+    "methodName": "method-name-value",
+    "successExecutionThreshold" : 99
+}]
+""", type)
+        def ip = ipsDTOs[0].toInformationPoint()
+
+        then:
+        ip.className == "class-name-value"
+        ip.methodName == "method-name-value"
+        ip.successExecutionThreshold == 99
+    }
+
     def "Should error out on parsing invalid JSON to DTO"() {
         when:
         Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(invalidJson, type)

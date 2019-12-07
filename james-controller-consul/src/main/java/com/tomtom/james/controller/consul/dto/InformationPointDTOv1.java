@@ -27,6 +27,7 @@ public class InformationPointDTOv1 extends Versioned {
     private Integer sampleRate;
     private Double successSampleRate;
     private Double errorSampleRate;
+    private Long successExecutionThreshold;
     private Metadata metadata;
 
     public List<String> getBaseScript() {
@@ -47,6 +48,10 @@ public class InformationPointDTOv1 extends Versioned {
 
     public Double getErrorSampleRate() {
         return errorSampleRate;
+    }
+
+    public Long getSuccessExecutionThreshold() {
+        return successExecutionThreshold;
     }
 
     public Metadata getMetadata() {

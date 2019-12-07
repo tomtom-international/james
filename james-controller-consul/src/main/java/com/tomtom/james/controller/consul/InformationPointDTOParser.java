@@ -58,6 +58,7 @@ class InformationPointDTOParser {
                 .withSampleRate(dto.getSampleRate())
                 .withSuccessSampleRate(dto.getSuccessSampleRate())
                 .withErrorSampleRate(dto.getErrorSampleRate())
+                .withSuccessExecutionThreshold(dto.getSuccessExecutionThreshold())
                 .withMetadata(dto.getMetadata())
                 .build();
     }

@@ -16,11 +16,6 @@
 
 package com.tomtom.james.informationpoint.advice;
 
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
-import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
-import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.newagent.MethodExecutionContextHelper;
-
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,8 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
+
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
+import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.newagent.MethodExecutionContextHelper;
 
 /*
  * Note: advices are inlined so this has to be public.
@@ -49,9 +49,9 @@ public final class ContextAwareAdvice {
                                Object[] arguments) {
         try {
             LOG.trace(() -> "onEnter: START ["
-                        + "originTypeName=" + originTypeName
-                        + ", originMethodName=" + originMethodName
-                        + "]");
+                    + "originTypeName=" + originTypeName
+                    + ", originMethodName=" + originMethodName
+                    + "]");
 
             Optional<InformationPoint> informationPoint = InformationPointServiceSupplier.get()
                     .getInformationPoint(originTypeName, originMethodName);
@@ -89,14 +89,14 @@ public final class ContextAwareAdvice {
 
     @SuppressWarnings("unused")
     public static void onExit(
-                       long _startTime,
-                       String informationPointClassName,
-                       String informationPointMethodName,
-                       Method origin,
-                       Object instance,
-                       Object[] arguments,
-                       Object returned,
-                       Throwable thrown) {
+            long _startTime,
+            String informationPointClassName,
+            String informationPointMethodName,
+            Method origin,
+            Object instance,
+            Object[] arguments,
+            Object returned,
+            Throwable thrown) {
         Instant eventTime = Instant.now();
         Duration executionTime = Duration.ofNanos(System.nanoTime() - _startTime);
         boolean requireInitialContextCleanup = false;
@@ -104,11 +104,12 @@ public final class ContextAwareAdvice {
         try {
             Optional<InformationPoint> optionalInformationPoint = InformationPointServiceSupplier.get()
                     .getInformationPoint(informationPointClassName, informationPointMethodName);
-            if(!optionalInformationPoint.isPresent()) {
+            if (!optionalInformationPoint.isPresent()) {
                 LOG.trace(() -> "onExit: skipping because information point is gone");
                 return;
             }
             final InformationPoint informationPoint = optionalInformationPoint.get();
+            final long successExecutionThreshold = informationPoint.getSuccessExecutionThreshold();
             final double sampleRate = getSampleRate(thrown, informationPoint);
 
             LOG.trace(() -> "onExit: START "
@@ -120,6 +121,7 @@ public final class ContextAwareAdvice {
                     + ", sampleRate=" + informationPoint.getSampleRate()
                     + ", successSampleRate=" + informationPoint.getSuccessSampleRate()
                     + ", errorSampleRate=" + informationPoint.getErrorSampleRate()
+                    + ", successExecutionThreshold=" + successExecutionThreshold
                     + ", instance=" + instance
                     + ", arguments=" + Arrays.asList(arguments)
                     + ", returned=" + returned
@@ -138,6 +140,10 @@ public final class ContextAwareAdvice {
                     : CompletableFuture.completedFuture(null);
 
             if (thrown == null) {
+                if (executionTime.toMillis() < successExecutionThreshold) {
+                    LOG.trace(() -> "onExit: ExecutionTime skipped (executionTime=" + executionTime.toMillis() + ")");
+                    return;
+                }
                 LOG.trace(() -> "onExit: Invoking success handler");
                 ScriptEngineSupplier.get().invokeSuccessHandler(
                         informationPoint,
@@ -177,10 +183,7 @@ public final class ContextAwareAdvice {
         }
     }
 
-    private static double getSampleRate(
-        Throwable thrown,
-        InformationPoint informationPoint) {
-
+    private static double getSampleRate(Throwable thrown, InformationPoint informationPoint) {
         if (thrown == null) {
             return informationPoint.getSuccessSampleRate();
         } else {

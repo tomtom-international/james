@@ -29,6 +29,7 @@ public class InformationPointDTO {
     private Integer sampleRate;
     private Double successSampleRate;
     private Double errorSampleRate;
+    private Long successExecutionThreshold;
     private Metadata metadata;
 
     public String getClassName() {
@@ -95,6 +96,14 @@ public class InformationPointDTO {
         this.errorSampleRate = errorSampleRate;
     }
 
+    public Long getSuccessExecutionThreshold() {
+        return successExecutionThreshold;
+    }
+
+    public void setSuccessExecutionThreshold(final Long successExecutionThreshold) {
+        this.successExecutionThreshold = successExecutionThreshold;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,12 +115,13 @@ public class InformationPointDTO {
                 Objects.equals(script, that.script) &&
                 Objects.equals(sampleRate, that.sampleRate) &&
                 Objects.equals(successSampleRate, that.successSampleRate) &&
-                Objects.equals(errorSampleRate, that.errorSampleRate);
+                Objects.equals(errorSampleRate, that.errorSampleRate) &&
+                Objects.equals(successExecutionThreshold, that.successExecutionThreshold);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, methodName, baseScript, script, sampleRate, successSampleRate, errorSampleRate, metadata);
+        return Objects.hash(className, methodName, baseScript, script, sampleRate, successSampleRate, errorSampleRate, successExecutionThreshold, metadata);
     }
 
 }

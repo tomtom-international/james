@@ -16,10 +16,10 @@
 
 package com.tomtom.james.store;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
-
-import java.util.List;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class InformationPointDTO {
@@ -31,6 +31,7 @@ class InformationPointDTO {
     private Integer sampleRate;
     private Double successSampleRate;
     private Double errorSampleRate;
+    private Long successExecutionThreshold;
 
     // For marshalling
     InformationPointDTO() {
@@ -44,6 +45,7 @@ class InformationPointDTO {
         sampleRate = informationPoint.getSampleRate();
         successSampleRate = informationPoint.getErrorSampleRate();
         errorSampleRate = informationPoint.getSuccessSampleRate();
+        successExecutionThreshold = informationPoint.getSuccessExecutionThreshold();
     }
 
     public InformationPoint toInformationPoint() {
@@ -55,6 +57,7 @@ class InformationPointDTO {
         builder.withSampleRate(sampleRate);
         builder.withSuccessSampleRate(successSampleRate);
         builder.withErrorSampleRate(errorSampleRate);
+        builder.withSuccessExecutionThreshold(successExecutionThreshold);
         return builder.build();
     }
 }
