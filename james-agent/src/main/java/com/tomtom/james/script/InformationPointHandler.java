@@ -16,6 +16,9 @@
 
 package com.tomtom.james.script;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.tomtom.james.agent.ToolkitManager;
 import com.tomtom.james.common.api.informationpoint.Metadata;
 import com.tomtom.james.common.api.publisher.Event;
@@ -41,10 +44,18 @@ public abstract class InformationPointHandler extends Script {
         this.metadata = metadata;
     }
 
+    public Event createEvent(InformationPointHandlerContext context) {
+        return createEvent(new HashMap<>(), context);
+    }
+
+    public Event createEvent(Map<String, Object> content, InformationPointHandlerContext context) {
+        return new Event(content, context.getEventTime());
+    }
+
     @SuppressWarnings("unused")
     public void publishEvent(Event evt) {
         if(metadata.size() > 0) {
-            evt.getContent().put(Metadata.PREFIX, metadata);
+            evt.withEntry(Metadata.PREFIX, metadata);
         }
         publisher.publish(evt);
     }

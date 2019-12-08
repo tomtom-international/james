@@ -16,9 +16,8 @@
 
 package com.tomtom.james.it.core
 
-import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.script.SuccessHandlerContext
 
 def onSuccess(SuccessHandlerContext context) {
-    publishEvent(new Event(event(context)))
+    publishEvent(createEvent(context))
 }

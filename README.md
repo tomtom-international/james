@@ -567,8 +567,11 @@ Property `returnValue` contains the return value of the method after successful 
 
 Property `errorCause` contains the reference to Throwable that was thrown by the method.
 
-Beside runtime properties passed to event handlers via a context there are two global functions defined for
+Beside runtime properties passed to event handlers via a context there are global functions defined for
 *Information Point scripts*.
+    
+Function `Event createEvent(InformationPointHandlerContext context)` or `Event createEvent(Map<String, Object> content, InformationPointHandlerContext context)` creates an *Event* for given context, optionally with content. It has advantage over simple
+`new Event()` by setting up event timestamp based on `eventTime`. 
 
 Function `void publishEvent(Event event)` sends an *Event* to *Publisher*'s queue for processing in the future.
 
@@ -627,16 +630,16 @@ Base script need to extend InformationPointHandler - if not specified Informatio
 
 ```groovy
 abstract class CustomInformationPointHandler extends InformationPointHandler {
-    def event(context) {
-        def eventMap = [
+    Event createEvent(Map<String, Object> content, InformationPointHandlerContext context) {
+        content << [
                 result     : context instanceof ErrorHandlerContext ? "error" : "success",
                 className  : context.informationPointClassName,
                 methodName : context.informationPointMethodName,
         ]
         context.parameters.each {
-            eventMap["arg(${it.name})"] = it.value
+            content["arg(${it.name})"] = it.value
         }
-        return eventMap
+        return super.createEvent(content, context);
     }
 }
 ```
@@ -647,7 +650,7 @@ import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.script.SuccessHandlerContext
 
 def onSuccess(SuccessHandlerContext context) {
-    publishEvent(new Event(event(context)))
+    publishEvent(createEvent(context))
 }
 ```
 

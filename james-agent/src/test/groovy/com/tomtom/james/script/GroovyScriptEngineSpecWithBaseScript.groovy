@@ -33,15 +33,14 @@ import java.util.concurrent.CompletableFuture
 class GroovyScriptEngineSpecWithBaseScript extends Specification {
 
     def script = """
-import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.script.*
 
 def onSuccess(SuccessHandlerContext context) {
-    publishEvent(new Event(event(context)))
+    publishEvent(createEvent(context))
 }
 
 def onError(ErrorHandlerContext context) {
-    publishEvent(new Event(event(context)))
+    publishEvent(createEvent(context))
 }
 """
 
@@ -56,23 +55,23 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
     }
 
     void publishEvent(Event evt) {
-        evt.getContent().put("custom", "value");
+        evt.withEntry("custom", "value");
         super.publishEvent(evt);
     }
     
-    def event(context) {
-        def eventMap = [
+    Event createEvent(Map<String, Object> content, InformationPointHandlerContext context) {
+        content << [
             result     : context instanceof ErrorHandlerContext ? "error" : "success",
             className  : context.informationPointClassName,
             methodName : context.informationPointMethodName,
         ]
         context.parameters.each {
-            eventMap["arg(\${it.name})"] = it.value
+            content["arg(\${it.name})"] = it.value
         }
         if (context.initialContext != null) {
-            eventMap['initialContext'] = context.initialContext
+            content['initialContext'] = context.initialContext
         }
-        return eventMap
+        return super.createEvent(content, context);
     }
 }
 """
