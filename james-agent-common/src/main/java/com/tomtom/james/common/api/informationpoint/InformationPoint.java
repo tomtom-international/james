@@ -199,25 +199,16 @@ public class InformationPoint {
         }
 
         public Builder withSampleRate(Integer sampleRate) {
-            if (sampleRate != null && errorSampleRate != null && successSampleRate != null) {
-                throw new IllegalStateException("Cannot set sampleRate when successSampleRate or errorSampleRate is set.");
-            }
             this.sampleRate = sampleRate;
             return this;
         }
 
         public Builder withSuccessSampleRate(Double successSampleRate) {
-            if (sampleRate != null && successSampleRate != null) {
-                throw new IllegalStateException("Cannot set successSampleRate when sampleRate is set.");
-            }
             this.successSampleRate = successSampleRate;
             return this;
         }
 
         public Builder withErrorSampleRate(Double errorSampleRate) {
-            if (sampleRate != null && errorSampleRate != null) {
-                throw new IllegalStateException("Cannot set errorSampleRate when sampleRate is set.");
-            }
             this.errorSampleRate = errorSampleRate;
             return this;
         }

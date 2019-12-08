@@ -40,27 +40,6 @@ class InformationPointSpec extends Specification {
         build.sampleRate == 100
     }
 
-    def "Should fail when sampleRate and successSampleRate are set."() {
-        when:
-        def build = defaultBuilder()
-                .withSampleRate(90)
-                .withSuccessSampleRate(25.0)
-                .build()
-        then:
-        def exceptions = thrown(IllegalStateException)
-        exceptions.message == "Cannot set successSampleRate when sampleRate is set."
-    }
-
-    def "Should fail when sampleRate and errorSampleRate are set."() {
-        when:
-        def build = defaultBuilder()
-                .withSampleRate(90)
-                .withErrorSampleRate(25.0)
-                .build()
-        then:
-        def exceptions = thrown(IllegalStateException)
-        exceptions.message == "Cannot set errorSampleRate when sampleRate is set."
-    }
 
     protected InformationPoint.Builder defaultBuilder() {
         InformationPoint.builder().withClassName("someClassName").withMethodName("someMethod")
