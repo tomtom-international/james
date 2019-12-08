@@ -8,6 +8,6 @@ public class Metadata extends ConcurrentHashMap<String, Object> {
 
     @Override
     public String toString() {
-        return "MetadataStore : size=" + size();
+        return "Metadata: " + super.toString();
     }
 }
