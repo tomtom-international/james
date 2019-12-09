@@ -54,7 +54,7 @@ task prepareConfiguration(type: Copy) {
     filter { it.replaceAll('@@projectVersion@@', project.version)}
 }
 
-task runAppWithJames(type: JvmRunWithJames, dependsOn: compileJava) {
+task runAppWithJames(type: JvmRunWithJames, dependsOn: [ compileJava, ':james-agent:build', ':james-controller-webservice:build']) {
     appMain = 'com.tomtom.james.it.webservice.App'
     jamesAgentJarPath = "../james-agent/build/libs/james-agent-${project.version}-all.jar"
     jamesConfigurationPath = '../integration-test/build/configurations/integration-test.yaml'

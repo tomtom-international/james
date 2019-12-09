@@ -27,6 +27,7 @@ shadowJar {
     relocate 'com.google', 'com.tomtom.james.controller.consul.repackaged.com.google'
     relocate 'org.apache', 'com.tomtom.james.controller.consul.repackaged.org.apache'
 }
+assemble.dependsOn(shadowJar)
 
 dependencies {
     compile project(':james-agent-common')

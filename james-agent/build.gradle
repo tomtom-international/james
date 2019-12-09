@@ -35,6 +35,7 @@ shadowJar {
     relocate 'org.yaml.snakeyaml', 'com.tomtom.james.repackaged.org.yaml.snakeyaml'
     relocate 'com.lmax.disruptor', 'com.tomtom.james.repackaged.com.lmax.disruptor'
 }
+assemble.dependsOn(shadowJar)
 
 dependencies {
     compile project(':james-agent-common')

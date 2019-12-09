@@ -54,6 +54,16 @@ public class Event {
         return Collections.unmodifiableMap(map);
     }
 
+    public Event withEntry(String key, Object value) {
+        this.content.put(key, value);
+        return this;
+    }
+
+    public Event withEntries(Map<String, Object> content) {
+        this.content.putAll(content);
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

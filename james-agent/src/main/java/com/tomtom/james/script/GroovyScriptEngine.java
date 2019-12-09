@@ -16,6 +16,15 @@
 
 package com.tomtom.james.script;
 
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.agent.ToolkitManager;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
@@ -28,15 +37,6 @@ import groovy.lang.GroovyShell;
 import groovy.lang.MissingMethodException;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 class GroovyScriptEngine implements ScriptEngine {
 
@@ -67,7 +67,7 @@ class GroovyScriptEngine implements ScriptEngine {
                                        Object instance,
                                        Thread currentThread,
                                        String contextKey) {
-        LOG.trace(() -> "Invoking prepareContext handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
+        LOG.trace(() -> "Invoking prepareContext handler for " + getIdentifier(informationPoint));
 
         try {
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
@@ -81,17 +81,14 @@ class GroovyScriptEngine implements ScriptEngine {
                     contextKey);
 
             final Object result = handler.invokeMethod(PREPARE_CONTEXT, new Object[]{contextPrepareArgs});
-            LOG.trace(() -> "Context preparation " + informationPoint.getClassName() + "#" + informationPoint.getMethodName() + " completed!");
+            LOG.trace(() -> "Context preparation " + getIdentifier(informationPoint) + " completed!");
             return result;
         } catch (CompilationFailedException e) {
-            LOG.error(() -> "Script compilation failed when calling prepareContext handler for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), e);
+            LOG.error(() -> "Script compilation failed when calling prepareContext handler for " + getIdentifier(informationPoint), e);
         } catch (MissingMethodException mme) {
-            LOG.error(() -> "Success handler function missing for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), mme);
+            LOG.error(() -> "Success handler function missing for " + getIdentifier(informationPoint), mme);
         } catch (Throwable t) {
-            LOG.error(() -> "Success handler invocation failed for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), t);
+            LOG.error(() -> "Success handler invocation failed for " + getIdentifier(informationPoint), t);
         }
         return null;
 
@@ -108,7 +105,7 @@ class GroovyScriptEngine implements ScriptEngine {
                                      String[] callStack,
                                      Object returnValue,
                                      CompletableFuture<Object> initialContextProvider) {
-        LOG.trace(() -> "Invoking success handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
+        LOG.trace(() -> "Invoking success handler for " + getIdentifier(informationPoint));
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
@@ -119,14 +116,11 @@ class GroovyScriptEngine implements ScriptEngine {
             stopwatch.stop();
             LOG.trace(() -> "Success handler invocation took " + stopwatch.elapsed());
         } catch (CompilationFailedException e) {
-            LOG.error(() -> "Script compilation failed when calling success handler for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), e);
+            LOG.error(() -> "Script compilation failed when calling success handler for " + getIdentifier(informationPoint), e);
         } catch (MissingMethodException mme) {
-            LOG.error(() -> "Success handler function missing for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), mme);
+            LOG.error(() -> "Success handler function missing for " + getIdentifier(informationPoint), mme);
         } catch (Throwable t) {
-            LOG.error(() -> "Success handler invocation failed for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), t);
+            LOG.error(() -> "Success handler invocation failed for " + getIdentifier(informationPoint), t);
         }
     }
 
@@ -141,7 +135,7 @@ class GroovyScriptEngine implements ScriptEngine {
                                    String[] callStack,
                                    Throwable errorCause,
                                    CompletableFuture<Object> initialContextProvider) {
-        LOG.trace(() -> "Invoking error handler for " + informationPoint.getClassName() + "#" + informationPoint.getMethodName());
+        LOG.trace(() -> "Invoking error handler for " + getIdentifier(informationPoint));
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
             InformationPointHandler handler = createOrGetCachedHandler(informationPoint);
@@ -152,15 +146,22 @@ class GroovyScriptEngine implements ScriptEngine {
             stopwatch.stop();
             LOG.trace(() -> "Error handler invocation took " + stopwatch.elapsed());
         } catch (CompilationFailedException cfe) {
-            LOG.error(() -> "Script compilation failed when calling error handler for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), cfe);
+            LOG.error(() -> "Script compilation failed when calling error handler for " + getIdentifier(informationPoint), cfe);
         } catch (MissingMethodException mme) {
-            LOG.error(() -> "Error handler function missing for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), mme);
+            LOG.error(() -> "Error handler function missing for " + getIdentifier(informationPoint), mme);
         } catch (Throwable t) {
-            LOG.error(() -> "Error handler invocation failed for "
-                    + informationPoint.getClassName() + "#" + informationPoint.getMethodName(), t);
+            LOG.error(() -> "Error handler invocation failed for " + getIdentifier(informationPoint), t);
         }
+    }
+
+    private String getIdentifier(InformationPoint informationPoint) {
+        final StringBuilder builder =
+                new StringBuilder()
+                        .append(informationPoint.getClassName()).append('#').append(informationPoint.getMethodName());
+        if (!informationPoint.getMetadata().isEmpty()) {
+            builder.append(' ').append(informationPoint.getMetadata());
+        }
+        return builder.toString();
     }
 
     @Override

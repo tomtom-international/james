@@ -21,6 +21,7 @@ sourceCompatibility = 1.8
 shadowJar {
     relocate 'com.fasterxml.jackson', 'com.tomtom.james.publisher.file.repackaged.com.fasterxml.jackson'
 }
+assemble.dependsOn(shadowJar)
 
 dependencies {
     compile project(':james-agent-common')

@@ -1,6 +1,4 @@
 language: java
 jdk: openjdk8
 sudo: true
-script:
-  - chmod +x ./gradlew
-install: gradle clean build shadowJar
+install: ./gradlew clean build

@@ -16,6 +16,14 @@
 
 package com.tomtom.james.informationpoint;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
@@ -23,15 +31,12 @@ import com.tomtom.james.informationpoint.advice.InformationPointServiceSupplier;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
 import com.tomtom.james.store.InformationPointStore;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class InformationPointServiceImpl implements InformationPointService {
 
     private static final Logger LOG = Logger.getLogger(InformationPointServiceImpl.class);
 
     private final InformationPointStore store;
-    private final List<InformationPoint> informationPoints;
+    private final Map<String, InformationPoint> informationPoints;
     private final InformationPointQueue informationPointQueue;
     private final InformationPointQueue removeInformationPointQueue;
 
@@ -40,32 +45,38 @@ public class InformationPointServiceImpl implements InformationPointService {
         this.store = Objects.requireNonNull(store);
         this.informationPointQueue = informationPointQueue;
         this.removeInformationPointQueue = removeInformationPointQueue;
-        informationPoints = new ArrayList<>(store.restore());
-        informationPointQueue.addAll(informationPoints); // put all restored information points to the queue
+        informationPoints = store.restore().stream().collect(Collectors.toConcurrentMap(InformationPointServiceImpl::toKey, Function.identity()));
+        informationPointQueue.addAll(informationPoints.values()); // put all restored information points to the queue
         InformationPointServiceSupplier.register(this);
+    }
+
+    private static String toKey(InformationPoint informationPoint) {
+        return toKey(informationPoint.getClassName(), informationPoint.getMethodName());
+    }
+
+    private static String toKey(String className, String methodName) {
+        return className + "#" + methodName;
     }
 
     @Override
     public Collection<InformationPoint> getInformationPoints() {
-        return Collections.unmodifiableCollection(informationPoints);
+        return Collections.unmodifiableCollection(informationPoints.values());
     }
 
     @Override
     public Collection<InformationPoint> getInformationPoints(String className) {
-        return informationPoints.stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toSet());
+        return informationPoints.values().stream().filter(ip -> ip.getClassName().equals(className)).collect(Collectors.toSet());
     }
 
     @Override
     public Optional<InformationPoint> getInformationPoint(String className, String methodName) {
-        return informationPoints.stream()
-                .filter(point -> point.getClassName().equals(className) && point.getMethodName().equals(methodName))
-                .findFirst();
+        return Optional.ofNullable(informationPoints.get(toKey(className, methodName)));
     }
 
     @Override
     public void addInformationPoint(InformationPoint informationPoint) {
-        informationPoints.add(informationPoint);
-        store.store(informationPoints);
+        informationPoints.put(toKey(informationPoint), informationPoint);
+        store.store(informationPoints.values());
         informationPointQueue.add(informationPoint);
         LOG.trace("InformationPoint added : " + informationPoint + " | queue size: " + informationPointQueue.size());
         LOG.trace("Metadata: " + informationPoint.getMetadata().toString());
@@ -73,9 +84,9 @@ public class InformationPointServiceImpl implements InformationPointService {
 
     @Override
     public void removeInformationPoint(InformationPoint informationPoint) {
-        informationPoints.remove(informationPoint);
+        informationPoints.remove(toKey(informationPoint));
         removeInformationPointQueue.add(informationPoint);
-        store.store(informationPoints);
+        store.store(informationPoints.values());
     }
 
 }
