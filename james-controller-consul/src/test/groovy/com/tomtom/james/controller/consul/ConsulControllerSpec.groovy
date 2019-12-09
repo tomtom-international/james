@@ -228,4 +228,46 @@ class ConsulControllerSpec extends Specification{
         ip.get().baseScript == Optional.of("baseline")
         ip.get().script == Optional.of("scriptline")
     }
+
+
+    def "Should parse v1 json when successExecutionThreshold is defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "version": 1, 
+    "successExecutionThreshold": 999,
+    "metadata": {
+        "owner": "jenkins"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        ip.isPresent()
+        ip.get().className == "foo.bar.className2"
+        ip.get().methodName == "methodName2"
+        ip.get().successExecutionThreshold == 999
+    }
+
+    def "Should parse v1 json when successExecutionThreshold is not defined" () {
+        given:
+        def methodRefrence = "foo.bar.className2#methodName2"
+        def json = '''{
+    "version": 1, 
+    "metadata": {
+        "owner": "jenkins"
+    } 
+    }'''
+
+        when:
+        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+
+        then:
+        ip.isPresent()
+        ip.get().className == "foo.bar.className2"
+        ip.get().methodName == "methodName2"
+        ip.get().successExecutionThreshold == -1
+    }
 }

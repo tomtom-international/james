@@ -117,6 +117,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
         dto.setSampleRate(informationPoint.getSampleRate());
         dto.setSuccessSampleRate(informationPoint.getSuccessSampleRate());
         dto.setErrorSampleRate(informationPoint.getErrorSampleRate());
+        dto.setSuccessExecutionThreshold(informationPoint.getSuccessExecutionThreshold());
         dto.setSampleRate(informationPoint.getSampleRate());
         dto.setMetadata(informationPoint.getMetadata());
         return dto;
@@ -131,6 +132,7 @@ public class InformationPointHandler extends AbstractHttpHandler {
                 .withSampleRate(dto.getSampleRate())
                 .withSuccessSampleRate(dto.getSuccessSampleRate())
                 .withErrorSampleRate(dto.getErrorSampleRate())
+                .withSuccessExecutionThreshold(dto.getSuccessExecutionThreshold())
                 .withMetadata(dto.getMetadata())
                 .build();
     }

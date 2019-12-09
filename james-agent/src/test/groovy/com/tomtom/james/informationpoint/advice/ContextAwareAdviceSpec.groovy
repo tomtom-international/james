@@ -50,6 +50,7 @@ class ContextAwareAdviceSpec extends Specification {
         ipService.getInformationPoint(informationPointClassName, informationPointMethodNameWithContext) >> Optional.of(contextAwareInformationPoint)
         informationPoint.getSuccessSampleRate() >> sampleRate
         informationPoint.getErrorSampleRate() >> sampleRate
+        informationPoint.getSuccessExecutionThreshold() >> -1
         informationPoint.getRequiresInitialContext() >> Boolean.FALSE
         informationPoint.getBaseScript() >> Optional.empty()
         informationPoint.getScript() >> Optional.of("script")
@@ -197,6 +198,60 @@ class ContextAwareAdviceSpec extends Specification {
                 _ as String)
         1 * scriptEngine.invokeSuccessHandler(
                 contextAwareInformationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as Instant,
+                _ as Duration,
+                _ as String[],
+                "returned",
+                _ as CompletableFuture<Object>
+        )
+    }
+
+
+    def "Should not call handler when threshold is not met"() {
+        given:
+        def method = Object.class.getMethod("equals", Object.class)
+        def currentThread = Thread.currentThread()
+
+        when:
+        informationPoint.getSuccessExecutionThreshold() >> 10000
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+                method, new Object(), ["arg0"] as Object[], "returned", null)
+
+        then:
+        0 * scriptEngine.invokeSuccessHandler(
+                informationPoint,
+                _ as Method,
+                _ as List<RuntimeInformationPointParameter>,
+                _ as Object,
+                currentThread,
+                _ as Instant,
+                _ as Duration,
+                _ as String[],
+                "returned",
+                _ as CompletableFuture<Object>
+        )
+    }
+
+    def "Should call handler when threshold is not met"() {
+        given:
+        def method = Object.class.getMethod("equals", Object.class)
+        def currentThread = Thread.currentThread()
+
+        when:
+        def startTime = System.nanoTime()
+        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
+        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+                method, new Object(), ["arg0"] as Object[], "returned", null)
+
+        then:
+        1 * scriptEngine.invokeSuccessHandler(
+                informationPoint,
                 _ as Method,
                 _ as List<RuntimeInformationPointParameter>,
                 _ as Object,

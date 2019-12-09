@@ -24,6 +24,7 @@
     * [Toolkit Plugins](#conf-toolkits)
         * [Example toolkit](#conf-toolkits-example)
     * [Complete configuration example](#conf-example)
+* [Information Point options](#ip-options)    
 * [Information Point scripts](#scripts)
     * [Script example](#scripts-example)
     * [Script example using base script](#scripts-example-with-base)
@@ -503,6 +504,22 @@ def onSuccess(SuccessHandlerContext context) {
     publishEvent(new Event(eventMap))
 }
 ```
+<a id='ip-options'></a>
+## Information Point options
+
+Information point can contains following information
+
+ Property                   | Type               |  Description             
+----------------------------|--------------------|--------------
+`className`                 | `java.lang.String` | Name of class information point should be applied
+`methodName`                | `java.lang.String` | Method of class information point should be applied
+`baseScript`                | `java.lang.String` | [Optional base script for this information point](#scripts-example-with-base)
+`script`                    | `java.lang.String` | [Script for this information point](#scripts-example-with-base)
+`sampleRate`                | `java.lang.Integer`| Sample rate (it is deprecated in favor of `successSampleRate` and `errorSampleRate` )
+`successSampleRate`         | `java.lang.Double` | Success sample rate
+`errorSampleRate`           | `java.lang.Double` | Error sample rate
+`successExecutionThreshold` | `java.lang.Long`   | Success threshold in milliseconds (onSuccess will be executed only for values with higher value of  `executionTime`) 
+
 
 <a id='scripts'></a>
 ## Information Point scripts

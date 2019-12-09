@@ -33,6 +33,7 @@ public class InformationPoint {
     protected int sampleRate = 100;
     protected double successSampleRate = 100;
     protected double errorSampleRate = 100;
+    protected long successExecutionThreshold = -1;
     protected Metadata metadata;
     protected Boolean requiresInitialContext = Boolean.FALSE;
 
@@ -48,6 +49,7 @@ public class InformationPoint {
         this.sampleRate = informationPoint.sampleRate;
         this.successSampleRate = informationPoint.successSampleRate;
         this.errorSampleRate = informationPoint.errorSampleRate;
+        this.successExecutionThreshold = informationPoint.successExecutionThreshold;
         this.metadata = informationPoint.metadata;
         this.requiresInitialContext = informationPoint.requiresInitialContext;
     }
@@ -86,6 +88,10 @@ public class InformationPoint {
 
     public double getErrorSampleRate() {
         return errorSampleRate;
+    }
+
+    public long getSuccessExecutionThreshold() {
+        return successExecutionThreshold;
     }
 
     public Boolean getRequiresInitialContext() {
@@ -135,6 +141,7 @@ public class InformationPoint {
         private Integer sampleRate;
         private Double successSampleRate;
         private Double errorSampleRate;
+        private Long successExecutionThreshold;
         private Metadata metadata;
         private Boolean requireInitialContext = Boolean.FALSE;
 
@@ -215,6 +222,11 @@ public class InformationPoint {
             return this;
         }
 
+        public Builder withSuccessExecutionThreshold(Long successExecutionThreshold) {
+            this.successExecutionThreshold = successExecutionThreshold;
+            return this;
+        }
+
         public Builder withMetadata(Metadata metadata) {
             if (metadata != null) {
                 this.metadata.putAll(metadata);
@@ -225,10 +237,12 @@ public class InformationPoint {
         public Builder copyOf(InformationPoint copyFrom) {
             this.className = copyFrom.className;
             this.methodName = copyFrom.methodName;
+            this.baseScript = copyFrom.baseScript;
             this.script = copyFrom.script;
             this.sampleRate = copyFrom.sampleRate;
             this.successSampleRate = copyFrom.successSampleRate;
             this.errorSampleRate = copyFrom.errorSampleRate;
+            this.successExecutionThreshold = copyFrom.successExecutionThreshold;
             this.metadata.putAll(copyFrom.metadata);
             this.requireInitialContext = copyFrom.requiresInitialContext;
             return this;
@@ -243,6 +257,7 @@ public class InformationPoint {
             ip.sampleRate = Optional.ofNullable(sampleRate).orElse(100);
             ip.successSampleRate = Optional.ofNullable(successSampleRate).orElse((double) ip.sampleRate);
             ip.errorSampleRate = Optional.ofNullable(errorSampleRate).orElse((double) ip.sampleRate);
+            ip.successExecutionThreshold = Optional.ofNullable(successExecutionThreshold).orElse(-1L);
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
             return ip;
