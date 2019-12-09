@@ -47,17 +47,6 @@ class InformationPointDTOSpec extends Specification {
 }]
 '''
 
-    def invalidJson = '''
-[{
-    "className": "class-name-value",
-    "methodName": "method-name-value",
-    "script": ["line1", "line2"],
-    "sampleRate": 100,
-    "successSampleRate": 50,
-    "errorSampleRate": 40
-}]
-'''
-
     def baseScriptJson = '''
 [{
     "className": "class-name-value",
@@ -136,14 +125,5 @@ class InformationPointDTOSpec extends Specification {
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
         ip.successExecutionThreshold == 99
-    }
-
-    def "Should error out on parsing invalid JSON to DTO"() {
-        when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(invalidJson, type)
-        def ip = ipsDTOs[0].toInformationPoint()
-
-        then:
-        thrown(IllegalStateException)
     }
 }

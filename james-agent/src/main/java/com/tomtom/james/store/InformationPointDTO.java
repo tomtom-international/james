@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import com.tomtom.james.common.api.informationpoint.Metadata;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class InformationPointDTO {
@@ -32,6 +33,7 @@ class InformationPointDTO {
     private Double successSampleRate;
     private Double errorSampleRate;
     private Long successExecutionThreshold;
+    private Metadata metadata = new Metadata();
 
     // For marshalling
     InformationPointDTO() {
@@ -43,8 +45,9 @@ class InformationPointDTO {
         baseScript = informationPoint.splittedBaseScriptLines();
         script = informationPoint.splittedScriptLines();
         sampleRate = informationPoint.getSampleRate();
-        successSampleRate = informationPoint.getErrorSampleRate();
-        errorSampleRate = informationPoint.getSuccessSampleRate();
+        successSampleRate = informationPoint.getSuccessSampleRate();
+        errorSampleRate = informationPoint.getErrorSampleRate();
+        metadata = informationPoint.getMetadata();
         successExecutionThreshold = informationPoint.getSuccessExecutionThreshold();
     }
 
@@ -52,6 +55,7 @@ class InformationPointDTO {
         InformationPoint.Builder builder = InformationPoint.builder()
                 .withClassName(className)
                 .withMethodName(methodName);
+        builder.withMetadata(metadata);
         builder.withBaseScript(baseScript);
         builder.withScript(script);
         builder.withSampleRate(sampleRate);
