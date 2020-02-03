@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 
 class JSONEventFormatter {
@@ -41,12 +43,15 @@ class JSONEventFormatter {
 
     String format(Event evt) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        long scriptDurationNano = Duration.between(evt.getTimestamp(), Instant.now()).toNanos();
+
         result.put("@timestamp", evt.getTimestamp().toString());
         result.put("@version", "1");
         result.put("type", configuration.getEventType());
         configuration.getEnvironment().ifPresent(env -> result.put("environment", env));
         result.put("host", hostname);
         result.put("jvmName", jvmName);
+        result.put("@scriptDurationNano", scriptDurationNano);
         result.putAll(evt.getContent());
 
         try {
