@@ -41,6 +41,7 @@ public class JamesHQ extends Thread {
         this.addInformationPointQueue = addInformationPointQueue;
         this.removeInformationPointQueue = removeInformationPointQueue;
         this.setDaemon(true);
+        this.setName(getClass().getSimpleName());
     }
 
     public JamesObjectivesQueue getJamesObjectivesQueue() {

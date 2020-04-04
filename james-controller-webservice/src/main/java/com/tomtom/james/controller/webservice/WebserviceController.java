@@ -104,7 +104,7 @@ public class WebserviceController implements JamesController {
     private Executor createExecutor(WebserviceControllerConfiguration configuration) {
         return new ThreadPoolExecutor(configuration.getMinThreads(), configuration.getMaxThreads(),
                 60L, TimeUnit.SECONDS,
-                new SynchronousQueue<>());
+                new SynchronousQueue<>(), new WebServer.ServerThreadFactory());
     }
 
 }
