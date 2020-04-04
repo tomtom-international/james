@@ -19,12 +19,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: "io.spring.dependency-management"
 apply plugin: 'org.springframework.boot'
 
 sourceCompatibility = 1.8
@@ -37,7 +39,8 @@ dependencies {
     compile project(':james-agent')
     compile project(':james-controller-webservice-client')
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: versions.groovy
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
@@ -55,6 +58,7 @@ task prepareConfiguration(type: Copy) {
 }
 
 task runAppWithJames(type: JvmRunWithJames, dependsOn: [ compileJava, ':james-agent:build', ':james-controller-webservice:build']) {
+    classpath = project.sourceSets.main.runtimeClasspath
     appMain = 'com.tomtom.james.it.webservice.App'
     jamesAgentJarPath = "../james-agent/build/libs/james-agent-${project.version}-all.jar"
     jamesConfigurationPath = '../integration-test/build/configurations/integration-test.yaml'

@@ -22,11 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BuildSystemSupportController {
 
-    @RequestMapping("/exit")
-    public void exit() {
-        System.exit(0);
-    }
-
     @RequestMapping("/status")
     public String status() {
         return "1";
