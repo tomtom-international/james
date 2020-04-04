@@ -16,7 +16,6 @@
 
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
 
@@ -25,7 +24,8 @@ jar {
         attributes 'Agent-Class': 'com.tomtom.james.newagent.JVMAgent',
                 'Premain-Class': 'com.tomtom.james.newagent.JVMAgent',
                 'Can-Redefine-Classes': true,
-                'Can-Retransform-Classes': true
+                'Can-Retransform-Classes': true,
+                'Multi-Release': true
     }
 }
 
@@ -34,6 +34,13 @@ shadowJar {
     relocate 'com.fasterxml.jackson', 'com.tomtom.james.repackaged.com.fasterxml.jackson'
     relocate 'org.yaml.snakeyaml', 'com.tomtom.james.repackaged.org.yaml.snakeyaml'
     relocate 'com.lmax.disruptor', 'com.tomtom.james.repackaged.com.lmax.disruptor'
+
+    from { // dont reinvent the wheel, take StackLocator from log4j4 as guys done great job
+        project.configurations.compileOnly.collect {
+            zipTree(it).matching
+                    { includes = ["**/apache/logging/log4j/util/StackLocator*"] }
+        }
+    }
 }
 assemble.dependsOn(shadowJar)
 
@@ -54,6 +61,8 @@ dependencies {
     compile group: 'org.javassist', name: 'javassist', version: versions.javassist
     compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonslang
     compile group: 'com.lmax', name: 'disruptor', version: versions.disruptor
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.log4j_stackutil
+    testRuntimeOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.log4j_stackutil
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility

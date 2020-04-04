@@ -578,7 +578,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsAfter.size() == 1
         (eventsAfter[0]["executionTimeNanos"] as Long) > 0
         (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
     }
 
@@ -604,7 +604,7 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsAfter.size() == 1
         (eventsAfter[0]["executionTimeNanos"] as Long) > 0
         (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
     }
 
@@ -629,11 +629,11 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsAfter.size() == 2
         (eventsAfter[0]["executionTimeNanos"] as Long) > 0
         (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
         (eventsAfter[1]["executionTimeNanos"] as Long) > 0
         (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[1]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
     }
 
@@ -658,11 +658,11 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         eventsAfter.size() == 2
         (eventsAfter[0]["executionTimeNanos"] as Long) > 0
         (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
         (eventsAfter[1]["executionTimeNanos"] as Long) > 0
         (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[1]["callStack"] as List).size() > 0
+        (eventsAfter[0]["callStack"] as List).findAll { it -> !it.isEmpty()}.size() > 0
         (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
     }
 

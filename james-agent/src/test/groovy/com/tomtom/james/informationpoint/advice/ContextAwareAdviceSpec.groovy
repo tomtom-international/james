@@ -85,7 +85,7 @@ class ContextAwareAdviceSpec extends Specification {
                 currentThread,
                 _ as Instant,
                 _ as Duration,
-                _ as String[],
+                { Arrays.asList(it as String[]).contains(ContextAwareAdviceSpec.getName()) },
                 "returned",
                 _ as CompletableFuture<Object>
         )

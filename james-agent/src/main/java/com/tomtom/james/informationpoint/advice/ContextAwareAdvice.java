@@ -30,6 +30,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.MethodExecutionContextHelper;
+import org.apache.logging.log4j.util.StackLocatorUtil;
 
 /*
  * Note: advices are inlined so this has to be public.
@@ -196,7 +197,7 @@ public final class ContextAwareAdvice {
         int adviceStackEntryCount = 2;
         String[] callStack = new String[size];
         for (int i = 0; i < size; i++) {
-            Class c = sun.reflect.Reflection.getCallerClass(i + adviceStackEntryCount);
+            Class c = StackLocatorUtil.getCallerClass(i + adviceStackEntryCount);
             if (c == null) {
                 return Arrays.copyOfRange(callStack, 0, i);
             }
