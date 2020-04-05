@@ -38,6 +38,7 @@ import org.apache.logging.log4j.util.StackLocatorUtil;
 public final class ContextAwareAdvice {
 
     public static final Logger LOG = Logger.getLogger(ContextAwareAdvice.class);
+    private static final String[] EMPTY_CALL_STACK = new String[0];
 
     private ContextAwareAdvice() {
     }
@@ -140,6 +141,7 @@ public final class ContextAwareAdvice {
                     ? MethodExecutionContextHelper.getContextAsync(MethodExecutionContextHelper.getKeyForCurrentFrame())
                     : CompletableFuture.completedFuture(null);
 
+            final String[] callStack = informationPoint.getRequiresCallStack() ? getCallStack() : EMPTY_CALL_STACK;
             if (thrown == null) {
                 if (executionTime.toMillis() < successExecutionThreshold) {
                     LOG.trace(() -> "onExit: ExecutionTime skipped (executionTime=" + executionTime.toMillis() + ")");
@@ -154,7 +156,7 @@ public final class ContextAwareAdvice {
                         Thread.currentThread(),
                         eventTime,
                         executionTime,
-                        getCallStack(),
+                        callStack,
                         returned,
                         initialContextAsyncProvider
                 );
@@ -168,7 +170,7 @@ public final class ContextAwareAdvice {
                         Thread.currentThread(),
                         eventTime,
                         executionTime,
-                        getCallStack(),
+                        callStack,
                         thrown,
                         initialContextAsyncProvider
                 );
