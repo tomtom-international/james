@@ -27,6 +27,7 @@ dependencies {
     compile project(':james-agent-common')
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
     compile group: 'com.amazonaws', name: 'amazon-kinesis-producer', version: '0.12.9'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
 
     compile group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.11.1'
 }
