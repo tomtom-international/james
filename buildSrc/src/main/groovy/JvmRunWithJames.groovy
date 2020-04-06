@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 
 import java.util.concurrent.Callable
@@ -24,6 +27,8 @@ import java.util.concurrent.Executors
 
 class JvmRunWithJames extends DefaultTask {
 
+    @InputFiles
+    FileCollection classpath
     @Input
     String appMain
     @Input
@@ -33,13 +38,24 @@ class JvmRunWithJames extends DefaultTask {
 
     @TaskAction
     def runJvmWithJames() {
+        def cp = classpath
+        // it need to be resolved before switching context to another thread
+        project.logger.info("[JvmRunWithJames]: Resolved classpath:" + cp.getFiles().join(':'))
+
         ExecutorService es = Executors.newSingleThreadExecutor()
         es.submit({
-            project.javaexec {
-                classpath = project.sourceSets.main.runtimeClasspath
-                main = appMain
-                jvmArgs = ["-javaagent:${jamesAgentJarPath}",
-                           "-Djames.configurationPath=${jamesConfigurationPath}"]
+            try {
+                project.logger.info("[JvmRunWithJames] Running ${appMain}")
+                project.javaexec {
+                    classpath = cp
+                    main = appMain
+                    jvmArgs = ["-javaagent:${jamesAgentJarPath}",
+                               "-Djames.configurationPath=${jamesConfigurationPath}"]
+                }
+            }
+            catch (Exception e) {
+                project.logger.info("[JvmRunWithJames] Error: Task 'JvmRunWithJames' interrupted.", e)
+                throw e;
             }
         } as Callable)
     }

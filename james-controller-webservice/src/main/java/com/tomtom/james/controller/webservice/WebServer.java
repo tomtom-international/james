@@ -68,13 +68,15 @@ class WebServer {
         }
     }
 
-    private static class ServerThreadFactory implements ThreadFactory {
+    static class ServerThreadFactory implements ThreadFactory {
         private final AtomicInteger threadNumber = new AtomicInteger(0);
 
         @Override
         public Thread newThread(Runnable runnable) {
             String threadName = "james-controller-webservice-server-pool-" + threadNumber.incrementAndGet();
-            return new Thread(runnable, threadName);
+            final Thread thread = new Thread(runnable, threadName);
+            thread.setDaemon(true);
+            return thread;
         }
     }
 }

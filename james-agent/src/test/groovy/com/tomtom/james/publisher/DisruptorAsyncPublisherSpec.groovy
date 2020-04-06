@@ -1,13 +1,12 @@
 package com.tomtom.james.publisher
 
 import com.tomtom.james.common.api.QueueBacked
-import com.tomtom.james.common.api.configuration.EventPublisherConfiguration
 import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.common.api.publisher.EventPublisher
 import org.awaitility.Awaitility
-import org.awaitility.Duration
 import spock.lang.Specification
 
+import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -16,7 +15,7 @@ import java.util.concurrent.Future
 class DisruptorAsyncPublisherSpec extends Specification {
     EventPublisher publisherUnderTest
 
-    private final int WORKER_COUNT = 2
+    private int WORKER_COUNT = 2
 
     private int PUBLISHER_SIZE = Math.max(2 * WORKER_COUNT, Runtime.getRuntime().availableProcessors() - WORKER_COUNT)
 
@@ -40,7 +39,7 @@ class DisruptorAsyncPublisherSpec extends Specification {
         waitForAll(futures)
 
         then:
-        Awaitility.await().atMost(Duration.ONE_SECOND).until{
+        Awaitility.await().atMost(Duration.ofSeconds(1)).until{
             publisher.counter.get() == QUEUE_SIZE
         }
 
@@ -73,7 +72,7 @@ class DisruptorAsyncPublisherSpec extends Specification {
         waitForAll(futures)
 
         then:
-        Awaitility.await().atMost(Duration.TWO_SECONDS).until {
+        Awaitility.await().atMost(Duration.ofSeconds(2)).until {
             jobQueueIsEmpty(publisherUnderTest, QUEUE_SIZE) && publisher.counter.get() == QUEUE_SIZE
         }
 
@@ -106,7 +105,7 @@ class DisruptorAsyncPublisherSpec extends Specification {
 
         then:
         publisherUnderTest.close()
-        Awaitility.await().atMost(Duration.ONE_SECOND).until{
+        Awaitility.await().atMost(Duration.ofSeconds(1)).until{
             publisherUnderTest.getJobQueueSize() == 0
         }
 
@@ -175,7 +174,7 @@ class DisruptorAsyncPublisherSpec extends Specification {
 
         then:
         //processing has finished
-        Awaitility.await().atMost(Duration.ONE_SECOND).until{
+        Awaitility.await().atMost(Duration.ofSeconds(1)).until{
             publisherUnderTest.getJobQueueSize() == 0
         }
         hasDroppedJobs(publisherUnderTest)

@@ -30,6 +30,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.MethodExecutionContextHelper;
+import org.apache.logging.log4j.util.StackLocatorUtil;
 
 /*
  * Note: advices are inlined so this has to be public.
@@ -37,6 +38,7 @@ import com.tomtom.james.newagent.MethodExecutionContextHelper;
 public final class ContextAwareAdvice {
 
     public static final Logger LOG = Logger.getLogger(ContextAwareAdvice.class);
+    private static final String[] EMPTY_CALL_STACK = new String[0];
 
     private ContextAwareAdvice() {
     }
@@ -139,6 +141,7 @@ public final class ContextAwareAdvice {
                     ? MethodExecutionContextHelper.getContextAsync(MethodExecutionContextHelper.getKeyForCurrentFrame())
                     : CompletableFuture.completedFuture(null);
 
+            final String[] callStack = informationPoint.getRequiresCallStack() ? getCallStack() : EMPTY_CALL_STACK;
             if (thrown == null) {
                 if (executionTime.toMillis() < successExecutionThreshold) {
                     LOG.trace(() -> "onExit: ExecutionTime skipped (executionTime=" + executionTime.toMillis() + ")");
@@ -153,7 +156,7 @@ public final class ContextAwareAdvice {
                         Thread.currentThread(),
                         eventTime,
                         executionTime,
-                        getCallStack(),
+                        callStack,
                         returned,
                         initialContextAsyncProvider
                 );
@@ -167,7 +170,7 @@ public final class ContextAwareAdvice {
                         Thread.currentThread(),
                         eventTime,
                         executionTime,
-                        getCallStack(),
+                        callStack,
                         thrown,
                         initialContextAsyncProvider
                 );
@@ -196,7 +199,7 @@ public final class ContextAwareAdvice {
         int adviceStackEntryCount = 2;
         String[] callStack = new String[size];
         for (int i = 0; i < size; i++) {
-            Class c = sun.reflect.Reflection.getCallerClass(i + adviceStackEntryCount);
+            Class c = StackLocatorUtil.getCallerClass(i + adviceStackEntryCount);
             if (c == null) {
                 return Arrays.copyOfRange(callStack, 0, i);
             }

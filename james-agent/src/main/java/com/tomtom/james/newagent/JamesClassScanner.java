@@ -33,6 +33,7 @@ public class JamesClassScanner extends Thread implements ClassScanner {
         this.ignoredPackages = ignoredPackages;
         this.processedClasses = processedClasses;
         this.setDaemon(true);
+        this.setName(getClass().getSimpleName());
         LOG.trace("JamesClassScanner : initDelay [" + initialDelay + "ms] : scanPeriod [" + scanPeriod + "ms]: ignoredPackages = " + ignoredPackages.stream().collect(Collectors.joining(", ")));
     }
 

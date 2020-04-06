@@ -52,9 +52,11 @@ class ContextAwareAdviceSpec extends Specification {
         informationPoint.getErrorSampleRate() >> sampleRate
         informationPoint.getSuccessExecutionThreshold() >> -1
         informationPoint.getRequiresInitialContext() >> Boolean.FALSE
+        informationPoint.getRequiresCallStack() >> Boolean.TRUE
         informationPoint.getBaseScript() >> Optional.empty()
         informationPoint.getScript() >> Optional.of("script")
         contextAwareInformationPoint.getRequiresInitialContext() >> Boolean.TRUE
+        contextAwareInformationPoint.getRequiresCallStack() >> Boolean.FALSE
         contextAwareInformationPoint.getSuccessSampleRate() >> sampleRate
         contextAwareInformationPoint.getErrorSampleRate() >> sampleRate
         contextAwareInformationPoint.getBaseScript() >> Optional.empty()
@@ -85,7 +87,7 @@ class ContextAwareAdviceSpec extends Specification {
                 currentThread,
                 _ as Instant,
                 _ as Duration,
-                _ as String[],
+                { Arrays.asList(it as String[]).contains(ContextAwareAdviceSpec.getName()) },
                 "returned",
                 _ as CompletableFuture<Object>
         )
@@ -204,7 +206,7 @@ class ContextAwareAdviceSpec extends Specification {
                 currentThread,
                 _ as Instant,
                 _ as Duration,
-                _ as String[],
+                new String[0],
                 "returned",
                 _ as CompletableFuture<Object>
         )

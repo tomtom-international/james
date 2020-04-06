@@ -14,6 +14,7 @@ public class GroovyJames extends AbstractJames {
     public GroovyJames(Queue<JamesObjective> objectives, long sleepTime) {
         super(objectives, sleepTime);
         this.setDaemon(true);
+        this.setName(getClass().getSimpleName());
     }
 
     // TODO check double if that is all chars that we need to escape

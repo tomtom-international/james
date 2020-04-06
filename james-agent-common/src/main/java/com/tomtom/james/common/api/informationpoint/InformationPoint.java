@@ -36,6 +36,7 @@ public class InformationPoint {
     protected long successExecutionThreshold = -1;
     protected Metadata metadata;
     protected Boolean requiresInitialContext = Boolean.FALSE;
+    protected Boolean requiresCallStack = Boolean.FALSE;
 
     public InformationPoint() {
         metadata = new Metadata();
@@ -98,6 +99,10 @@ public class InformationPoint {
         return requiresInitialContext;
     }
 
+    public Boolean getRequiresCallStack() {
+        return requiresCallStack;
+    }
+
     public Metadata getMetadata() {
         return metadata;
     }
@@ -144,6 +149,7 @@ public class InformationPoint {
         private Long successExecutionThreshold;
         private Metadata metadata;
         private Boolean requireInitialContext = Boolean.FALSE;
+        private Boolean requiresCallStack = Boolean.FALSE;
 
         private Builder() {
             metadata = new Metadata();
@@ -192,8 +198,9 @@ public class InformationPoint {
         }
 
         private Builder doesRequireInitialContext(String script) {
-            if (script != null && script.contains(" onPrepareContext")) {
-                this.requireInitialContext = true;
+            if (script != null) {
+                this.requireInitialContext = script.contains(" onPrepareContext");
+                this.requiresCallStack = script.contains(".callStack");
             }
             return this;
         }
@@ -236,6 +243,7 @@ public class InformationPoint {
             this.successExecutionThreshold = copyFrom.successExecutionThreshold;
             this.metadata.putAll(copyFrom.metadata);
             this.requireInitialContext = copyFrom.requiresInitialContext;
+            this.requiresCallStack = copyFrom.requiresCallStack;
             return this;
         }
 
@@ -251,6 +259,7 @@ public class InformationPoint {
             ip.successExecutionThreshold = Optional.ofNullable(successExecutionThreshold).orElse(-1L);
             ip.metadata.putAll(metadata);
             ip.requiresInitialContext = requireInitialContext;
+            ip.requiresCallStack = requiresCallStack;
             return ip;
         }
     }

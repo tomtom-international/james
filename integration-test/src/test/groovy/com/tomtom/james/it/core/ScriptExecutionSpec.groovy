@@ -556,6 +556,13 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "doNotThrow result"
     }
 
+    void assertVolatileEvent(Map<String, Object> event) {
+        assert (event["executionTimeNanos"] as Long) > 0
+        assert (event["executionTimeNanos"] as Long) < 50_000_000 // 50ms
+        assert (event["callStack"] as List<String>).findAll { it -> !it.isEmpty()}.size() > 0
+        assert (event["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+    }
+
     def "Method with information point publishing volatile fields, not throwing exception"() {
         given:
         def ip = new InformationPointDTO(
@@ -574,12 +581,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 
         then:
         eventsBefore.isEmpty()
-        eventsBefore.isEmpty()
         eventsAfter.size() == 1
-        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
-        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        assertVolatileEvent(eventsAfter[0])
     }
 
     def "Method with information point publishing volatile fields, throwing exception"() {
@@ -600,12 +603,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
 
         then:
         eventsBefore.isEmpty()
-        eventsBefore.isEmpty()
         eventsAfter.size() == 1
-        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
-        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        assertVolatileEvent(eventsAfter[0])
     }
 
     def "Method which calls another method with the same name, not throwing exception"() {
@@ -627,14 +626,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         then:
         eventsBefore.isEmpty()
         eventsAfter.size() == 2
-        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
-        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
-        (eventsAfter[1]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[1]["callStack"] as List).size() > 0
-        (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        assertVolatileEvent(eventsAfter[0])
+        assertVolatileEvent(eventsAfter[1])
     }
 
     def "Method which calls another method with the same name, throwing exception"() {
@@ -656,14 +649,8 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         then:
         eventsBefore.isEmpty()
         eventsAfter.size() == 2
-        (eventsAfter[0]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[0]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[0]["callStack"] as List).size() > 0
-        (eventsAfter[0]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
-        (eventsAfter[1]["executionTimeNanos"] as Long) > 0
-        (eventsAfter[1]["executionTimeNanos"] as Long) < 5000000
-        (eventsAfter[1]["callStack"] as List).size() > 0
-        (eventsAfter[1]["currentThreadName"] as String).startsWith("http-nio-8008-exec-")
+        assertVolatileEvent(eventsAfter[0])
+        assertVolatileEvent(eventsAfter[1])
     }
 
     def "Method with verbose information point, throwing exception"() {

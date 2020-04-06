@@ -26,9 +26,15 @@ class ShutdownApp extends DefaultTask {
     @TaskAction
     def shutdownApp() {
         try {
-            new URL("http://localhost:$port/exit").text
+            URL url = new URL("http://localhost:${port}/actuator/shutdown");
+            URLConnection con = url.openConnection();
+            HttpURLConnection http = (HttpURLConnection) con;
+            http.setRequestMethod("POST"); // PUT is another valid option
+            http.connect()
+            project.logger.info("Server respond with message: " + http.inputStream.text)
+
         } catch (SocketException e) {
-            if (e.message != "Connection reset") {
+            if (!(e.message == "Connection reset" || e.message == "Connection refused (Connection refused)")) {
                 throw e
             }
         }
