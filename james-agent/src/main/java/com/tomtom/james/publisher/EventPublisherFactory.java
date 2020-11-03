@@ -22,6 +22,7 @@ import com.tomtom.james.common.api.configuration.ConfigurationStructureException
 import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.common.api.publisher.EventPublisherSupplier;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,9 +47,9 @@ public class EventPublisherFactory {
             case 0:
                 throw new ConfigurationStructureException("No event publishers defined, check configuration");
             case 1:
-                return Iterables.getOnlyElement(publishers);
+                return EventPublisherSupplier.register(Iterables.getOnlyElement(publishers));
             default:
-                return new CompositePublisher(publishers);
+                return EventPublisherSupplier.register(new CompositePublisher(publishers));
         }
     }
 
