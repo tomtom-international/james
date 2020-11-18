@@ -121,6 +121,13 @@ class AgentConfigurationFacade implements AgentConfiguration {
     }
 
     @Override
+    public Integer getShutdownDelay() {
+        return configuration.get("shutdownDelay")
+                            .map(StructuredConfiguration::asInteger)
+                            .orElse(1000);
+    }
+
+    @Override
     public Logger.Level getLogLevel() {
         return configuration.get("logLevel")
                 .map(StructuredConfiguration::asString)

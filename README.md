@@ -144,6 +144,8 @@ example of core settings configuration:
 quiet: true                                     # Don't print out ASCII banner at the start (default: false)
 logLevel: trace                                 # Level of James logs - trace|debug|info|warn|error|fatal
                                                 # (default: warn)
+shutdownDelay: 500                              # Shutdown hook delay in ms make possible to capture closing events 
+                                                # default: 1000
 
 plugins:
   includeDirectories:

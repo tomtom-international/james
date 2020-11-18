@@ -34,6 +34,7 @@ class ShutdownHookSpec extends Specification {
 
     def "Should close resources on execution"() {
         when:
+        agentConfiguration.getShutdownDelay() >> 1
         shutdownHook.run()
 
         then:

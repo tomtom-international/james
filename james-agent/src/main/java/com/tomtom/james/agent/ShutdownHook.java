@@ -17,15 +17,15 @@
 package com.tomtom.james.agent;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.tomtom.james.common.api.Closeable;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.configuration.AgentConfiguration;
-import com.tomtom.james.newagent.MethodExecutionContextHelper;
-
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class ShutdownHook extends Thread {
 
@@ -50,6 +50,7 @@ public class ShutdownHook extends Thread {
 
     @Override
     public void run() {
+        Uninterruptibles.sleepUninterruptibly(agentConfiguration.getShutdownDelay(), TimeUnit.MILLISECONDS);
         closeables.forEach(Closeable::close);
         if (!agentConfiguration.isQuiet()) {
             LOG.info("Agent shutdown complete.");
