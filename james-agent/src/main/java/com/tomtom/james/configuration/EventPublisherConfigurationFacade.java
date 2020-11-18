@@ -48,7 +48,7 @@ class EventPublisherConfigurationFacade implements EventPublisherConfiguration {
     public int getMaxAsyncJobQueueCapacity() {
         return structuredConfiguration.get("maxAsyncJobQueueCapacity")
                 .map(StructuredConfiguration::asInteger)
-                .orElse(10_000);
+                .orElse(16_384);
     }
 
     @Override
