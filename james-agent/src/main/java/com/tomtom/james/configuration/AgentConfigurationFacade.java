@@ -128,6 +128,13 @@ class AgentConfigurationFacade implements AgentConfiguration {
     }
 
     @Override
+    public boolean isShutdownHookEnabled() {
+        return configuration.get("shutdownHookEnabled")
+                            .map(StructuredConfiguration::asBoolean)
+                            .orElse(true);
+    }
+
+    @Override
     public Logger.Level getLogLevel() {
         return configuration.get("logLevel")
                 .map(StructuredConfiguration::asString)

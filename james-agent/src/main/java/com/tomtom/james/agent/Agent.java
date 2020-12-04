@@ -62,8 +62,11 @@ class Agent {
             //InformationPointService informationPointService = new InformationPointServiceImpl(store, instrumentation);
             //controllersManager.initializeControllers(informationPointService, engine, publisher);
 
-            ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration, () -> MethodExecutionContextHelper.shutdown());
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
+            if (configuration.isShutdownHookEnabled()) {
+                ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration,
+                                                             () -> MethodExecutionContextHelper.shutdown());
+                Runtime.getRuntime().addShutdownHook(shutdownHook);
+            }
             LOG.info("Agent initialization complete.");
         } catch (ConfigurationInitializationException e) {
             LOG.fatal("Failed to initialize agent: " + e.getMessage());

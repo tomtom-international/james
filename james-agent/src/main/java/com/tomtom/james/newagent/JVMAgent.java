@@ -170,13 +170,12 @@ public class JVMAgent {
                     removeInformationPointQueue
                     );
             LOG.trace("initialize controllers time=" + stopwatch.elapsed());
-
-
-
-
-            ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration, () -> MethodExecutionContextHelper.shutdown());
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
-            LOG.trace("shutdownHook time=" + stopwatch.elapsed());
+            if (configuration.isShutdownHookEnabled()) {
+                ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration,
+                                                             () -> MethodExecutionContextHelper.shutdown());
+                Runtime.getRuntime().addShutdownHook(shutdownHook);
+                LOG.trace("shutdownHook time=" + stopwatch.elapsed());
+            }
             stopwatch.stop();
             LOG.info("JVMAgent - initialization complete - time=" + stopwatch.elapsed());
 
