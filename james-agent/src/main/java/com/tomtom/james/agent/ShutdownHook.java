@@ -16,14 +16,9 @@
 
 package com.tomtom.james.agent;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.tomtom.james.common.api.Closeable;
-import com.tomtom.james.common.api.publisher.EventPublisher;
-import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.configuration.AgentConfiguration;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -32,26 +27,18 @@ public class ShutdownHook extends Thread {
     private static final Logger LOG = Logger.getLogger(ShutdownHook.class);
 
     private final AgentConfiguration agentConfiguration;
-    private final Collection<Closeable> closeables;
+    private Runnable cleanupCallback;
 
-    public ShutdownHook(ControllersManager controllersManager,
-                 ScriptEngine scriptEngine,
-                 EventPublisher eventPublisher,
-                 AgentConfiguration agentConfiguration,
-                 Closeable methodExecutionContextHelper) {
+    public ShutdownHook(AgentConfiguration agentConfiguration, Runnable cleanupCallback) {
         super("james-shutdown-thread");
         this.agentConfiguration = Objects.requireNonNull(agentConfiguration);
-        closeables = ImmutableList.of(
-                Objects.requireNonNull(controllersManager),
-                Objects.requireNonNull(scriptEngine),
-                Objects.requireNonNull(eventPublisher),
-                Objects.requireNonNull(methodExecutionContextHelper));
+        this.cleanupCallback = cleanupCallback;
     }
 
     @Override
     public void run() {
         Uninterruptibles.sleepUninterruptibly(agentConfiguration.getShutdownDelay(), TimeUnit.MILLISECONDS);
-        closeables.forEach(Closeable::close);
+        cleanupCallback.run();
         if (!agentConfiguration.isQuiet()) {
             LOG.info("Agent shutdown complete.");
         }
