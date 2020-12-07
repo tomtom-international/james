@@ -24,13 +24,10 @@ import spock.lang.Specification
 
 class ShutdownHookSpec extends Specification {
 
-    def controllersManager = Mock(ControllersManager)
-    def scriptEngine = Mock(ScriptEngine)
-    def eventPublisher = Mock(EventPublisher)
+    def runnable = Mock(Runnable)
     def agentConfiguration = Mock(AgentConfiguration)
-    def methodExecutionHelper = Mock(Closeable)
 
-    def shutdownHook = new ShutdownHook(controllersManager, scriptEngine, eventPublisher, agentConfiguration, methodExecutionHelper)
+    def shutdownHook = new ShutdownHook(agentConfiguration, runnable)
 
     def "Should close resources on execution"() {
         when:
@@ -38,9 +35,6 @@ class ShutdownHookSpec extends Specification {
         shutdownHook.run()
 
         then:
-        1 * controllersManager.close()
-        1 * scriptEngine.close()
-        1 * eventPublisher.close()
-        1 * methodExecutionHelper.close()
+        1 * runnable.run()
     }
 }

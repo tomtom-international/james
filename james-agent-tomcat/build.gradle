@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-rootProject.name = 'james'
+apply plugin: 'java'
+apply plugin: 'groovy'
 
-include 'james-agent'
-include 'james-agent-common'
-include 'james-agent-tomcat'
+sourceCompatibility = 1.8
 
-include 'james-controller-consul'
-include 'james-controller-webservice', 'james-controller-webservice-api', 'james-controller-webservice-client'
-include 'james-publisher-aws-kinesis'
-
-include 'integration-test'
+dependencies {
+    compileOnly project(':james-agent')
+    compileOnly group: 'org.apache.tomcat', name: 'tomcat-catalina', version: '9.0.40'
+}

@@ -170,9 +170,9 @@ public class JVMAgent {
                     removeInformationPointQueue
                     );
             LOG.trace("initialize controllers time=" + stopwatch.elapsed());
+            JVMAgentCleaner.init(controllersManager, engine, publisher, MethodExecutionContextHelper::shutdown);
             if (configuration.isShutdownHookEnabled()) {
-                ShutdownHook shutdownHook = new ShutdownHook(controllersManager, engine, publisher, configuration,
-                                                             () -> MethodExecutionContextHelper.shutdown());
+                ShutdownHook shutdownHook = new ShutdownHook(configuration, JVMAgentCleaner::close);
                 Runtime.getRuntime().addShutdownHook(shutdownHook);
                 LOG.trace("shutdownHook time=" + stopwatch.elapsed());
             }
