@@ -21,6 +21,7 @@ import com.tomtom.james.common.api.configuration.StructuredConfiguration;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.Optional;
 
 class FilePublisherConfiguration {
 
@@ -49,4 +50,14 @@ class FilePublisherConfiguration {
         return path.normalize().toString();
     }
 
+    public String getEventType() {
+        return configurationProperties.get("eventType")
+                            .map(StructuredConfiguration::asString)
+                            .orElse("james");
+    }
+
+    public Optional<String> getEnvironment() {
+        return configurationProperties.get("environment")
+                            .map(StructuredConfiguration::asString);
+    }
 }

@@ -18,6 +18,7 @@ package com.tomtom.james.publisher;
 
 import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
+import java.util.Optional;
 
 class ConsolePublisherConfiguration {
 
@@ -34,4 +35,14 @@ class ConsolePublisherConfiguration {
                 .orElse(false);
     }
 
+    public String getEventType() {
+        return configurationProperties.get("eventType")
+                            .map(StructuredConfiguration::asString)
+                            .orElse("james");
+    }
+
+    public Optional<String> getEnvironment() {
+        return configurationProperties.get("environment")
+                            .map(StructuredConfiguration::asString);
+    }
 }
