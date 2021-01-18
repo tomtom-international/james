@@ -108,8 +108,10 @@ public class JVMAgent {
             Logger.setCurrentLogLevel(configuration.getLogLevel());
             printBanner(configuration);
 
-            Stopwatch stopwatch = Stopwatch.createStarted();
+            if (configuration.isQuiet())
+                SystemErrCapture.register();
 
+            Stopwatch stopwatch = Stopwatch.createStarted();
             PluginManager pluginManager = new PluginManager(configuration.getPluginIncludeDirectories(), configuration.getPluginIncludeFiles());
             LOG.trace("pluginManager time=" + stopwatch.elapsed());
 
@@ -181,6 +183,8 @@ public class JVMAgent {
 
         } catch (ConfigurationInitializationException e) {
             e.printStackTrace();
+        } finally {
+            SystemErrCapture.unregisterAndReplay(line -> !line.startsWith("SLF4J:"));
         }
     }
 
