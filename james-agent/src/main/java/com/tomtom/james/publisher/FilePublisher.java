@@ -48,7 +48,7 @@ public class FilePublisher implements EventPublisher {
     public void initialize(EventPublisherConfiguration eventPublisherConfiguration) {
         FilePublisherConfiguration configuration = new FilePublisherConfiguration(eventPublisherConfiguration);
         writer = createWriter(configuration);
-        formatter = new JSONEventFormatter(configuration.isPrettifyJSON());
+        formatter = new JSONEventFormatter(configuration.isPrettifyJSON(), configuration.getEventType(), configuration.getEnvironment());
     }
 
     @Override

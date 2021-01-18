@@ -22,22 +22,29 @@ import com.tomtom.james.common.api.publisher.Event;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 class JSONEventFormatter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final boolean pretty;
+    private String type;
+    private Optional<String> environment;
 
-    JSONEventFormatter(boolean pretty) {
+    JSONEventFormatter(boolean pretty, String type, Optional<String> environment) {
         this.pretty = pretty;
+        this.type = type;
+        this.environment = environment;
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     String format(Event evt) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-        result.put("timestamp", evt.getTimestamp().toString());
-        result.put("content", evt.getContent());
+        result.put("@timestamp", evt.getTimestamp().toString());
+        result.put("type", type);
+        environment.ifPresent(env -> result.put("environment", env));
+        result.putAll(evt.getContent());
 
         try {
             return pretty

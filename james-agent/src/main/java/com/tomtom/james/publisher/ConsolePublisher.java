@@ -48,7 +48,7 @@ public class ConsolePublisher implements EventPublisher {
     @Override
     public void initialize(EventPublisherConfiguration eventPublisherConfiguration) {
         ConsolePublisherConfiguration configuration = new ConsolePublisherConfiguration(eventPublisherConfiguration);
-        formatter = new JSONEventFormatter(configuration.isPrettifyJSON());
+        formatter = new JSONEventFormatter(configuration.isPrettifyJSON(), configuration.getEventType(), configuration.getEnvironment());
     }
 
     @Override
