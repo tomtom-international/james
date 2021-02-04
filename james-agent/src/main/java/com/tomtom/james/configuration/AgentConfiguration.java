@@ -39,6 +39,7 @@ public interface AgentConfiguration {
 
     boolean isQuiet();
     Logger.Level getLogLevel();
+    Logger.Format getLogFormat();
     Integer getShutdownDelay();
     boolean isShutdownHookEnabled();
 

@@ -19,3 +19,6 @@ apply plugin: 'maven'
 
 sourceCompatibility = 1.8
 
+dependencies {
+    compile(group: 'co.elastic.logging', name: 'ecs-logging-core', version: versions.ecs_logging)
+}

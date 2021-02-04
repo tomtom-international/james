@@ -106,6 +106,7 @@ public class JVMAgent {
 
             AgentConfiguration configuration = AgentConfigurationFactory.create();
             Logger.setCurrentLogLevel(configuration.getLogLevel());
+            Logger.setLogFormat(configuration.getLogFormat());
             printBanner(configuration);
 
             if (configuration.isQuiet())

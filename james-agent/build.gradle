@@ -38,7 +38,7 @@ shadowJar {
     relocate 'com.lmax.disruptor', 'com.tomtom.james.repackaged.com.lmax.disruptor'
     relocate 'org.apache.logging', 'com.tomtom.james.repackaged.org.apache.logging'
     relocate 'META-INF.versions.9.org.apache.logging', 'META-INF.versions.9.com.tomtom.james.repackaged.org.apache.logging'
-
+    relocate 'co.elastic.logging', 'com.tomtom.james.repackaged.co.elastic.logging'
 }
 assemble.dependsOn(shadowJar)
 

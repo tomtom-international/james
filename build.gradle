@@ -51,7 +51,8 @@ subprojects {
             javassist   : '3.24.0-GA',
             bytebuddytests: '1.9.3',
             disruptor: '3.4.2',
-            log4j_stackutil: '2.13.1' // 2.13.2 should be used as soon as it is released - LOG4J2-2809
+            log4j_stackutil: '2.13.1', // 2.13.2 should be used as soon as it is released - LOG4J2-2809
+            ecs_logging: '1.0.0'
     ]
 }
 

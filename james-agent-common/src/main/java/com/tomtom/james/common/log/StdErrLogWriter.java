@@ -16,33 +16,60 @@
 
 package com.tomtom.james.common.log;
 
+import co.elastic.logging.EcsJsonSerializer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 class StdErrLogWriter implements LogWriter {
 
     private static final String SEPARATOR = " ";
 
     @Override
-    public void write(Logger.Level level, String path, String message) {
-        String formattedMessage = formatMessage(level, path, message);
+    public void write(Logger.Level level, Logger.Format format, String path, String message) {
+        String formattedMessage;
+        if (format == Logger.Format.JSON) {
+            formattedMessage = formatJsonMessage(level, path, message, null);
+        } else {
+            formattedMessage = formatMessage(level, path, message);
+        }
         System.err.println(formattedMessage);
     }
 
     @Override
-    public void write(Logger.Level level, String path, String message, Throwable throwable) {
-        String formattedMessage = formatMessage(level, path, message, throwable);
+    public void write(Logger.Level level, Logger.Format format, String path, String message, Throwable throwable) {
+        String formattedMessage = null;
+        if (format == Logger.Format.JSON) {
+            formattedMessage = formatJsonMessage(level, path, message, null);
+        } else {
+            formattedMessage = formatMessage(level, path, message, throwable);
+        }
         System.err.println(formattedMessage);
     }
 
+    private String formatJsonMessage(final Logger.Level level, final String path, final String message, final Throwable throwable) {
+        StringBuilder builder = new StringBuilder();
+        EcsJsonSerializer.serializeObjectStart(builder, ZonedDateTime.now().toInstant().toEpochMilli());
+        EcsJsonSerializer.serializeLogLevel(builder, level.toString());
+        EcsJsonSerializer.serializeFormattedMessage(builder, message);
+        EcsJsonSerializer.serializeEcsVersion(builder);
+        EcsJsonSerializer.serializeThreadName(builder, Thread.currentThread().getName());
+        EcsJsonSerializer.serializeLoggerName(builder, path);
+        if (throwable != null) {
+            EcsJsonSerializer.serializeException(builder,throwable, false);
+        }
+        EcsJsonSerializer.serializeObjectEnd(builder);
+        return builder.toString();
+    }
+
     private String formatMessage(Logger.Level level, String path, String message) {
-        String result = String.valueOf(LocalDateTime.now()) + " [James] " +
-                '[' + Thread.currentThread().getName() + ']' +
-                SEPARATOR + level +
-                SEPARATOR + path +
-                SEPARATOR + '-' +
-                SEPARATOR + message;
+        String result = LocalDateTime.now() + " [James] " +
+                        '[' + Thread.currentThread().getName() + ']' +
+                        SEPARATOR + level +
+                        SEPARATOR + path +
+                        SEPARATOR + '-' +
+                        SEPARATOR + message;
         return result;
     }
 
