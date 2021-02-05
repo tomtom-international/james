@@ -17,6 +17,6 @@
 package com.tomtom.james.common.log;
 
 interface LogWriter {
-    void write(Logger.Level level, String path, String message);
-    void write(Logger.Level level, String path, String message, Throwable throwable);
+    void write(Logger.Level level, Logger.Format format, String path, String message);
+    void write(Logger.Level level, Logger.Format format, String path, String message, Throwable throwable);
 }

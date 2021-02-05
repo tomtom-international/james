@@ -143,4 +143,13 @@ class AgentConfigurationFacade implements AgentConfiguration {
                 .orElse(Logger.Level.WARN);
     }
 
+    @Override
+    public Logger.Format getLogFormat() {
+        return configuration.get("logFormat")
+                            .map(StructuredConfiguration::asString)
+                            .map(String::toUpperCase)
+                            .map(Logger.Format::valueOf)
+                            .orElse(Logger.Format.PLAIN);
+    }
+
 }
