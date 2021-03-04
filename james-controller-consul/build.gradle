@@ -20,7 +20,6 @@ apply plugin: 'groovy'
 sourceCompatibility = 1.8
 
 shadowJar {
-    relocate 'com.boundary', 'com.tomtom.james.controller.consul.repackaged.com.boundary'
     relocate 'com.ecwid', 'com.tomtom.james.controller.consul.repackaged.com.ecwid'
     relocate 'com.netflix', 'com.tomtom.james.controller.consul.repackaged.com.netflix'
     relocate 'com.fasterxml.jackson', 'com.tomtom.james.controller.consul.repackaged.com.fasterxml.jackson'
@@ -33,7 +32,7 @@ dependencies {
     compile project(':james-agent-common')
     compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
     compile 'com.ecwid.consul:consul-api:1.2.3'
-    compile 'org.irenical.consul:archaius-consul:1.0.0'
-
+    compile "com.google.guava:guava:${versions.guava}"
+    compile 'com.netflix.archaius:archaius-core:0.7.1'
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
 }
