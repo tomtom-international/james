@@ -16,7 +16,6 @@
 
 package com.tomtom.james.controller.consul;
 
-import com.boundary.config.ConsulWatchedConfigurationSource;
 import com.ecwid.consul.v1.ConsulClient;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
