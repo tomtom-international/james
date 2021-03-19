@@ -29,8 +29,8 @@ controllers:
       maxThreads: 8
   - id: james.controller.consul
     properties:
-      host: 192.168.99.100
-      port: 8500
+      host: \${TEST_CONSUL_HOST:-localhost}
+      port: \${TEST_CONSUL_PORT:-8500}
       folderPath: james/test/information-points
 """
 
@@ -47,6 +47,8 @@ controllers:
 
         conf1.id == "james.controller.webservice"
         conf2.id == "james.controller.consul"
+        conf2.properties.get().get("host").get().asString() == "localhost"
+        conf2.properties.get().get("port").get().asInteger() == 8500
     }
 
 }
