@@ -19,6 +19,7 @@ package com.tomtom.james.configuration;
 import com.tomtom.james.common.api.configuration.ConfigurationStructureException;
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.env.EnvScalarConstructor;
 
 import java.io.InputStream;
 import java.util.*;
@@ -30,13 +31,19 @@ class YAMLConfiguration implements StructuredConfiguration {
     private final List<String> path;
 
     YAMLConfiguration(InputStream is) {
-        root = assertConfigurationNotEmpty(new Yaml().load(is));
+        root = assertConfigurationNotEmpty(getYaml().load(is));
         path = Collections.emptyList();
     }
 
     YAMLConfiguration(String s) {
-        root = assertConfigurationNotEmpty(new Yaml().load(s));
+        root = assertConfigurationNotEmpty(getYaml().load(s));
         path = Collections.emptyList();
+    }
+
+    private Yaml getYaml() {
+        final Yaml yaml = new Yaml(new EnvScalarConstructor());
+        yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$");
+        return yaml;
     }
 
     private YAMLConfiguration(Object root, List<String> path) {
@@ -75,7 +82,11 @@ class YAMLConfiguration implements StructuredConfiguration {
     @Override
     public boolean asBoolean() {
         try {
-            return (Boolean) root;
+            if (root instanceof Boolean) {
+                return (Boolean) root;
+            } else {
+                return Boolean.valueOf((String)root);
+            }
         } catch (ClassCastException e) {
             throw new ConfigurationException(e);
         }
@@ -84,7 +95,11 @@ class YAMLConfiguration implements StructuredConfiguration {
     @Override
     public int asInteger() {
         try {
-            return (Integer) root;
+            if (root instanceof Integer) {
+                return (Integer) root;
+            } else {
+                return Integer.valueOf((String)root);
+            }
         } catch (ClassCastException e) {
             throw new ConfigurationException(e);
         }
@@ -93,7 +108,13 @@ class YAMLConfiguration implements StructuredConfiguration {
     @Override
     public long asLong() {
         try {
-            return (root instanceof Long) ? (Long) root : (Integer) root;
+            if (root instanceof Long) {
+                return (Long) root;
+            } else if (root instanceof Integer) {
+                return (Integer) root;
+            } else {
+                return Long.valueOf((String)root);
+            }
         } catch (ClassCastException e) {
             throw new ConfigurationException(e);
         }

@@ -36,7 +36,6 @@ repositories {
 }
 
 dependencies {
-    compile project(':james-agent')
     compile project(':james-controller-webservice-client')
 
     implementation('org.springframework.boot:spring-boot-starter-web')
