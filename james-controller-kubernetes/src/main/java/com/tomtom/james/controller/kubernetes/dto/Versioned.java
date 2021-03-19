@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name = 'james'
+package com.tomtom.james.controller.kubernetes.dto;
 
-include 'james-agent'
-include 'james-agent-common'
-include 'james-agent-tomcat'
+public class Versioned {
 
-include 'james-controller-consul'
-include 'james-controller-kubernetes'
-include 'james-controller-webservice', 'james-controller-webservice-api', 'james-controller-webservice-client'
-include 'james-publisher-aws-kinesis'
+    private int version;
 
-include 'integration-test'
+    // for marshaller
+    Versioned() {
+    }
+
+    public int getVersion() {
+        return version;
+    }
+}
