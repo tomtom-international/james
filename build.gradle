@@ -19,7 +19,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.4"
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
 
@@ -40,7 +40,7 @@ subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     ext.versions = [
-            groovy      : '2.5.10',
+            groovy      : '2.5.14',
             guava       : '28.2-jre',
             jackson     : '2.10.3',
             snakeyaml   : '1.27',

@@ -15,9 +15,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.netflix.config.WatchedConfigurationSource;
 import com.netflix.config.WatchedUpdateListener;
 import com.netflix.config.WatchedUpdateResult;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.tomtom.james.common.log.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +34,7 @@ import static com.google.common.io.BaseEncoding.base64;
  */
 public class ConsulWatchedConfigurationSource extends AbstractExecutionThreadService implements WatchedConfigurationSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulWatchedConfigurationSource.class);
+    private static final Logger LOG = Logger.getLogger(ConsulWatchedConfigurationSource.class);
 
     private final String rootPath;
     private final KeyValueClient client;
@@ -122,7 +120,7 @@ public class ConsulWatchedConfigurationSource extends AbstractExecutionThreadSer
             try {
                 l.updateConfiguration(result);
             } catch (Throwable ex) {
-                LOGGER.error("Error invoking WatchedUpdateListener", ex);
+                LOG.error("Error invoking WatchedUpdateListener", ex);
             }
         }
     }
@@ -197,7 +195,7 @@ public class ConsulWatchedConfigurationSource extends AbstractExecutionThreadSer
             lastState.set(full);
             fireEvent(result);
         } catch (Exception e) {
-            LOGGER.error("Error watching path, waiting to retry", e);
+            LOG.error("Error watching path, waiting to retry", e);
             Thread.sleep(1000);
         }
     }
