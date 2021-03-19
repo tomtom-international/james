@@ -20,7 +20,7 @@ buildscript {
     }
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE"
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.6.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.4")
     }
 }
 
@@ -40,7 +40,6 @@ dependencies {
 
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
-    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: versions.groovy
 
     testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
