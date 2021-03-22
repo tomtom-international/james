@@ -1,5 +1,6 @@
 package com.tomtom.james.newagent;
 
+import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.api.informationpoint.ExtendedInformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
@@ -9,7 +10,6 @@ import com.tomtom.james.newagent.james.GroovyJames;
 import com.tomtom.james.newagent.james.James;
 import com.tomtom.james.newagent.tools.ClassQueue;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
-import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -65,8 +65,7 @@ public class JamesHQ extends Thread {
                 }
         }
 
-        List<Class<?>> superIC = ClassUtils.getAllSuperclasses(clazz);
-        superIC.addAll(ClassUtils.getAllInterfaces(clazz));
+        List<Class<?>> superIC = ClassUtil.findRawSuperTypes(clazz, null, false);
         for (Class superClassOrInterface : superIC) {
             // look for ip
             if (informationPointService.getInformationPoints(superClassOrInterface.getName()).size() > 0) {

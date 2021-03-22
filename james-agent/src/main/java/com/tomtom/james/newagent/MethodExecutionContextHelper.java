@@ -47,7 +47,7 @@ public class MethodExecutionContextHelper {
         }
         try {
             contextCallbackExecutor.shutdown();
-            contextStoreAccessExecutor.awaitTermination(5, TimeUnit.SECONDS);
+            contextCallbackExecutor.awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Executor contextCallbackExecutor shutdown interrupted " + e);
         }

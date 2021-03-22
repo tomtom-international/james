@@ -1,11 +1,11 @@
 package com.tomtom.james.newagent;
 
+import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.google.common.base.Stopwatch;
 import com.tomtom.james.common.api.ClassScanner;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.newagent.tools.ClassQueue;
 import com.tomtom.james.newagent.tools.ClassStructure;
-import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
@@ -47,8 +47,7 @@ public class JamesClassScanner extends Thread implements ClassScanner {
 
         if (!clazz.isInterface()) { // interface can not be child - because every method.isEmpty == true, abstractClass could be ...
             Set<Class<?>> parentClassesAndInterfaces = new HashSet<>();
-            parentClassesAndInterfaces.addAll(ClassUtils.getAllInterfaces(clazz)); // interfaces
-            parentClassesAndInterfaces.addAll(ClassUtils.getAllSuperclasses(clazz)); // superclasses
+            parentClassesAndInterfaces.addAll(ClassUtil.findRawSuperTypes(clazz, null, false));
             parentClassesAndInterfaces.stream()
                     .filter(c -> ignoredPackages.stream().filter(pack -> c.getName().startsWith(pack)).findFirst().orElse(null) == null) // remove ignored packages // TODO is (.orElse(null) == null) == !.isPresent() ?????????????
                     .forEach(c -> {
