@@ -39,7 +39,7 @@ class StdErrLogWriter implements LogWriter {
 
     @Override
     public void write(Logger.Level level, Logger.Format format, String path, String message, Throwable throwable) {
-        String formattedMessage = null;
+        String formattedMessage;
         if (format == Logger.Format.JSON) {
             formattedMessage = formatJsonMessage(level, path, message, throwable);
         } else {
@@ -60,6 +60,7 @@ class StdErrLogWriter implements LogWriter {
             EcsJsonSerializer.serializeException(builder,throwable, false);
         }
         EcsJsonSerializer.serializeObjectEnd(builder);
+        builder.setLength(builder.length() - 1); // remove new line
         return builder.toString();
     }
 
