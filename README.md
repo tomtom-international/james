@@ -17,6 +17,7 @@
     * [Controller plugins](#conf-controllers)
         * [Webservice Controller](#conf-controllers-ws)
         * [Consul Controller](#conf-controllers-consul)
+        * [Kubernetes Controller](#conf-controllers-kubernetes)
     * [Publisher plugins](#conf-publishers)
         * [Console Publisher](#conf-publishers-console)
         * [File Publisher](#conf-publishers-file)
@@ -326,6 +327,44 @@ An example of Consul KV store value containing *Information Point* definition co
 For the above example, the key value could be `com.github.me.myapp.MyClass!myMethodInMyClass`. The `version` 
 property is the version of the JSON schema, intended to maintain backward compatibility of existing
 *Information Point* definitions.
+
+<a id='conf-controllers-kubernetes'></a>
+#### Kubernetes Controller
+With *Kubernetes Controller* you can add, remove or modify *Information Points* using [Kubernetes ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/). Each *Information Point* is stored as a key-value pair, where the key is a method reference
+of *Information Point* (for example `com.github.me.myapp.MyClass!myMethodInMyClass`) and the value is 
+a JSON-formatted definition of the *Information Point*. 
+
+It expects the same format as Consul controller, but under ConfigMap with key ending with extension `.properties` 
+
+```
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: james-my-application
+  namespace: default
+  labels:
+    app: my-application
+    cluster: default
+data:
+  app.properties: >
+    com.github.me.myapp.MyClass!myMethodInMyClass={\"version\": 1, \"script\": [], \"sampleRate\": 30}
+```
+
+You can configure *Kubernetes Controller* using the following configuration properties:
+
+```yaml
+plugins:
+  includeFiles:
+    - /path/to/plugins/james-controller-kubernetes.jar
+
+controllers:
+  - id: james.controller.kubernetes
+    properties:
+      labels:                                       # K8s config map labels
+        app: my-application 
+        owner: james
+      namespace: default                            # namespace when config map should be located
+```
 
 
 <a id='conf-publishers'></a>
