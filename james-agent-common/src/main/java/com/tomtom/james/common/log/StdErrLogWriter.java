@@ -41,7 +41,7 @@ class StdErrLogWriter implements LogWriter {
     public void write(Logger.Level level, Logger.Format format, String path, String message, Throwable throwable) {
         String formattedMessage = null;
         if (format == Logger.Format.JSON) {
-            formattedMessage = formatJsonMessage(level, path, message, null);
+            formattedMessage = formatJsonMessage(level, path, message, throwable);
         } else {
             formattedMessage = formatMessage(level, path, message, throwable);
         }
