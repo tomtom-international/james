@@ -395,36 +395,35 @@ class ScriptExecutionSpec extends BaseJamesSpecification {
         result == "overloadedMethodOfSubclass-valueFor(String,int)"
     }
 
-// FIXME - should work fine - no idea why does not work
-//    def "Method of internal class"() {
-//        given:
-//        def ip = new InformationPointDTO(
-//                className: TestService.InternalClass.name,
-//                methodName: "methodOfInternalClass",
-//                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
-//        )
-//        def eventsBefore = TestUtils.readPublishedEvents()
-//
-//        when:
-//        AppClient.methodOfInternalClass()
-//        jamesController.createInformationPoint(ip)
-//        def result = AppClient.methodOfInternalClass()
-//        sleep(2000)
-//        def eventsAfter = readPublishedEventsWithWait(1)
-//
-//        then:
-//        eventsBefore.isEmpty()
-//        eventsAfter == [
-//                [
-//                        result     : "success",
-//                        className  : TestService.InternalClass.name,
-//                        methodName : "methodOfInternalClass",
-//                        "arg(arg0)": "methodIfInternalClass-arg0",
-//                        returnValue: "methodOfInternalClass-value"
-//                ]
-//        ]
-//        result == "methodOfInternalClass-value"
-//    }
+    def "Method of internal class"() {
+        given:
+        def ip = new InformationPointDTO(
+                className: TestService.InternalClass.name,
+                methodName: "methodOfInternalClass",
+                script: TestUtils.scriptLines(ScriptExecutionSpec, "simple")
+        )
+        def eventsBefore = TestUtils.readPublishedEvents()
+
+        when:
+        AppClient.methodOfInternalClass()
+        jamesController.createInformationPoint(ip)
+        sleep(2000)
+        def result = AppClient.methodOfInternalClass()
+        def eventsAfter = readPublishedEventsWithWait(1)
+
+        then:
+        eventsBefore.isEmpty()
+        eventsAfter == [
+                [
+                        result     : "success",
+                        className  : TestService.InternalClass.name,
+                        methodName : "methodOfInternalClass",
+                        "arg(arg0)": "methodIfInternalClass-arg0",
+                        returnValue: "methodOfInternalClass-value"
+                ]
+        ]
+        result == "methodOfInternalClass-value"
+    }
 
     def "Method of interface implemented in subclass, information point on subclass"() {
         given:
