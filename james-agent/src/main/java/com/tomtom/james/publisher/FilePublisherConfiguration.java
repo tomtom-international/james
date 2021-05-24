@@ -18,30 +18,19 @@ package com.tomtom.james.publisher;
 
 import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
-
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Optional;
 
-class FilePublisherConfiguration {
-
-    private final StructuredConfiguration configurationProperties;
+class FilePublisherConfiguration extends ConsolePublisherConfiguration {
 
     FilePublisherConfiguration(EventPublisherConfiguration eventPublisherConfiguration) {
-        configurationProperties = eventPublisherConfiguration.getProperties()
-                .orElseGet(StructuredConfiguration.Empty::new);
+        super(eventPublisherConfiguration);
     }
 
     String getPath() {
-        return configurationProperties.get("path")
+        return getConfigurationProperties().get("path")
                 .map(StructuredConfiguration::asString)
                 .orElse(defaultFilePath());
-    }
-
-    boolean isPrettifyJSON() {
-        return configurationProperties.get("prettifyJSON")
-                .map(StructuredConfiguration::asBoolean)
-                .orElse(false);
     }
 
     private String defaultFilePath() {
@@ -50,14 +39,4 @@ class FilePublisherConfiguration {
         return path.normalize().toString();
     }
 
-    public String getEventType() {
-        return configurationProperties.get("eventType")
-                            .map(StructuredConfiguration::asString)
-                            .orElse("james");
-    }
-
-    public Optional<String> getEnvironment() {
-        return configurationProperties.get("environment")
-                            .map(StructuredConfiguration::asString);
-    }
 }

@@ -14,36 +14,46 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.publisher.kinesis.configuration;
+package com.tomtom.james.publisher;
 
+import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ElasticSearchConfiguration {
+class StreamPublisherConfiguration {
 
-    private final StructuredConfiguration configuration;
+    private final StructuredConfiguration configurationProperties;
 
-    ElasticSearchConfiguration(StructuredConfiguration configuration) {
-        this.configuration = configuration;
+    StreamPublisherConfiguration(EventPublisherConfiguration eventPublisherConfiguration) {
+        configurationProperties = eventPublisherConfiguration.getProperties()
+                .orElseGet(StructuredConfiguration.Empty::new);
     }
 
-    public String getEventType() {
-        return configuration.get("eventType")
-                .map(StructuredConfiguration::asString)
-                .orElse("james");
+    protected StructuredConfiguration getConfigurationProperties() {
+        return configurationProperties;
+    }
+
+    boolean isPrettifyJSON() {
+        return configurationProperties.get("prettifyJSON")
+                .map(StructuredConfiguration::asBoolean)
+                .orElse(false);
+    }
+
+    public Optional<String> getEventType() {
+        return configurationProperties.get("eventType")
+                            .map(StructuredConfiguration::asString);
     }
 
     public Optional<String> getEnvironment() {
-        return configuration.get("environment")
-                .map(StructuredConfiguration::asString);
+        return configurationProperties.get("environment")
+                            .map(StructuredConfiguration::asString);
     }
 
     public Map<String, String> getFields() {
-        return configuration
+        return configurationProperties
             .get("fields")
             .map(StructuredConfiguration::asMap)
             .orElseGet(Collections::emptyMap)
@@ -51,5 +61,4 @@ public class ElasticSearchConfiguration {
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().asString()));
     }
-
 }

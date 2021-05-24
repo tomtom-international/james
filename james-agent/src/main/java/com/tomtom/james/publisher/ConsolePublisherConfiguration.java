@@ -17,32 +17,11 @@
 package com.tomtom.james.publisher;
 
 import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
-import com.tomtom.james.common.api.configuration.StructuredConfiguration;
-import java.util.Optional;
 
-class ConsolePublisherConfiguration {
-
-    private final StructuredConfiguration configurationProperties;
+class ConsolePublisherConfiguration extends StreamPublisherConfiguration {
 
     ConsolePublisherConfiguration(EventPublisherConfiguration eventPublisherConfiguration) {
-        configurationProperties = eventPublisherConfiguration.getProperties()
-                .orElseGet(StructuredConfiguration.Empty::new);
+        super(eventPublisherConfiguration);
     }
 
-    boolean isPrettifyJSON() {
-        return configurationProperties.get("prettifyJSON")
-                .map(StructuredConfiguration::asBoolean)
-                .orElse(false);
-    }
-
-    public String getEventType() {
-        return configurationProperties.get("eventType")
-                            .map(StructuredConfiguration::asString)
-                            .orElse("james");
-    }
-
-    public Optional<String> getEnvironment() {
-        return configurationProperties.get("environment")
-                            .map(StructuredConfiguration::asString);
-    }
 }

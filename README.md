@@ -389,6 +389,8 @@ publishers:
   - id: james.publisher.console
     properties:
       prettifyJSON: true        # Whether the output JSON should be pretty-printed (default: false).
+      fields:                   # Additional fields that will be added to each event
+        client: clientX
 ``` 
 
 <a id='conf-publishers-file'></a>
@@ -403,6 +405,8 @@ publishers:
   - id: james.publisher.file
     properties:
       prettifyJSON: true                    # Whether the output JSON should be pretty-printed (default: false).
+      fields:                               # Additional fields that will be added to each event
+        client: clientX      
       path: /var/james/file-publisher.out   # Output file path (default: $HOME/james-publisher-file-output.json).
 ``` 
 
@@ -437,6 +441,8 @@ publishers:
       elasticSearch:
         eventType: james                # Type of the Event for Elasticsearch (default: james).
         environment: dev-env            # Name of the environment for Elasticsearch (only sent if present).
+        fields:                         # Additional fields that will be added to each event
+          client: clientX
       producer:                         # Optional. See below.
         aggregationEnabled: true
         aggregationMaxCount: 4294967295

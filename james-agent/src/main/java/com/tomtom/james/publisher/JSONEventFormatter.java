@@ -22,32 +22,27 @@ import com.tomtom.james.common.api.publisher.Event;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 
 class JSONEventFormatter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final StreamPublisherConfiguration configuration;
 
-    private final boolean pretty;
-    private String type;
-    private Optional<String> environment;
-
-    JSONEventFormatter(boolean pretty, String type, Optional<String> environment) {
-        this.pretty = pretty;
-        this.type = type;
-        this.environment = environment;
+    JSONEventFormatter(StreamPublisherConfiguration configuration) {
+        this.configuration = configuration;
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     String format(Event evt) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         result.put("@timestamp", evt.getTimestamp().toString());
-        result.put("type", type);
-        environment.ifPresent(env -> result.put("environment", env));
+        configuration.getEventType().ifPresent(type -> result.put("type", type));
+        configuration.getEnvironment().ifPresent(env -> result.put("environment", env));
+        result.putAll(configuration.getFields());
         result.putAll(evt.getContent());
 
         try {
-            return pretty
+            return configuration.isPrettifyJSON()
                     ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result)
                     : objectMapper.writeValueAsString(result);
         } catch (IOException e) {
