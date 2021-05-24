@@ -39,7 +39,7 @@ class ConsolePublisherSpec extends Specification {
         publisher.close()
 
         then:
-        1 * out.println { it.contains('"type":"james","message":"event body"') }
+        1 * out.println { it.contains('"message":"event body"') }
 
         then:
         1 * out.flush()
