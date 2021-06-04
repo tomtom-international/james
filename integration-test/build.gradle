@@ -36,13 +36,13 @@ repositories {
 }
 
 dependencies {
-    compile project(':james-controller-webservice-client')
+    implementation project(':james-controller-webservice-client')
 
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
 
-    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
-    testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
 }
 
 test {

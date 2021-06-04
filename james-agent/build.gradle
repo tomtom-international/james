@@ -43,26 +43,26 @@ shadowJar {
 assemble.dependsOn(shadowJar)
 
 dependencies {
-    compile project(':james-agent-common')
+    implementation project(':james-agent-common')
 
-    compile(group: 'com.google.guava', name: 'guava', version: versions.guava) {
+    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava) {
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
         exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
         exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
         exclude group: 'org.checkerframework', module: 'checker-qual'
     }
-    compile group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
-    compile group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
-    compile group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
-    compile group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
-    compile group: 'org.javassist', name: 'javassist', version: versions.javassist
-    compile group: 'com.lmax', name: 'disruptor', version: versions.disruptor
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.log4j_stackutil
+    implementation group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
+    implementation group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
+    implementation group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
+    implementation group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
+    implementation group: 'org.javassist', name: 'javassist', version: versions.javassist
+    implementation group: 'com.lmax', name: 'disruptor', version: versions.disruptor
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.log4j_stackutil
 
-    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
-    testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
-    testRuntime group: 'org.objenesis', name: 'objenesis', version: versions.objenesis
-    testRuntime group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddytests
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+    testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: versions.objenesis
+    testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: versions.bytebuddytests
 }

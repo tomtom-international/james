@@ -24,7 +24,7 @@ shadowJar {
 assemble.dependsOn(shadowJar)
 
 dependencies {
-    compile project(':james-controller-webservice-api')
-    compile project(':james-agent-common')
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
+    implementation project(':james-controller-webservice-api')
+    implementation project(':james-agent-common')
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
 }

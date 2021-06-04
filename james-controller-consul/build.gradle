@@ -29,11 +29,11 @@ shadowJar {
 assemble.dependsOn(shadowJar)
 
 dependencies {
-    compile project(':james-agent-common')
-    compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
-    compile 'com.ecwid.consul:consul-api:1.2.3'
-    compile "com.google.guava:guava:${versions.guava}"
-    compile 'commons-configuration:commons-configuration:1.8'
-    compile 'com.netflix.archaius:archaius-core:0.7.1'
-    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    implementation project(':james-agent-common')
+    implementation "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
+    implementation 'com.ecwid.consul:consul-api:1.2.3'
+    implementation "com.google.guava:guava:${versions.guava}"
+    implementation 'commons-configuration:commons-configuration:1.8'
+    implementation 'com.netflix.archaius:archaius-core:0.7.1'
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
 }

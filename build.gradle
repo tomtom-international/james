@@ -16,12 +16,14 @@
 
 buildscript {
     repositories {
-        jcenter()
+        gradlePluginPortal()
     }
     dependencies {
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
+        classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
     }
 }
+apply plugin: "io.github.gradle-nexus.publish-plugin"
 
 allprojects {
     if(project.hasProperty('releaseVersion')) {
@@ -32,13 +34,29 @@ allprojects {
     group = 'com.github.tomtom-international.james'
 }
 
-subprojects {
+nexusPublishing {
     repositories {
-        jcenter()
+        sonatype {
+            username = project.properties["ossrhUsername"]
+            password = project.properties["ossrhPassword"]
+        }
     }
+}
 
-    apply plugin: 'com.github.johnrengelman.shadow'
+def projectDescriptions = [
+        'james-agent-common': 'A package that lets you write your own toolkits for James',
+        'james-controller-webservice-api': 'API for REST controller of James',
+        'james-controller-webservice-client': 'Client for REST controller of James'
+]
 
+subprojects { prj ->
+    repositories {
+      mavenCentral()
+    }
+    apply plugin : 'java'
+    if (!projectDescriptions.containsKey(prj.name)) {
+        apply plugin: 'com.github.johnrengelman.shadow'
+    }
     ext.versions = [
             groovy      : '2.5.14',
             guava       : '28.2-jre',
@@ -56,85 +74,62 @@ subprojects {
     ]
 }
 
-wrapper {
-    gradleVersion = '4.2'
-}
-
-def projectDescriptions = [
-  'james-agent-common': 'A package that lets you write your own toolkits for James',
-  'james-controller-webservice-api': 'API for REST controller of James',
-  'james-controller-webservice-client': 'Client for REST controller of James'
-]
-
 def projectList = subprojects.findAll { projectDescriptions.keySet().contains(it.name) }
 
-configure(projectList) { confPrj ->
-  apply plugin: 'java'
-  apply plugin: 'maven'
-
-  if(project.hasProperty('releaseVersion')) {
+configure(projectList) { Project confPrj ->
+    apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    signing {
-        sign configurations.archives
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
     }
-
-    task javadocJar(type: Jar) {
-      classifier = 'javadoc'
-      from javadoc
+    if(project.hasProperty('releaseVersion')) {
+        signing {
+          sign publishing.publications
+        }
     }
-
-    task sourcesJar(type: Jar) {
-      classifier = 'sources'
-      from sourceSets.main.allSource
-    }
-
-    artifacts {
-      archives javadocJar, sourcesJar
-    }
-
-    uploadArchives {
-      repositories {
-        mavenDeployer {
-          beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-          repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            authentication(userName: ossrhUsername, password: ossrhPassword)
-          }
-
-          pom.project {
-            name confPrj.name
-            packaging 'jar'
-            description projectDescriptions[confPrj.name]
-            url 'https://github.com/tomtom-international/james'
+    publishing {
+      publications {
+        sonatype(MavenPublication) {
+          from components.java
+          pom {
+            name = confPrj.name
+            packaging = 'jar'
+            description  = projectDescriptions[confPrj.name]
+            url = 'https://github.com/tomtom-international/james'
 
             scm {
-              connection 'scm:git:https://github.com/tomtom-international/james.git'
-              developerConnection 'scm:git:https://github.com/tomtom-international/james.git'
-              url 'https://github.com/tomtom-international/james'
+              connection = 'scm:git:https://github.com/tomtom-international/james.git'
+              developerConnection = 'scm:git:https://github.com/tomtom-international/james.git'
+              url = 'https://github.com/tomtom-international/james'
             }
 
             licenses {
               license {
-                name 'The Apache License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0'
+                name = 'The Apache License, Version 2.0'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0'
               }
             }
 
             developers {
               developer {
-                id 'pdebicki'
-                name 'Piotr Dębicki'
-                email 'piotr.debicki@tomtom.com'
+                id = 'pdebicki'
+                name = 'Piotr Dębicki'
+                email = 'piotr.debicki@tomtom.com'
               }
               developer {
-                id 'alibich'
-                name 'Artur Libich'
-                email 'artur.libich@tomtom.com'
+                id = 'alibich'
+                name = 'Artur Libich'
+                email = 'artur.libich@tomtom.com'
               }
             }
           }
         }
       }
     }
-  }
+}
+
+wrapper {
+    gradleVersion = '7.0.2'
 }
