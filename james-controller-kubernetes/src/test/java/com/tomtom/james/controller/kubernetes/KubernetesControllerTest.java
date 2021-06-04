@@ -12,7 +12,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.tomtom.james.common.api.configuration.JamesControllerConfiguration;
 import com.tomtom.james.common.api.configuration.StructuredConfiguration;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
@@ -22,11 +23,12 @@ import io.kubernetes.client.openapi.models.V1ConfigMap;
 import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
 import io.kubernetes.client.openapi.models.V1ObjectMetaBuilder;
 import io.kubernetes.client.util.Watch;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,11 +37,10 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class KubernetesControllerTest {
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().dynamicPort());
+    public WireMockServer wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
 
     @Mock
     private InformationPointService informationPointService;
@@ -52,13 +53,16 @@ public class KubernetesControllerTest {
         Logger.setCurrentLogLevel(Logger.Level.DEBUG);
         final StructuredConfiguration configuration = mock(StructuredConfiguration.class);
         final StructuredConfiguration nameSpaceConfiguration = mock(StructuredConfiguration.class);
+        final StructuredConfiguration tokenConfiguration = mock(StructuredConfiguration.class);
         final StructuredConfiguration urlConfiguration = mock(StructuredConfiguration.class);
         final StructuredConfiguration labelsConfiguration = mock(StructuredConfiguration.class);
         final StructuredConfiguration appConfiguration = mock(StructuredConfiguration.class);
         when(jamesControllerConfiguration.getProperties())
             .thenReturn(Optional.of(configuration));
         when(configuration.get("url")).thenReturn(Optional.of(urlConfiguration));
-        when(urlConfiguration.asString()).thenReturn(wireMockRule.baseUrl());
+        when(urlConfiguration.asString()).thenReturn(wireMockServer.baseUrl());
+        when(configuration.get("token")).thenReturn(Optional.of(tokenConfiguration));
+        when(tokenConfiguration.asString()).thenReturn("token");
         when(configuration.get("namespace")).thenReturn(Optional.of(nameSpaceConfiguration));
         when(nameSpaceConfiguration.asString()).thenReturn("dev");
         when(configuration.get("labels")).thenReturn(Optional.of(labelsConfiguration));
@@ -77,6 +81,17 @@ public class KubernetesControllerTest {
             null,
             null);
         return kubernetesController;
+    }
+
+    @BeforeEach
+    void setUp() {
+        wireMockServer.start();
+        WireMock.configureFor("localhost", wireMockServer.port());
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMockServer.stop();
     }
 
     @Test

@@ -39,7 +39,7 @@ public class GlobalValueStore {
 
     public static void put(String key, long value) {
         //System.out.println(" --------------------------------------------- PUT VALUE TO ValueStore : " + valueStore);
-        getValueStore().put(Thread.currentThread().getId() + key, new Long(value));
+        getValueStore().put(Thread.currentThread().getId() + key, value);
     }
 
     public static long get(String key) {
