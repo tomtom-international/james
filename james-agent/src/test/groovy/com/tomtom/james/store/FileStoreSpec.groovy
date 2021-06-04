@@ -18,15 +18,15 @@ package com.tomtom.james.store
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.informationpoint.Metadata
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import java.nio.file.Files
 
 class FileStoreSpec extends Specification {
-    @Rule
-    TemporaryFolder tempFolder
 
     def "Should store and restore instrumentation point"() {
+        setup:
+        def fileName = Files.createTempFile("spock", "FileStoreSpec")
+                .toAbsolutePath().toString()
         when:
         def meta = new Metadata()
         meta['key'] = 'value'
@@ -39,7 +39,6 @@ class FileStoreSpec extends Specification {
                 .withErrorSampleRate(10)
                 .withMetadata(meta)
                 .build();
-        def fileName = tempFolder.newFile().getAbsolutePath()
         def fileStorage = new FileStore(fileName);
 
         fileStorage.store(Collections.singletonList(simpleIP))
