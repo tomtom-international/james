@@ -142,4 +142,19 @@ public class ProducerConfiguration {
         return configuration.get("verifyCertificate")
                 .map(StructuredConfiguration::asBoolean);
     }
+
+    public Optional<String> getMetricsLevel() {
+        return configuration.get("metricsLevel")
+                            .map(StructuredConfiguration::asString);
+    }
+
+    public Optional<String> getMetricsGranularity() {
+        return configuration.get("metricsGranularity")
+                            .map(StructuredConfiguration::asString);
+    }
+
+    public Optional<String> getMetricsNamespace() {
+        return configuration.get("metricsNamespace")
+                            .map(StructuredConfiguration::asString);
+    }
 }

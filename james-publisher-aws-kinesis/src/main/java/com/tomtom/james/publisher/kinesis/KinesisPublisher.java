@@ -82,6 +82,9 @@ public class KinesisPublisher implements EventPublisher {
         pc.isAggregationEnabled().ifPresent(kc::setAggregationEnabled);
         pc.getAggregationMaxCount().ifPresent(kc::setAggregationMaxCount);
         pc.getAggregationMaxSize().ifPresent(kc::setAggregationMaxSize);
+        pc.getMetricsLevel().ifPresent(kc::setMetricsLevel);
+        pc.getMetricsGranularity().ifPresent(kc::setMetricsGranularity);
+        pc.getMetricsNamespace().ifPresent(kc::setMetricsNamespace);
         pc.getCloudwatchEndpoint().ifPresent(kc::setCloudwatchEndpoint);
         pc.getCloudwatchPort().ifPresent(kc::setCloudwatchPort);
         pc.getCollectionMaxCount().ifPresent(kc::setCollectionMaxCount);
