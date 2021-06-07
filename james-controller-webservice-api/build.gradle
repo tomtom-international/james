@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
-apply plugin: 'maven'
+plugins {
+    id 'java-library'
+}
 
 sourceCompatibility = 1.8
 
 
 dependencies {
-    compile project(':james-agent-common')
+    api project(':james-agent-common')
 }

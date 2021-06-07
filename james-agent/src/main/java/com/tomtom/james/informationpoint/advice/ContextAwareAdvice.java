@@ -238,7 +238,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             byte returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Byte(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Byte.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -251,7 +251,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             short returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Short(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Short.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -264,7 +264,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             int returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Integer(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Integer.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -277,7 +277,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             long returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Long(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Long.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -290,7 +290,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             float returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Float(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Float.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -303,7 +303,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             double returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Double(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Double.valueOf(returned), thrown);
     }
 
     @SuppressWarnings("unused")
@@ -316,7 +316,7 @@ public final class ContextAwareAdvice {
             Object[] arguments,
             char returned,
             Throwable thrown) {
-        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, new Character(returned), thrown);
+        onExit(_startTime, informationPointClassName, informationPointMethodName, origin, instance, arguments, Character.valueOf(returned), thrown);
     }
 
 }

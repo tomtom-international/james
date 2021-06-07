@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
-apply plugin: 'maven'
+plugins {
+    id 'java-library'
+}
 
 sourceCompatibility = 1.8
 
 dependencies {
-    compile project(':james-controller-webservice-api')
-    compile 'com.squareup.okhttp3:okhttp:3.8.1'
-    compile "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
+    api project(':james-controller-webservice-api')
+    api 'com.squareup.okhttp3:okhttp:3.8.1'
+    api "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
 }
 

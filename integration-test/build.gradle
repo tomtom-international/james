@@ -19,8 +19,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE"
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.4")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.5.0")
     }
 }
 
@@ -36,13 +36,13 @@ repositories {
 }
 
 dependencies {
-    compile project(':james-controller-webservice-client')
+    implementation project(':james-controller-webservice-client')
 
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
 
-    testCompile group: 'org.spockframework', name: 'spock-core', version: versions.spock
-    testCompile group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
 }
 
 test {
@@ -69,6 +69,7 @@ task shutdownApp(type: ShutdownApp) {
 task integrationTest(type: Test) {
     dependsOn prepareConfiguration, runAppWithJames
     testLogging.showStandardStreams = true
+    useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
     }
