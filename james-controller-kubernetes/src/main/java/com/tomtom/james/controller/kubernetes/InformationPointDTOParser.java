@@ -49,6 +49,10 @@ public class InformationPointDTOParser {
         }
     }
 
+    public static String serialize(Object obj) {
+        return MAPPER.toJson(obj);
+    }
+
     private static InformationPoint parseV1(String json, String methodReference) throws IOException {
         InformationPointDTOv1 dto = MAPPER.fromJson(json, InformationPointDTOv1.class);
         return InformationPoint.builder()

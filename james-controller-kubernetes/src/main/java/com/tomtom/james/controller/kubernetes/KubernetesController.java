@@ -16,6 +16,7 @@
 
 package com.tomtom.james.controller.kubernetes;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -39,12 +40,14 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Watch;
 import okhttp3.OkHttpClient;
+import org.yaml.snakeyaml.Yaml;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -55,9 +58,12 @@ import java.util.stream.Collectors;
 
 public class KubernetesController implements JamesController {
 
+    private static final String SCRIPT = "script";
+    private static final String BASE_SCRIPT = "baseScript";
     private static final Logger LOG = Logger.getLogger(KubernetesController.class);
     private final ExecutorService executor;
     private final Map<String, Map<String, String>> informationPointsCache;
+    private final Yaml yaml = new Yaml();
 
     @Override
     public String getId() {
@@ -177,10 +183,29 @@ public class KubernetesController implements JamesController {
                     return new Pair(line.substring(0, index).replace('!', '#'), line.substring(index + 1));
                 })
                 .collect(Collectors.toMap(Pair::getName, Pair::getValue));
+        } else if (name.endsWith(".yaml")) {
+            final Map<String, Map> entries = yaml.load(content);
+            return entries.entrySet().stream()
+                          .collect(Collectors.toMap(e -> e.getKey().replace('!', '#'),
+                                                    e -> adaptToCommonFormat(e.getValue())));
         } else {
             LOG.warn("Unrecognized format:" + name);
         }
         return Collections.emptyMap();
+    }
+
+    private String adaptToCommonFormat(final Map yamlDefinition) {
+        if (yamlDefinition.containsKey(SCRIPT)) {
+            yamlDefinition.put(SCRIPT, splitToLines(yamlDefinition, SCRIPT));
+        }
+        if (yamlDefinition.containsKey(BASE_SCRIPT) && ((Map)yamlDefinition.get(BASE_SCRIPT)).containsKey(SCRIPT)) {
+            yamlDefinition.put(BASE_SCRIPT, splitToLines(((Map)yamlDefinition.get(BASE_SCRIPT)), SCRIPT));
+        }
+        return InformationPointDTOParser.serialize(yamlDefinition);
+    }
+
+    private List<String> splitToLines(final Map definition, final String key) {
+        return Splitter.on("\n").omitEmptyStrings().splitToList(definition.get(key).toString());
     }
 
     private void processUpdate(final String configName, final Map<String, String> informationPoints,
