@@ -95,7 +95,7 @@ public class KubernetesControllerTest {
     }
 
     @Test
-    public void shouldRegister() throws InterruptedException, IOException {
+    public void shouldRegisterProperties() throws InterruptedException, IOException {
         final V1ConfigMap configMap = new V1ConfigMapBuilder()
             .withApiVersion("v1")
             .withKind("ConfigMap")
@@ -125,6 +125,47 @@ public class KubernetesControllerTest {
                 assertThat(ip.getClassName()).isEqualTo("Class");
                 assertThat(ip.getMethodName()).isEqualTo("method");
                 assertThat(ip.getScript()).hasValue("boom");
+            });
+    }
+
+
+    @Test
+    public void shouldRegisterYaml() throws InterruptedException, IOException {
+        final V1ConfigMap configMap = new V1ConfigMapBuilder()
+            .withApiVersion("v1")
+            .withKind("ConfigMap")
+            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
+            .addToData("app.yaml", "Class!methodY:\n"
+                                   + "  baseScript:\n"
+                                   + "    script: base\n"
+                                   + "  script: |\n"
+                                   + "    boom\n"
+                                   + "  version: 1")
+            .build();
+        final Watch.Response<V1ConfigMap> response = new Watch.Response<>("ADDED", configMap);
+
+        stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
+                    .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json")
+                                    .withBody(objectMapper.writeValueAsString(response))));
+
+        final KubernetesController controller = startKubernetesController();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        doAnswer(invocationOnMock -> {
+            informationPoints.add(invocationOnMock.getArgument(0, InformationPoint.class));
+            countDownLatch.countDown();
+            return null;
+        }).when(informationPointService).addInformationPoint(any(InformationPoint.class));
+        countDownLatch.await(3, TimeUnit.SECONDS);
+        controller.close();
+        assertThat(informationPoints)
+            .hasSize(1)
+            .allSatisfy(ip -> {
+                assertThat(ip.getClassName()).isEqualTo("Class");
+                assertThat(ip.getMethodName()).isEqualTo("methodY");
+                assertThat(ip.getScript()).hasValue("boom");
+                assertThat(ip.getBaseScript()).hasValue("base");
             });
     }
 }
