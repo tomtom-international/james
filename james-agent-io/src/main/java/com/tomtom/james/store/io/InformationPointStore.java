@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.controller.consul.dto;
+package com.tomtom.james.store.io;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Versioned {
+import java.util.Collection;
 
-    private int version;
+public interface InformationPointStore {
 
-    // for marshaller
-    Versioned() {
-    }
+    void store(Collection<InformationPoint> informationPoints);
+    Collection<InformationPoint> restore();
 
-    public int getVersion() {
-        return version;
-    }
 }

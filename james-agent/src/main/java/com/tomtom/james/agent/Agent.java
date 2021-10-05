@@ -27,7 +27,7 @@ import com.tomtom.james.newagent.JVMAgentCleaner;
 import com.tomtom.james.newagent.MethodExecutionContextHelper;
 import com.tomtom.james.publisher.EventPublisherFactory;
 import com.tomtom.james.script.ScriptEngineFactory;
-import com.tomtom.james.store.InformationPointStore;
+import com.tomtom.james.store.io.InformationPointStore;
 import com.tomtom.james.store.InformationPointStoreFactory;
 
 import java.io.IOException;

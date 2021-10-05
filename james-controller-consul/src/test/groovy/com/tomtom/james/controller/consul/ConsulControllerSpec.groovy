@@ -16,6 +16,7 @@
 
 package com.tomtom.james.controller.consul
 
+import org.apache.commons.configuration.event.ConfigurationEvent
 import spock.lang.Specification
 
 
@@ -34,7 +35,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -60,7 +61,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -88,7 +89,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -119,7 +120,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -146,7 +147,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -169,7 +170,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()
@@ -189,7 +190,7 @@ class ConsulControllerSpec extends Specification{
     }'''
 
         when:
-        def ip = InformationPointDTOParser.parse(json, methodRefrence)
+        def ip = new ConsulController().eventToInformationPoint(new ConfigurationEvent(this,0, methodRefrence, json,false))
 
         then:
         ip.isPresent()

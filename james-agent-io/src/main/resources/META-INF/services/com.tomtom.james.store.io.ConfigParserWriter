@@ -1,0 +1,3 @@
+com.tomtom.james.store.io.YamlConfigParserWriter
+com.tomtom.james.store.io.PropertiesConfigParserWriter
+com.tomtom.james.store.io.JsonConfigParserWriter

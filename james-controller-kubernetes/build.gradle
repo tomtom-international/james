@@ -21,6 +21,7 @@ sourceCompatibility = 1.8
 shadowJar {
     dependencies {
         exclude(project(':james-agent-common'))
+        exclude(project(':james-agent-io'))
     }
     minimize()
 }
@@ -28,6 +29,7 @@ assemble.dependsOn(shadowJar)
 
 dependencies {
     implementation project(':james-agent-common')
+    implementation project(':james-agent-io')
     implementation 'io.kubernetes:client-java:10.0.1'
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")

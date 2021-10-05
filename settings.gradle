@@ -19,6 +19,7 @@ rootProject.name = 'james'
 include 'james-agent'
 include 'james-agent-common'
 include 'james-agent-tomcat'
+include 'james-agent-io'
 
 include 'james-controller-consul'
 include 'james-controller-kubernetes'

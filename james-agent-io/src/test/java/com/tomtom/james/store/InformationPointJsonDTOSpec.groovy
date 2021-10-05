@@ -17,9 +17,10 @@
 package com.tomtom.james.store
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.tomtom.james.store.io.InformationPointJsonDTO
 import spock.lang.Specification
 
-class InformationPointDTOSpec extends Specification {
+class InformationPointJsonDTOSpec extends Specification {
 
     def minimalJSON = '''
 [{
@@ -57,11 +58,11 @@ class InformationPointDTOSpec extends Specification {
 '''
 
     def objectMapper = new ObjectMapper();
-    def type = objectMapper.getTypeFactory().constructCollectionType(Collection, InformationPointDTO)
+    def type = objectMapper.getTypeFactory().constructCollectionType(Collection, InformationPointJsonDTO)
 
     def "Should parse minimal JSON to DTO"() {
         when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(minimalJSON, type)
+        Collection<InformationPointJsonDTO> ipsDTOs = objectMapper.readValue(minimalJSON, type)
         def ip = ipsDTOs[0].toInformationPoint()
 
         then:
@@ -73,7 +74,7 @@ class InformationPointDTOSpec extends Specification {
 
     def "Should parse complete JSON to DTO"() {
         when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(completeJSON, type)
+        Collection<InformationPointJsonDTO> ipsDTOs = objectMapper.readValue(completeJSON, type)
         def ip = ipsDTOs[0].toInformationPoint()
 
         then:
@@ -85,7 +86,7 @@ class InformationPointDTOSpec extends Specification {
 
     def "Should parse update JSON to DTO (with new sample rates)"() {
         when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(updatedJson, type)
+        Collection<InformationPointJsonDTO> ipsDTOs = objectMapper.readValue(updatedJson, type)
         def ip = ipsDTOs[0].toInformationPoint()
 
         then:
@@ -99,7 +100,7 @@ class InformationPointDTOSpec extends Specification {
 
     def "Should parse JSON with base script"() {
         when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue(baseScriptJson, type)
+        Collection<InformationPointJsonDTO> ipsDTOs = objectMapper.readValue(baseScriptJson, type)
         def ip = ipsDTOs[0].toInformationPoint()
 
         then:
@@ -112,7 +113,7 @@ class InformationPointDTOSpec extends Specification {
 
     def "Should parse JSON with successExecutionThreshold"() {
         when:
-        Collection<InformationPointDTO> ipsDTOs = objectMapper.readValue("""
+        Collection<InformationPointJsonDTO> ipsDTOs = objectMapper.readValue("""
 [{
     "className": "class-name-value",
     "methodName": "method-name-value",
