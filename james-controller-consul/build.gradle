@@ -30,6 +30,7 @@ assemble.dependsOn(shadowJar)
 
 dependencies {
     implementation project(':james-agent-common')
+    implementation project(':james-agent-io')
     implementation "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
     implementation 'com.ecwid.consul:consul-api:1.2.3'
     implementation "com.google.guava:guava:${versions.guava}"

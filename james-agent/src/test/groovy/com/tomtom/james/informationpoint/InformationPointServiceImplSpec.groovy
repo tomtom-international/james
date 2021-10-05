@@ -18,7 +18,7 @@ package com.tomtom.james.informationpoint
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.newagent.tools.InformationPointQueue
-import com.tomtom.james.store.InformationPointStore
+import com.tomtom.james.store.io.InformationPointStore
 import spock.lang.Specification
 
 class InformationPointServiceImplSpec extends Specification {

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store;
+plugins {
+    id 'java-library'
+}
 
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
+sourceCompatibility = 1.8
 
-import java.util.Collection;
 
-public interface InformationPointStore {
-
-    void store(Collection<InformationPoint> informationPoints);
-    Collection<InformationPoint> restore();
-
+dependencies {
+    api project(':james-agent-common')
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: versions.jackson
 }

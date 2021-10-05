@@ -164,7 +164,7 @@ public class KubernetesControllerTest {
             .allSatisfy(ip -> {
                 assertThat(ip.getClassName()).isEqualTo("Class");
                 assertThat(ip.getMethodName()).isEqualTo("methodY");
-                assertThat(ip.getScript()).hasValue("boom");
+                assertThat(ip.getScript()).hasValue("boom\n");
                 assertThat(ip.getBaseScript()).hasValue("base");
             });
     }

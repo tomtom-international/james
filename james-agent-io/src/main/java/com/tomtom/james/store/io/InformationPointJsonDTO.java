@@ -14,32 +14,25 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store;
+package com.tomtom.james.store.io;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
-import com.tomtom.james.common.api.informationpoint.Metadata;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-class InformationPointDTO {
+public class InformationPointJsonDTO extends InformationPointDTO {
 
-    private String className;
-    private String methodName;
     private List<String> baseScript;
     private List<String> script;
-    private Integer sampleRate;
-    private Double successSampleRate;
-    private Double errorSampleRate;
-    private Long successExecutionThreshold;
-    private Metadata metadata = new Metadata();
 
     // For marshalling
-    InformationPointDTO() {
+    InformationPointJsonDTO() {
     }
 
-    InformationPointDTO(InformationPoint informationPoint) {
+    public InformationPointJsonDTO(InformationPoint informationPoint) {
         className = informationPoint.getClassName();
         methodName = informationPoint.getMethodName();
         baseScript = informationPoint.splittedBaseScriptLines();
@@ -51,6 +44,18 @@ class InformationPointDTO {
         successExecutionThreshold = informationPoint.getSuccessExecutionThreshold();
     }
 
+    @Override
+    public InformationPointDTO processFiles(ScriptsStore fileScriptStore){
+        if(this.scriptPath != null){
+            this.script = Arrays.asList(fileScriptStore.loadScriptByName(this.scriptPath).split("\n"));
+        }
+        if(this.baseScriptPath != null){
+            this.baseScript = Arrays.asList(fileScriptStore.loadScriptByName(this.baseScriptPath));
+        }
+        return this;
+    }
+
+    @Override
     public InformationPoint toInformationPoint() {
         InformationPoint.Builder builder = InformationPoint.builder()
                 .withClassName(className)

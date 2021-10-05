@@ -29,15 +29,23 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.store.io.InformationPointDTO;
+import com.tomtom.james.store.io.NoopScriptsStore;
+import com.tomtom.james.store.io.PropertiesConfigParserWriter;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.event.ConfigurationEvent;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class ConsulController implements JamesController {
 
     private static final Logger LOG = Logger.getLogger(ConsulController.class);
+
+    private PropertiesConfigParserWriter configParser = new PropertiesConfigParserWriter();
+    private NoopScriptsStore scriptStore = new NoopScriptsStore();
 
     @Override
     public String getId() {
@@ -74,21 +82,25 @@ public class ConsulController implements JamesController {
 
         dynamicConfig.addConfigurationListener(event -> {
             if (!event.isBeforeUpdate()) {
-                switch (event.getType()) {
-                    case AbstractConfiguration.EVENT_ADD_PROPERTY:
-                        onInformationPointAdded(event, informationPointService);
-                        break;
-                    case AbstractConfiguration.EVENT_SET_PROPERTY:
-                        onInformationPointModified(event, informationPointService);
-                        break;
-                    case AbstractConfiguration.EVENT_CLEAR_PROPERTY:
-                        onInformationPointRemoved(event, informationPointService);
-                        break;
-                    case AbstractConfiguration.EVENT_CLEAR:
-                        onInformationPointsCleared(informationPointService);
-                        break;
-                    default:
-                        LOG.debug(() -> "Unsupported event type: " + event.getType());
+                try {
+                    switch (event.getType()) {
+                        case AbstractConfiguration.EVENT_ADD_PROPERTY:
+                            onInformationPointAdded(event, informationPointService);
+                            break;
+                        case AbstractConfiguration.EVENT_SET_PROPERTY:
+                            onInformationPointModified(event, informationPointService);
+                            break;
+                        case AbstractConfiguration.EVENT_CLEAR_PROPERTY:
+                            onInformationPointRemoved(event, informationPointService);
+                            break;
+                        case AbstractConfiguration.EVENT_CLEAR:
+                            onInformationPointsCleared(informationPointService);
+                            break;
+                        default:
+                            LOG.debug(() -> "Unsupported event type: " + event.getType());
+                    }
+                } catch (IOException e) {
+                    LOG.error("Exception thrown while deserializing event");
                 }
             }
         });
@@ -99,24 +111,18 @@ public class ConsulController implements JamesController {
         ConfigurationManager.install(compositeConfig);
     }
 
-    private void onInformationPointAdded(ConfigurationEvent event, InformationPointService informationPointService) {
-        String methodReference = readMethodReference(event);
-        String informationPointDtoAsJsonString = (String) event.getPropertyValue();
-
-        Optional<InformationPoint> informationPoint =
-                InformationPointDTOParser.parse(informationPointDtoAsJsonString, methodReference);
+    private void onInformationPointAdded(ConfigurationEvent event, InformationPointService informationPointService)
+        throws IOException {
+        Optional<InformationPoint> informationPoint = eventToInformationPoint(event);
         informationPoint.ifPresent(ip -> {
             informationPointService.addInformationPoint(ip);
             LOG.trace(() -> "Information point " + ip + " added");
         });
     }
 
-    private void onInformationPointModified(ConfigurationEvent event, InformationPointService informationPointService) {
-        String methodReference = readMethodReference(event);
-        String informationPointDtoAsJsonString = (String) event.getPropertyValue();
-
-        Optional<InformationPoint> informationPoint =
-                InformationPointDTOParser.parse(informationPointDtoAsJsonString, methodReference);
+    private void onInformationPointModified(ConfigurationEvent event, InformationPointService informationPointService)
+        throws IOException {
+        Optional<InformationPoint> informationPoint = eventToInformationPoint(event);
         informationPoint.ifPresent(ip -> {
             informationPointService.removeInformationPoint(ip);
             informationPointService.addInformationPoint(ip);
@@ -139,7 +145,19 @@ public class ConsulController implements JamesController {
         LOG.trace("All information points removed");
     }
 
+
+    protected Optional<InformationPoint> eventToInformationPoint(final ConfigurationEvent event) throws IOException {
+        String methodReference = readMethodReference(event);
+        String informationPointDtoAsJsonString = (String) event.getPropertyValue();
+        final String properties = methodReference.replaceAll("#","!") + "=" + informationPointDtoAsJsonString.replaceAll("\n","");
+        final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(properties.getBytes());
+        return configParser.parseConfiguration(infoPointStream, scriptStore).stream()
+                           .map(InformationPointDTO::toInformationPoint).findFirst();
+
+    }
+
     private String readMethodReference(ConfigurationEvent event) {
         return event.getPropertyName().replace('!', '#');
     }
+
 }

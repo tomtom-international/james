@@ -16,13 +16,17 @@
 
 package com.tomtom.james.store;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
-
+import com.tomtom.james.store.io.ConfigParserWriter;
+import com.tomtom.james.store.io.ConfigParserFactory;
+import com.tomtom.james.store.io.InformationPointDTO;
+import com.tomtom.james.store.io.InformationPointJsonDTO;
+import com.tomtom.james.store.io.InformationPointStore;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,23 +37,19 @@ class FileStore implements InformationPointStore {
 
     private static final Logger LOG = Logger.getLogger(FileStore.class);
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final CollectionType informationPointCollectionType = objectMapper
-            .getTypeFactory()
-            .constructCollectionType(Collection.class, InformationPointDTO.class);
+    private final ConfigParserWriter configSerializerDeserializer;
     private final String filePath;
 
     FileStore(String filePath) {
         this.filePath = filePath;
+        configSerializerDeserializer = ConfigParserFactory.getInstance().getParser(filePath);
     }
 
     @Override
     public void store(Collection<InformationPoint> informationPoints) {
         try {
-            List<InformationPointDTO> dtos = informationPoints.stream()
-                    .map(InformationPointDTO::new)
-                    .collect(Collectors.toList());
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), dtos);
+            final File file = new File(filePath);
+            configSerializerDeserializer.storeConfiguration(new FileOutputStream(file), informationPoints);
         } catch (IOException e) {
             LOG.error("Information points write failed", e);
         }
@@ -58,9 +58,14 @@ class FileStore implements InformationPointStore {
     @Override
     public Collection<InformationPoint> restore() {
         try {
-            Collection<InformationPointDTO> dtos = objectMapper.readValue(new File(filePath), informationPointCollectionType);
-            return dtos.stream()
-                    .map(InformationPointDTO::toInformationPoint)
+            final File informationPointFile = new File(filePath);
+            final FileScriptStore fileScriptStore = new FileScriptStore(informationPointFile);
+
+            final Collection<InformationPointDTO> dtos =
+                this.configSerializerDeserializer.parseConfiguration(new FileInputStream(informationPointFile),
+                                                                     fileScriptStore
+                                                                    );
+            return dtos.stream().map(InformationPointDTO::toInformationPoint)
                     .collect(Collectors.toList());
         } catch (FileNotFoundException e) {
             LOG.warn(() -> "Information point store file not found at " + filePath);
@@ -69,4 +74,5 @@ class FileStore implements InformationPointStore {
             throw new RuntimeException("Information points read failed", e);
         }
     }
+
 }

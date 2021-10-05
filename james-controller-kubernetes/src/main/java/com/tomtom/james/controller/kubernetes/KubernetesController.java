@@ -16,7 +16,6 @@
 
 package com.tomtom.james.controller.kubernetes;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -31,39 +30,45 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
+import com.tomtom.james.store.io.ConfigParserFactory;
+import com.tomtom.james.store.io.ConfigParserWriter;
+import com.tomtom.james.store.io.InMemoryScriptStore;
+import com.tomtom.james.store.io.InformationPointDTO;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.Pair;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
+import io.kubernetes.client.openapi.models.V1ConfigMapList;
 import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Watch;
 import okhttp3.OkHttpClient;
-import org.yaml.snakeyaml.Yaml;
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class KubernetesController implements JamesController {
 
-    private static final String SCRIPT = "script";
-    private static final String BASE_SCRIPT = "baseScript";
     private static final Logger LOG = Logger.getLogger(KubernetesController.class);
     private final ExecutorService executor;
-    private final Map<String, Map<String, String>> informationPointsCache;
-    private final Yaml yaml = new Yaml();
+    private final Map<String, Map<String,InformationPointDTO>> informationPointsCache;
+    private ApiClient apiClient;
+
 
     @Override
     public String getId() {
@@ -92,7 +97,7 @@ public class KubernetesController implements JamesController {
                            final QueueBacked removeInformationPointQueue) {
         final KubernetesControllerConfiguration configuration =
             new KubernetesControllerConfiguration(jamesControllerConfiguration);
-        final ApiClient apiClient = createApiClient(configuration.getUrl(), configuration.getToken());
+        apiClient = createApiClient(configuration.getUrl(), configuration.getToken());
         executor.execute(() -> {
             while (!Thread.interrupted()) {
                 try {
@@ -114,7 +119,7 @@ public class KubernetesController implements JamesController {
         executor.shutdownNow();
     }
 
-    private ApiClient createApiClient(final String url, final String token) {
+    private static ApiClient createApiClient(final String url, final String token) {
         try {
             if (url.trim().isEmpty()) {
                 return Config.defaultClient();
@@ -128,20 +133,70 @@ public class KubernetesController implements JamesController {
 
     private void watchConfigMapChanges(final Watch<V1ConfigMap> watch,
                                        final InformationPointService informationPointService) {
+        Set<String> alreadyProcessed = new HashSet<>();
         for (final Watch.Response<V1ConfigMap> response : watch) {
+
+            final V1ObjectMeta metadata = response.object.getMetadata();
             final String name =
-                Optional.ofNullable(response.object.getMetadata()).map(V1ObjectMeta::getName).orElse("noName");
-            final Map<String, String> data = Optional.ofNullable(response.object.getData()).orElse(Collections.emptyMap());
-            final String type = response.type;
-            LOG.debug(String.format("ConfigMap %s was %s ", name, type));
-            final Map<String, String> informationPoints = new HashMap<>();
-            for (final Map.Entry<String, String> entry : data.entrySet()) {
+                Optional.ofNullable(metadata).map(V1ObjectMeta::getName).orElse("noName");
+            final String otherConfigMapName = getSecondPartOfConfigurationName(name);
+            if(!alreadyProcessed.contains(otherConfigMapName)) {
+                final Map<String, String> data = Maps.newHashMap();
+
+                data.putAll(updatePairedMaps(metadata, name));
+                final String type = response.type;
+                LOG.debug(String.format("ConfigMap %s was %s ", name, type));
                 if (!"DELETED".equals(type)) {
-                    informationPoints.putAll(readConfigFile(entry.getKey(), entry.getValue()));
+                    final Map<String, String> currentConfigMapData =
+                        Optional.ofNullable(response.object.getData()).orElse(Collections.emptyMap());
+                    data.putAll(currentConfigMapData);
                 }
+                processUpdate(name, readAllConfigurations(data), informationPointService);
+                alreadyProcessed.add(name);
+                alreadyProcessed.add(otherConfigMapName);
             }
-            processUpdate(name, informationPoints, informationPointService);
         }
+    }
+
+    private Map<String,String> updatePairedMaps(final V1ObjectMeta metadata, final String name) {
+        final String mainMapName = getSecondPartOfConfigurationName(name);
+
+        try {
+            final String fieldSelector = "metadata.name=" + mainMapName;
+            final V1ConfigMapList v1ConfigMapList =
+                new CoreV1Api(apiClient).listNamespacedConfigMap(metadata.getNamespace(),
+                                                                 null,
+                                                                 null,
+                                                                 null,
+                                                                 fieldSelector,
+                                                                 null,
+                                                                 null,
+                                                                 null,
+                                                                 null,
+                                                                 false);
+            return v1ConfigMapList.getItems().stream().findFirst().map(V1ConfigMap::getData)
+                                                         .orElse(Collections.emptyMap());
+        } catch (ApiException e) {
+            LOG.warn("Problem while looking for map other map");
+            return Collections.emptyMap();
+        }
+    }
+
+    private String getSecondPartOfConfigurationName(final String name) {
+        final String suffix;
+        final String toReplace;
+        //configuration is stored in to config maps:
+        // - configMap with configuration: CONFIG_NAME
+        // - configMap with script files: CONFIG_NAME-files
+        if(name.endsWith("-files")) {
+            toReplace = "-files";
+            suffix = "";
+        }else {
+            suffix = "-files";
+            toReplace = "";
+        }
+        final String mainMapName = name.replace(toReplace, "") + suffix;
+        return mainMapName;
     }
 
     private Watch<V1ConfigMap> createConfigMapWatch(
@@ -174,45 +229,38 @@ public class KubernetesController implements JamesController {
             }.getType());
     }
 
-    private Map<String, String> readConfigFile(final String name, final String content) {
-        if (name.endsWith(".properties")) {
-            return new BufferedReader(new StringReader(content))
-                .lines()
-                .map(line -> {
-                    final int index = line.indexOf('=');
-                    return new Pair(line.substring(0, index).replace('!', '#'), line.substring(index + 1));
-                })
-                .collect(Collectors.toMap(Pair::getName, Pair::getValue));
-        } else if (name.endsWith(".yaml")) {
-            final Map<String, Map> entries = yaml.load(content);
-            return entries.entrySet().stream()
-                          .collect(Collectors.toMap(e -> e.getKey().replace('!', '#'),
-                                                    e -> adaptToCommonFormat(e.getValue())));
-        } else {
-            LOG.warn("Unrecognized format:" + name);
+    private Collection<InformationPointDTO> readAllConfigurations(Map<String,String> configMaps) {
+        Map<ConfigParserWriter,InputStream> configurations = new HashMap<>();
+        InMemoryScriptStore scriptStore = new InMemoryScriptStore();
+        for (Map.Entry<String, String> configEntry : configMaps.entrySet()) {
+            final ConfigParserWriter parser = ConfigParserFactory.getInstance().getParser(configEntry.getKey());
+            if(parser != null){
+                InputStream configStream = new ByteArrayInputStream(configEntry.getValue().getBytes());
+                configurations.put(parser,configStream);
+            } else if (configEntry.getKey().endsWith(".groovy")){
+                scriptStore.registerFile("files/"+configEntry.getKey(), configEntry.getValue());
+            } else {
+                LOG.warn("Unrecognized format:" + configEntry.getKey());
+            }
         }
-        return Collections.emptyMap();
+        return configurations.entrySet().stream().flatMap(entry-> {
+            try {
+                return entry.getKey().parseConfiguration(entry.getValue(),scriptStore).stream();
+            } catch (IOException e) {
+                LOG.error("Unable to parse configurations: "+configMaps.keySet(),e);
+                return Stream.empty();
+            }
+        }).collect(Collectors.toSet());
     }
 
-    private String adaptToCommonFormat(final Map yamlDefinition) {
-        if (yamlDefinition.containsKey(SCRIPT)) {
-            yamlDefinition.put(SCRIPT, splitToLines(yamlDefinition, SCRIPT));
-        }
-        if (yamlDefinition.containsKey(BASE_SCRIPT) && ((Map)yamlDefinition.get(BASE_SCRIPT)).containsKey(SCRIPT)) {
-            yamlDefinition.put(BASE_SCRIPT, splitToLines(((Map)yamlDefinition.get(BASE_SCRIPT)), SCRIPT));
-        }
-        return InformationPointDTOParser.serialize(yamlDefinition);
-    }
-
-    private List<String> splitToLines(final Map definition, final String key) {
-        return Splitter.on("\n").omitEmptyStrings().splitToList(definition.get(key).toString());
-    }
-
-    private void processUpdate(final String configName, final Map<String, String> informationPoints,
+    private void processUpdate(final String configName, final Collection<InformationPointDTO> informationPoints,
                                final InformationPointService informationPointService) {
-        final Map<String, String> cache =
-            informationPointsCache.computeIfAbsent(configName, name -> new HashMap<>());
-        final MapDifference<String, String> difference = Maps.difference(informationPoints, cache);
+        final Map<String,InformationPointDTO> cache = informationPointsCache.computeIfAbsent(configName, name -> new LinkedHashMap<>());
+        final Map<String, InformationPointDTO> informationPointsMap = informationPoints.stream().collect(
+            Collectors.toMap(informationPoint -> informationPoint.getMethodReference(),Function.identity()));
+
+        final MapDifference<String, InformationPointDTO> difference = Maps.difference(informationPointsMap, cache);
+
         difference.entriesOnlyOnLeft()
                   .forEach((name, value) -> onInformationPointAdded(name, value, informationPointService));
         difference.entriesDiffering()
@@ -220,29 +268,23 @@ public class KubernetesController implements JamesController {
         difference.entriesOnlyOnRight().forEach((name, value) -> onInformationPointRemoved(name, informationPointService));
 
         cache.clear();
-        cache.putAll(informationPoints);
+        cache.putAll(informationPointsMap);
     }
 
-    private void onInformationPointAdded(final String methodReference, final String informationPointDtoAsJsonString,
+    private void onInformationPointAdded(final String methodReference, final InformationPointDTO informationPointDto,
                                          final InformationPointService informationPointService) {
-
-        final Optional<InformationPoint> informationPoint =
-            InformationPointDTOParser.parse(informationPointDtoAsJsonString, methodReference);
-        informationPoint.ifPresent(ip -> {
-            informationPointService.addInformationPoint(ip);
-            LOG.debug(() -> "Information point " + ip + " added");
-        });
+        final InformationPoint ip = informationPointDto.toInformationPoint();
+        informationPointService.addInformationPoint(ip);
+        LOG.debug(() -> "Information point " + ip + " added");
     }
 
-    private void onInformationPointModified(final String methodReference, final String informationPointDtoAsJsonString,
+    private void onInformationPointModified(final String methodReference, final InformationPointDTO informationPointDto,
                                             final InformationPointService informationPointService) {
-        final Optional<InformationPoint> informationPoint =
-            InformationPointDTOParser.parse(informationPointDtoAsJsonString, methodReference);
-        informationPoint.ifPresent(ip -> {
-            informationPointService.removeInformationPoint(ip);
-            informationPointService.addInformationPoint(ip);
-            LOG.debug(() -> "Information point " + ip + " modified");
-        });
+        final InformationPoint ip = informationPointDto.toInformationPoint();
+        informationPointService.removeInformationPoint(ip);
+        informationPointService.addInformationPoint(ip);
+        LOG.debug(() -> "Information point " + ip + " modified");
+
     }
 
     private void onInformationPointRemoved(final String methodReference,
