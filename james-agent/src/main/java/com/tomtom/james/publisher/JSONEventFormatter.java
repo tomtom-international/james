@@ -36,8 +36,8 @@ class JSONEventFormatter {
     String format(Event evt) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         result.put("@timestamp", evt.getTimestamp().toString());
-        configuration.getEventType().ifPresent(type -> result.put("type", type));
-        configuration.getEnvironment().ifPresent(env -> result.put("environment", env));
+        configuration.getEventType().ifPresent(type -> result.computeIfAbsent("type",s-> type));
+        configuration.getEnvironment().ifPresent(env -> result.computeIfAbsent("environment", s->env));
         result.putAll(configuration.getFields());
         result.putAll(evt.getContent());
 
