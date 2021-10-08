@@ -1,9 +1,11 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InformationPointYamlDTO extends InformationPointDTO {
 
     private BaseScript baseScript;
@@ -42,8 +44,8 @@ public class InformationPointYamlDTO extends InformationPointDTO {
                                                            .withClassName(className)
                                                            .withMethodName(methodName);
         builder.withMetadata(metadata);
-        builder.withBaseScript(baseScript == null? null :baseScript.getScript());
-        builder.withScript(script);
+        builder.withBaseScript(baseScript == null? null : safeTrim(baseScript.getScript()));
+        builder.withScript(safeTrim(script));
         builder.withSampleRate(sampleRate);
         builder.withSuccessSampleRate(successSampleRate);
         builder.withErrorSampleRate(errorSampleRate);
@@ -64,5 +66,12 @@ public class InformationPointYamlDTO extends InformationPointDTO {
         public String getScript() {
             return script;
         }
+    }
+
+    private String safeTrim(String script){
+        if(script != null){
+            return script.trim();
+        }
+        return null;
     }
 }

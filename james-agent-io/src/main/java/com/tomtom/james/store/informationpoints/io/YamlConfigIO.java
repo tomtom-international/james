@@ -1,17 +1,20 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class YamlConfigParserWriter implements ConfigParserWriter {
+public class YamlConfigIO implements ConfigParser, ConfigWriter {
 
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
     MapType informationPointType = objectMapper
@@ -42,7 +45,15 @@ public class YamlConfigParserWriter implements ConfigParserWriter {
     @Override
     public void storeConfiguration(final OutputStream outputStream, final Collection<InformationPoint> informationPoints)
         throws IOException {
-        //TODO
+        final Map<String, InformationPointYamlDTO> dtosMap =
+            informationPoints.stream().map(InformationPointYamlDTO::new).collect(
+                Collectors.toMap(informationPoint -> informationPoint.getMethodReference(),
+                                 informationPointJsonDTO -> {
+                                     informationPointJsonDTO.className = null;
+                                     informationPointJsonDTO.methodName = null;
+                                     return informationPointJsonDTO;
+                                 }));
+        objectMapper.writeValue(outputStream,dtosMap);
     }
 
 }

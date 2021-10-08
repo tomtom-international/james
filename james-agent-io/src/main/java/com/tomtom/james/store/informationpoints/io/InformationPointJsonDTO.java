@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InformationPointJsonDTO extends InformationPointDTO {
 
     private List<String> baseScript;

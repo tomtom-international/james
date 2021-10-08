@@ -29,9 +29,9 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.store.io.InformationPointDTO;
-import com.tomtom.james.store.io.NoopScriptsStore;
-import com.tomtom.james.store.io.PropertiesConfigParserWriter;
+import com.tomtom.james.store.informationpoints.io.InformationPointDTO;
+import com.tomtom.james.store.informationpoints.io.NoopScriptsStore;
+import com.tomtom.james.store.informationpoints.io.PropertiesConfigIO;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.event.ConfigurationEvent;
 
@@ -44,7 +44,7 @@ public class ConsulController implements JamesController {
 
     private static final Logger LOG = Logger.getLogger(ConsulController.class);
 
-    private PropertiesConfigParserWriter configParser = new PropertiesConfigParserWriter();
+    private PropertiesConfigIO configParser = new PropertiesConfigIO();
     private NoopScriptsStore scriptStore = new NoopScriptsStore();
 
     @Override
@@ -150,9 +150,10 @@ public class ConsulController implements JamesController {
         String methodReference = readMethodReference(event);
         String informationPointDtoAsJsonString = (String) event.getPropertyValue();
         final String properties = methodReference.replaceAll("#","!") + "=" + informationPointDtoAsJsonString.replaceAll("\n","");
-        final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(properties.getBytes());
-        return configParser.parseConfiguration(infoPointStream, scriptStore).stream()
-                           .map(InformationPointDTO::toInformationPoint).findFirst();
+        try(final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(properties.getBytes())) {
+            return configParser.parseConfiguration(infoPointStream, scriptStore).stream()
+                               .map(InformationPointDTO::toInformationPoint).findFirst();
+        }
 
     }
 

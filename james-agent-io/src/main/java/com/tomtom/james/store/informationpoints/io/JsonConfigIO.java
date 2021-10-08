@@ -1,4 +1,4 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JsonConfigParserWriter implements ConfigParserWriter {
+public class JsonConfigIO implements ConfigParser , ConfigWriter{
 
     ObjectMapper objectMapper = new ObjectMapper();
     CollectionType informationPointType = objectMapper

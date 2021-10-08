@@ -30,10 +30,10 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.api.publisher.EventPublisher;
 import com.tomtom.james.common.api.script.ScriptEngine;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.store.io.ConfigParserFactory;
-import com.tomtom.james.store.io.ConfigParserWriter;
-import com.tomtom.james.store.io.InMemoryScriptStore;
-import com.tomtom.james.store.io.InformationPointDTO;
+import com.tomtom.james.store.informationpoints.io.ConfigIOFactory;
+import com.tomtom.james.store.informationpoints.io.ConfigParser;
+import com.tomtom.james.store.informationpoints.io.InMemoryScriptStore;
+import com.tomtom.james.store.informationpoints.io.InformationPointDTO;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
@@ -133,28 +133,22 @@ public class KubernetesController implements JamesController {
 
     private void watchConfigMapChanges(final Watch<V1ConfigMap> watch,
                                        final InformationPointService informationPointService) {
-        Set<String> alreadyProcessed = new HashSet<>();
         for (final Watch.Response<V1ConfigMap> response : watch) {
 
             final V1ObjectMeta metadata = response.object.getMetadata();
             final String name =
                 Optional.ofNullable(metadata).map(V1ObjectMeta::getName).orElse("noName");
-            final String otherConfigMapName = getSecondPartOfConfigurationName(name);
-            if(!alreadyProcessed.contains(otherConfigMapName)) {
-                final Map<String, String> data = Maps.newHashMap();
+            final Map<String, String> data = Maps.newHashMap();
 
-                data.putAll(updatePairedMaps(metadata, name));
-                final String type = response.type;
-                LOG.debug(String.format("ConfigMap %s was %s ", name, type));
-                if (!"DELETED".equals(type)) {
-                    final Map<String, String> currentConfigMapData =
-                        Optional.ofNullable(response.object.getData()).orElse(Collections.emptyMap());
-                    data.putAll(currentConfigMapData);
-                }
-                processUpdate(name, readAllConfigurations(data), informationPointService);
-                alreadyProcessed.add(name);
-                alreadyProcessed.add(otherConfigMapName);
+            data.putAll(updatePairedMaps(metadata, name));
+            final String type = response.type;
+            LOG.debug(String.format("ConfigMap %s was %s ", name, type));
+            if (!"DELETED".equals(type)) {
+                final Map<String, String> currentConfigMapData =
+                    Optional.ofNullable(response.object.getData()).orElse(Collections.emptyMap());
+                data.putAll(currentConfigMapData);
             }
+            processUpdate(name, readAllConfigurations(data), informationPointService);
         }
     }
 
@@ -230,13 +224,12 @@ public class KubernetesController implements JamesController {
     }
 
     private Collection<InformationPointDTO> readAllConfigurations(Map<String,String> configMaps) {
-        Map<ConfigParserWriter,InputStream> configurations = new HashMap<>();
+        Map<ConfigParser,String> configurations = new HashMap<>();
         InMemoryScriptStore scriptStore = new InMemoryScriptStore();
         for (Map.Entry<String, String> configEntry : configMaps.entrySet()) {
-            final ConfigParserWriter parser = ConfigParserFactory.getInstance().getParser(configEntry.getKey());
+            final ConfigParser parser = ConfigIOFactory.getInstance().getParser(configEntry.getKey()).orElse(null);
             if(parser != null){
-                InputStream configStream = new ByteArrayInputStream(configEntry.getValue().getBytes());
-                configurations.put(parser,configStream);
+                configurations.put(parser, configEntry.getValue());
             } else if (configEntry.getKey().endsWith(".groovy")){
                 scriptStore.registerFile("files/"+configEntry.getKey(), configEntry.getValue());
             } else {
@@ -244,8 +237,8 @@ public class KubernetesController implements JamesController {
             }
         }
         return configurations.entrySet().stream().flatMap(entry-> {
-            try {
-                return entry.getKey().parseConfiguration(entry.getValue(),scriptStore).stream();
+            try (InputStream configStream = new ByteArrayInputStream(entry.getValue().getBytes());){
+                return entry.getKey().parseConfiguration(configStream,scriptStore).stream();
             } catch (IOException e) {
                 LOG.error("Unable to parse configurations: "+configMaps.keySet(),e);
                 return Stream.empty();
