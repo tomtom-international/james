@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '8', '11', '16']
+        java: [ '8', '11', '17']
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 
       uses: actions/setup-java@v2
       with:
         java-version:  ${{ matrix.java }}
-        distribution: 'adopt'
+        distribution: 'temurin'
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Cache Gradle packages
