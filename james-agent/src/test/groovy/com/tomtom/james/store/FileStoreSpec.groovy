@@ -25,7 +25,7 @@ class FileStoreSpec extends Specification {
 
     def "Should store and restore instrumentation point"() {
         setup:
-        def fileName = Files.createTempFile("spock", "FileStoreSpec")
+        def fileName = Files.createTempFile("spock", "FileStoreSpec.json")
                 .toAbsolutePath().toString()
         when:
         def meta = new Metadata()

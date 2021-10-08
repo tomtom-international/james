@@ -1,6 +1,6 @@
 package com.tomtom.james.store;
 
-import com.tomtom.james.store.io.ScriptsStore;
+import com.tomtom.james.store.informationpoints.io.ScriptsStore;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

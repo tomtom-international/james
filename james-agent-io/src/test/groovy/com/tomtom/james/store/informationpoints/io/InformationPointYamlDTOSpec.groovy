@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store
+package com.tomtom.james.store.informationpoints.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.tomtom.james.store.io.InformationPointYamlDTO
 import spock.lang.Specification
 
 class InformationPointYamlDTOSpec extends Specification {
@@ -107,7 +106,7 @@ class-name-value!method-name-value:
         then:
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
-        ip.script.get() == "line1\nline2\n"
+        ip.script.get() == "line1\nline2"
         ip.sampleRate == 70
     }
 
@@ -123,7 +122,7 @@ class-name-value!method-name-value:
         then:
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
-        ip.script.get() == "line1\nline2\n"
+        ip.script.get() == "line1\nline2"
         ip.successSampleRate == 0.5
         ip.errorSampleRate == 100
         ip.sampleRate == 100
@@ -141,8 +140,8 @@ class-name-value!method-name-value:
         then:
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
-        ip.baseScript.get() == "baseline1\nbaseline2\n"
-        ip.script.get() == "line1\nline2\n"
+        ip.baseScript.get() == "baseline1\nbaseline2"
+        ip.script.get() == "line1\nline2"
     }
 
 

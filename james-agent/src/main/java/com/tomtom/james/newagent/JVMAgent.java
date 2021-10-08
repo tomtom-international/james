@@ -17,7 +17,7 @@ import com.tomtom.james.informationpoint.InformationPointServiceImpl;
 import com.tomtom.james.newagent.tools.*;
 import com.tomtom.james.publisher.EventPublisherFactory;
 import com.tomtom.james.script.ScriptEngineFactory;
-import com.tomtom.james.store.io.InformationPointStore;
+import com.tomtom.james.store.informationpoints.io.InformationPointStore;
 import com.tomtom.james.store.InformationPointStoreFactory;
 import javassist.CannotCompileException;
 import javassist.CtClass;

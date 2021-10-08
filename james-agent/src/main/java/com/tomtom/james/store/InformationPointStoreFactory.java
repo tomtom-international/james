@@ -17,7 +17,7 @@
 package com.tomtom.james.store;
 
 import com.tomtom.james.configuration.InformationPointStoreConfiguration;
-import com.tomtom.james.store.io.InformationPointStore;
+import com.tomtom.james.store.informationpoints.io.InformationPointStore;
 
 public class InformationPointStoreFactory {
 

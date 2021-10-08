@@ -1,4 +1,4 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 import java.util.HashMap;
 import java.util.Map;

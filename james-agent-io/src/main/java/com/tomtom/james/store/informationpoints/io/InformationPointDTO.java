@@ -1,5 +1,6 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.Metadata;
 
@@ -30,6 +31,7 @@ public abstract class InformationPointDTO {
 
     public abstract InformationPoint toInformationPoint();
 
+    @JsonIgnore
     public String getMethodReference(){
         return className+"!"+methodName;
     }

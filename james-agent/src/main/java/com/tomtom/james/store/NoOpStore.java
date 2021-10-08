@@ -17,7 +17,7 @@
 package com.tomtom.james.store;
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
-import com.tomtom.james.store.io.InformationPointStore;
+import com.tomtom.james.store.informationpoints.io.InformationPointStore;
 
 import java.util.Collection;
 import java.util.Collections;

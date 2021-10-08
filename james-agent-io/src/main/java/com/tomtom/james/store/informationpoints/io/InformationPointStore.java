@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 

@@ -29,7 +29,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.informationpoint.advice.InformationPointServiceSupplier;
 import com.tomtom.james.newagent.tools.InformationPointQueue;
-import com.tomtom.james.store.io.InformationPointStore;
+import com.tomtom.james.store.informationpoints.io.InformationPointStore;
 
 public class InformationPointServiceImpl implements InformationPointService {
 

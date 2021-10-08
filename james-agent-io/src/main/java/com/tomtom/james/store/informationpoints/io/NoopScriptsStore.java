@@ -1,4 +1,4 @@
-package com.tomtom.james.store.io;
+package com.tomtom.james.store.informationpoints.io;
 
 public class NoopScriptsStore implements ScriptsStore {
 

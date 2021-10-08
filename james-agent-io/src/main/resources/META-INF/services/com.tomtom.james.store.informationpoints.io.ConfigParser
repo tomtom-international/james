@@ -1,0 +1,3 @@
+com.tomtom.james.store.informationpoints.io.YamlConfigIO
+com.tomtom.james.store.informationpoints.io.PropertiesConfigIO
+com.tomtom.james.store.informationpoints.io.JsonConfigIO

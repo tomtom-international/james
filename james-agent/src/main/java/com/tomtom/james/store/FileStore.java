@@ -18,11 +18,11 @@ package com.tomtom.james.store;
 
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.store.io.ConfigParserWriter;
-import com.tomtom.james.store.io.ConfigParserFactory;
-import com.tomtom.james.store.io.InformationPointDTO;
-import com.tomtom.james.store.io.InformationPointJsonDTO;
-import com.tomtom.james.store.io.InformationPointStore;
+import com.tomtom.james.store.informationpoints.io.ConfigParser;
+import com.tomtom.james.store.informationpoints.io.ConfigIOFactory;
+import com.tomtom.james.store.informationpoints.io.ConfigWriter;
+import com.tomtom.james.store.informationpoints.io.InformationPointDTO;
+import com.tomtom.james.store.informationpoints.io.InformationPointStore;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,26 +30,31 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 class FileStore implements InformationPointStore {
 
     private static final Logger LOG = Logger.getLogger(FileStore.class);
 
-    private final ConfigParserWriter configSerializerDeserializer;
+    private final ConfigParser configParser;
+    private final ConfigWriter configWriter;
     private final String filePath;
 
     FileStore(String filePath) {
         this.filePath = filePath;
-        configSerializerDeserializer = ConfigParserFactory.getInstance().getParser(filePath);
+        configParser = ConfigIOFactory.getInstance().getParser(filePath).orElseThrow(
+            () -> new IllegalArgumentException(String.format("Config file: %s has unsuported extension for reading ", filePath)));
+        configWriter = ConfigIOFactory.getInstance().getWriter(filePath).orElseThrow(
+            () -> new IllegalArgumentException(String.format("Config file: %s has unsuported extension for writing ", filePath)));
     }
 
     @Override
     public void store(Collection<InformationPoint> informationPoints) {
         try {
             final File file = new File(filePath);
-            configSerializerDeserializer.storeConfiguration(new FileOutputStream(file), informationPoints);
+            try(final FileOutputStream outputStream = new FileOutputStream(file)){
+                configWriter.storeConfiguration(outputStream, informationPoints);
+            }
         } catch (IOException e) {
             LOG.error("Information points write failed", e);
         }
@@ -61,12 +66,14 @@ class FileStore implements InformationPointStore {
             final File informationPointFile = new File(filePath);
             final FileScriptStore fileScriptStore = new FileScriptStore(informationPointFile);
 
-            final Collection<InformationPointDTO> dtos =
-                this.configSerializerDeserializer.parseConfiguration(new FileInputStream(informationPointFile),
-                                                                     fileScriptStore
-                                                                    );
-            return dtos.stream().map(InformationPointDTO::toInformationPoint)
-                    .collect(Collectors.toList());
+            try(final FileInputStream fileInputStream = new FileInputStream(informationPointFile)) {
+                final Collection<InformationPointDTO> dtos =
+                    this.configParser.parseConfiguration(fileInputStream,
+                                                         fileScriptStore
+                                                        );
+                return dtos.stream().map(InformationPointDTO::toInformationPoint)
+                           .collect(Collectors.toList());
+            }
         } catch (FileNotFoundException e) {
             LOG.warn(() -> "Information point store file not found at " + filePath);
             return Collections.emptyList();

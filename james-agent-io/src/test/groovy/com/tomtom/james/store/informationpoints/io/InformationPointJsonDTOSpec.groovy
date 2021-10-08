@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.tomtom.james.store
+package com.tomtom.james.store.informationpoints.io
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.tomtom.james.store.io.InformationPointJsonDTO
 import spock.lang.Specification
 
 class InformationPointJsonDTOSpec extends Specification {
