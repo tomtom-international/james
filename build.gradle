@@ -69,7 +69,7 @@ subprojects { prj ->
             bytebuddytests: '1.11.1',
             disruptor: '3.4.2',
             log4j_stackutil: '2.14.1',
-            ecs_logging: '1.0.1'
+            ecs_logging: '1.1.0'
     ]
     test.useJUnitPlatform()
 }
