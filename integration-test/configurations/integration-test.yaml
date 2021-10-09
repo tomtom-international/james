@@ -6,6 +6,7 @@ plugins:
     - ../james-controller-consul/build/libs/james-controller-consul-@@projectVersion@@-all.jar
     - ../james-controller-webservice/build/libs/james-controller-webservice-@@projectVersion@@-all.jar
     - ../james-publisher-aws-kinesis/build/libs/james-publisher-aws-kinesis-@@projectVersion@@-all.jar
+    - ../james-publisher-log4j2/build/libs/james-publisher-log4j2-@@projectVersion@@-all.jar
 
 controllers:
   - id: james.controller.webservice
@@ -13,9 +14,9 @@ controllers:
       port: 7007
 
 publishers:
-  - id: james.publisher.console
+  - id: james.publisher.log4j2
     properties:
-      prettifyJSON: true
+      level: WARN
   - id: integrationTest.publisher
 
 jamesHQ:

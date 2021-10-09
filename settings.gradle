@@ -24,5 +24,6 @@ include 'james-controller-consul'
 include 'james-controller-kubernetes'
 include 'james-controller-webservice', 'james-controller-webservice-api', 'james-controller-webservice-client'
 include 'james-publisher-aws-kinesis'
+include 'james-publisher-log4j2'
 
 include 'integration-test'

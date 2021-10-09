@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.5.0")
-    }
+plugins {
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'groovy'
 }
-
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: "io.spring.dependency-management"
-apply plugin: 'org.springframework.boot'
 
 sourceCompatibility = 1.8
 
@@ -40,9 +32,17 @@ dependencies {
 
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('org.springframework.boot:spring-boot-starter-log4j2')
+    implementation('co.elastic.logging:log4j2-ecs-layout:1.1.0')
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+}
+
+configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 test {
