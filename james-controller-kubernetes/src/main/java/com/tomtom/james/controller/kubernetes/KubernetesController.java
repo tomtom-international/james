@@ -231,7 +231,7 @@ public class KubernetesController implements JamesController {
             if(parser != null){
                 configurations.put(parser, configEntry.getValue());
             } else if (configEntry.getKey().endsWith(".groovy")){
-                scriptStore.registerFile("files/"+configEntry.getKey(), configEntry.getValue());
+                scriptStore.registerFile(configEntry.getKey(), configEntry.getValue());
             } else {
                 LOG.warn("Unrecognized format:" + configEntry.getKey());
             }
