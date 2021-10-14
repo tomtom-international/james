@@ -42,6 +42,12 @@ public class ElasticSearchConfiguration {
                 .map(StructuredConfiguration::asString);
     }
 
+    public boolean isDefaultFields() {
+        return configuration.get("defaultFields")
+                            .map(StructuredConfiguration::asBoolean)
+                            .orElse(true);
+    }
+
     public Map<String, String> getFields() {
         return configuration
             .get("fields")
