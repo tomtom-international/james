@@ -46,8 +46,10 @@ class JSONEventFormatter {
         result.put("type", configuration.getEventType());
         configuration.getEnvironment().ifPresent(env -> result.put("environment", env));
         result.putAll(configuration.getFields());
-        result.put("host", hostname);
-        result.put("jvmName", jvmName);
+        if (configuration.isDefaultFields()) {
+            result.put("host", hostname);
+            result.put("jvmName", jvmName);
+        }
         result.putAll(evt.getContent());
 
         try {
