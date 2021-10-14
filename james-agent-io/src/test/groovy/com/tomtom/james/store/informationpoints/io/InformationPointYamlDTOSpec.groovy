@@ -59,7 +59,27 @@ class-name-value!method-name-value:
         line2
 '''
 
+    def baseScriptWithReferenceYAML = '''
+class-name-value!method-name-value:
+    baseScript: &id001
+        script: |
+            baseline1
+            baseline2
+    script: |
+        line1
+        line2
+class-name-value2!method-name-value:
+    baseScript: *id001
+    script: &sId002 |
+        line3
+        line4
+class-name-value3!method-name-value:
+    baseScript: *id001
+    script: *sId002
+'''
+
     def objectMapper = new ObjectMapper(new YAMLMapper()).findAndRegisterModules();
+
     def type = objectMapper.getTypeFactory().constructMapType(Map, String, InformationPointYamlDTO)
 
     def "Should parse Only yaml to DTO"() {
@@ -161,5 +181,22 @@ class-name-value!method-name-value:
         ip.className == "class-name-value"
         ip.methodName == "method-name-value"
         ip.successExecutionThreshold == 99
+    }
+
+    def "Should parse yaml with reference to base script to DTO"() {
+        when:
+        Collection<InformationPointYamlDTO> ipsDTOs = objectMapper.readValue(baseScriptWithReferenceYAML, type).entrySet()
+                .stream()
+                .map(entry ->
+                        Optional.ofNullable(entry.getValue()).orElse(new InformationPointYamlDTO()).withMethodReference(entry.getKey()))
+                .collect(java.util.stream.Collectors.toList())
+        def ip = ipsDTOs[0].toInformationPoint()
+        def ip1 = ipsDTOs[1].toInformationPoint()
+        def ip2 = ipsDTOs[2].toInformationPoint()
+
+        then:
+        ip.getBaseScript() == ip2.getBaseScript()
+        ip1.getScript() != ip2.getScript() //not able to reference on simple types
+        ip.getScript() != ip1.getScript()
     }
 }
