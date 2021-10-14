@@ -1,13 +1,16 @@
 package com.tomtom.james.store.informationpoints.io;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InformationPointYamlDTO extends InformationPointDTO {
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.StringIdGenerator.class)
     private BaseScript baseScript;
     private String script;
 
