@@ -49,11 +49,9 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -100,9 +98,8 @@ public class KubernetesController implements JamesController {
         apiClient = createApiClient(configuration.getUrl(), configuration.getToken());
         executor.execute(() -> {
             while (!Thread.interrupted()) {
-                try {
-                    final Watch<V1ConfigMap> watch =
-                        createConfigMapWatch(apiClient, configuration.getNamespace(), configuration.getLabels());
+                try(final Watch<V1ConfigMap> watch =
+                        createConfigMapWatch(apiClient, configuration.getNamespace(), configuration.getLabels())) {
                     watchConfigMapChanges(watch, informationPointService);
                 } catch (final Exception e) {
                     LOG.info("Unable to setup k8s watcher", e);
@@ -255,23 +252,23 @@ public class KubernetesController implements JamesController {
         final MapDifference<String, InformationPointDTO> difference = Maps.difference(informationPointsMap, cache);
 
         difference.entriesOnlyOnLeft()
-                  .forEach((name, value) -> onInformationPointAdded(name, value, informationPointService));
+                  .forEach((name, value) -> onInformationPointAdded(value, informationPointService));
         difference.entriesDiffering()
-                  .forEach((name, value) -> onInformationPointModified(name, value.leftValue(), informationPointService));
-        difference.entriesOnlyOnRight().forEach((name, value) -> onInformationPointRemoved(name, informationPointService));
+                  .forEach((name, value) -> onInformationPointModified(value.leftValue(), informationPointService));
+        difference.entriesOnlyOnRight().forEach((name, value) -> onInformationPointRemoved(value, informationPointService));
 
         cache.clear();
         cache.putAll(informationPointsMap);
     }
 
-    private void onInformationPointAdded(final String methodReference, final InformationPointDTO informationPointDto,
+    private void onInformationPointAdded(final InformationPointDTO informationPointDto,
                                          final InformationPointService informationPointService) {
         final InformationPoint ip = informationPointDto.toInformationPoint();
         informationPointService.addInformationPoint(ip);
         LOG.debug(() -> "Information point " + ip + " added");
     }
 
-    private void onInformationPointModified(final String methodReference, final InformationPointDTO informationPointDto,
+    private void onInformationPointModified(final InformationPointDTO informationPointDto,
                                             final InformationPointService informationPointService) {
         final InformationPoint ip = informationPointDto.toInformationPoint();
         informationPointService.removeInformationPoint(ip);
@@ -280,11 +277,11 @@ public class KubernetesController implements JamesController {
 
     }
 
-    private void onInformationPointRemoved(final String methodReference,
+    private void onInformationPointRemoved(final InformationPointDTO informationPointDto,
                                            final InformationPointService informationPointService) {
-        final InformationPoint informationPoint = InformationPoint.builder().withMethodReference(methodReference).build();
-        informationPointService.removeInformationPoint(informationPoint);
-        LOG.debug(() -> "Information point " + informationPoint + " removed");
+        final InformationPoint ip = informationPointDto.toInformationPoint();
+        informationPointService.removeInformationPoint(ip);
+        LOG.debug(() -> "Information point " + ip + " removed");
     }
 
 }

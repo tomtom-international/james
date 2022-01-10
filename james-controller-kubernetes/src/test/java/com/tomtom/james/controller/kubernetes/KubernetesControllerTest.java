@@ -30,10 +30,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +48,7 @@ public class KubernetesControllerTest {
     private InformationPointService informationPointService;
     @Mock
     private JamesControllerConfiguration jamesControllerConfiguration;
-    private final List<InformationPoint> informationPoints = new ArrayList<>();
+    private final List<InformationPoint> informationPoints = new CopyOnWriteArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public KubernetesController startKubernetesController() {
@@ -204,6 +206,72 @@ public class KubernetesControllerTest {
             .allSatisfy(ip -> {
                 assertThat(ip.getClassName()).isEqualTo("Class");
                 assertThat(ip.getMethodName()).isEqualTo("methodY");
+                assertThat(ip.getScript()).hasValue("boom");
+                assertThat(ip.getBaseScript()).hasValue("base");
+            });
+    }
+
+    @Test
+    public void shouldRegisterAndRemoveYaml() throws InterruptedException, IOException {
+        final V1ConfigMap configMap = new V1ConfigMapBuilder()
+            .withApiVersion("v1")
+            .withKind("ConfigMap")
+            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
+            .addToData("app.yaml", "Class!methodY:\n"
+                                   + "  baseScript:\n"
+                                   + "    script: base\n"
+                                   + "  script: |\n"
+                                   + "    boom\n"
+                                   + "  version: 1")
+            .build();
+
+        final V1ConfigMap modifiedConfigMap = new V1ConfigMapBuilder()
+            .withApiVersion("v1")
+            .withKind("ConfigMap")
+            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
+            .addToData("app.yaml", "Class!methodX:\n"
+                                   + "  baseScript:\n"
+                                   + "    script: base\n"
+                                   + "  script: |\n"
+                                   + "    boom\n"
+                                   + "  version: 1")
+            .build();
+
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        doAnswer(invocationOnMock -> {
+            informationPoints.add(invocationOnMock.getArgument(0, InformationPoint.class));
+            countDownLatch.countDown();
+            return null;
+        }).when(informationPointService).addInformationPoint(any(InformationPoint.class));
+        final CountDownLatch countDownModifiedLatch = new CountDownLatch(1);
+        doAnswer(invocationOnMock -> {
+            informationPoints.remove(invocationOnMock.getArgument(0, InformationPoint.class));
+            countDownModifiedLatch.countDown();
+            return null;
+        }).when(informationPointService).removeInformationPoint(any(InformationPoint.class));
+
+        final KubernetesController controller = startKubernetesController();
+        stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
+                    .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json")
+                                    .withBody(objectMapper.writeValueAsString(new Watch.Response<>("ADDED", configMap)))));
+
+        countDownLatch.await(3, TimeUnit.SECONDS);
+        // modify
+        stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
+                    .willReturn(aResponse()
+                                    .withStatus(200)
+                                    .withHeader("Content-Type", "application/json")
+                                    .withBody(objectMapper.writeValueAsString(new Watch.Response<>("MODIFIED", modifiedConfigMap)))));
+
+        countDownModifiedLatch.await(3, TimeUnit.SECONDS);
+        controller.close();
+        assertThat(informationPoints)
+            .hasSize(1)
+            .allSatisfy(ip -> {
+                assertThat(ip.getClassName()).isEqualTo("Class");
+                assertThat(ip.getMethodName()).isEqualTo("methodX");
                 assertThat(ip.getScript()).hasValue("boom");
                 assertThat(ip.getBaseScript()).hasValue("base");
             });

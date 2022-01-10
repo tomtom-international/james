@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.tomtom.james.common.api.informationpoint.InformationPoint;
+import java.util.Objects;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -69,6 +70,19 @@ public class InformationPointYamlDTO extends InformationPointDTO {
         public String getScript() {
             return script;
         }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final BaseScript that = (BaseScript)o;
+            return Objects.equals(script, that.script);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(script);
+        }
     }
 
     private String safeTrim(String script){
@@ -76,5 +90,19 @@ public class InformationPointYamlDTO extends InformationPointDTO {
             return script.trim();
         }
         return null;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        final InformationPointYamlDTO that = (InformationPointYamlDTO)o;
+        return Objects.equals(baseScript, that.baseScript) && Objects.equals(script, that.script);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), baseScript, script);
     }
 }
