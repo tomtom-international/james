@@ -30,7 +30,7 @@ assemble.dependsOn(shadowJar)
 dependencies {
     implementation project(':james-agent-common')
     implementation project(':james-agent-io')
-    implementation 'io.kubernetes:client-java:10.0.1'
+    implementation 'io.kubernetes:client-java:14.0.0'
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
