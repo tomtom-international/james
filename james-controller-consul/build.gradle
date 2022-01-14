@@ -32,7 +32,7 @@ dependencies {
     implementation project(':james-agent-common')
     implementation project(':james-agent-io')
     implementation "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
-    implementation 'com.ecwid.consul:consul-api:1.2.3'
+    implementation 'com.ecwid.consul:consul-api:1.4.5'
     implementation "com.google.guava:guava:${versions.guava}"
     implementation 'commons-configuration:commons-configuration:1.8'
     implementation 'com.netflix.archaius:archaius-core:0.7.1'
