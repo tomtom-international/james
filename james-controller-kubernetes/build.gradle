@@ -30,6 +30,7 @@ assemble.dependsOn(shadowJar)
 dependencies {
     implementation project(':james-agent-common')
     implementation project(':james-agent-io')
+    implementation "com.google.guava:guava:${versions.guava}"
     implementation 'io.kubernetes:client-java:14.0.0'
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")

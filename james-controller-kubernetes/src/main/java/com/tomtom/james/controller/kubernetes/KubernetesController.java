@@ -164,6 +164,7 @@ public class KubernetesController implements JamesController {
                                                                  null,
                                                                  null,
                                                                  null,
+                                                                 null,
                                                                  false);
             return v1ConfigMapList.getItems().stream().findFirst().map(V1ConfigMap::getData)
                                                          .orElse(Collections.emptyMap());
@@ -210,6 +211,7 @@ public class KubernetesController implements JamesController {
                                             null,
                                             null,
                                             labelSelector,
+                                            null,
                                             null,
                                             null,
                                             null,
