@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -20,8 +21,7 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.api.informationpoint.InformationPointService;
 import com.tomtom.james.common.log.Logger;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
-import io.kubernetes.client.openapi.models.V1ConfigMapBuilder;
-import io.kubernetes.client.openapi.models.V1ObjectMetaBuilder;
+import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.util.Watch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +31,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +85,7 @@ public class KubernetesControllerTest {
 
     @BeforeEach
     void setUp() {
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         wireMockServer.start();
         WireMock.configureFor("localhost", wireMockServer.port());
     }
@@ -98,12 +97,11 @@ public class KubernetesControllerTest {
 
     @Test
     public void shouldRegisterProperties() throws InterruptedException, IOException {
-        final V1ConfigMap configMap = new V1ConfigMapBuilder()
-            .withApiVersion("v1")
-            .withKind("ConfigMap")
-            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
-            .addToData("app.properties", "Class!method={ \"version\":\"1\", \"script\":[\"boom\"]}")
-            .build();
+        final V1ConfigMap configMap = new V1ConfigMap()
+            .apiVersion("v1")
+            .kind("ConfigMap")
+            .metadata(new V1ObjectMeta().name("james-test").putLabelsItem("app", "qa-webservice"))
+            .putDataItem("app.properties", "Class!method={ \"version\":\"1\", \"script\":[\"boom\"]}");
         final Watch.Response<V1ConfigMap> response = new Watch.Response<>("ADDED", configMap);
 
         stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
@@ -133,17 +131,16 @@ public class KubernetesControllerTest {
 
     @Test
     public void shouldRegisterYaml() throws InterruptedException, IOException {
-        final V1ConfigMap configMap = new V1ConfigMapBuilder()
-            .withApiVersion("v1")
-            .withKind("ConfigMap")
-            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
-            .addToData("app.yaml", "Class!methodY:\n"
+        final V1ConfigMap configMap = new V1ConfigMap()
+            .apiVersion("v1")
+            .kind("ConfigMap")
+            .metadata(new V1ObjectMeta().name("james-test").putLabelsItem("app", "qa-webservice"))
+            .putDataItem("app.yaml", "Class!methodY:\n"
                                    + "  baseScript:\n"
                                    + "    script: base\n"
                                    + "  script: |\n"
                                    + "    boom\n"
-                                   + "  version: 1")
-            .build();
+                                   + "  version: 1");
         final Watch.Response<V1ConfigMap> response = new Watch.Response<>("ADDED", configMap);
 
         stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
@@ -173,17 +170,16 @@ public class KubernetesControllerTest {
 
     @Test
     public void shouldRegisterYamlWithFiles() throws InterruptedException, IOException {
-        final V1ConfigMap configMap = new V1ConfigMapBuilder()
-            .withApiVersion("v1")
-            .withKind("ConfigMap")
-            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
-            .addToData("app.yaml", "Class!methodY:\n"
+        final V1ConfigMap configMap = new V1ConfigMap()
+            .apiVersion("v1")
+            .kind("ConfigMap")
+            .metadata(new V1ObjectMeta().name("james-test").putLabelsItem("app", "qa-webservice"))
+            .putDataItem("app.yaml", "Class!methodY:\n"
                                    + "  baseScriptPath: base.groovy\n"
                                    + "  scriptPath: script.groovy\n"
                                    + "  version: 1")
-            .addToData("base.groovy", "base")
-            .addToData("script.groovy", "boom")
-            .build();
+            .putDataItem("base.groovy", "base")
+            .putDataItem("script.groovy", "boom");
         final Watch.Response<V1ConfigMap> response = new Watch.Response<>("ADDED", configMap);
 
         stubFor(get(urlEqualTo("/api/v1/namespaces/dev/configmaps?labelSelector=app%3Dmy-app&watch=true"))
@@ -213,29 +209,27 @@ public class KubernetesControllerTest {
 
     @Test
     public void shouldRegisterAndRemoveYaml() throws InterruptedException, IOException {
-        final V1ConfigMap configMap = new V1ConfigMapBuilder()
-            .withApiVersion("v1")
-            .withKind("ConfigMap")
-            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
-            .addToData("app.yaml", "Class!methodY:\n"
+        final V1ConfigMap configMap = new V1ConfigMap()
+            .apiVersion("v1")
+            .kind("ConfigMap")
+            .metadata(new V1ObjectMeta().name("james-test").putLabelsItem("app", "qa-webservice"))
+            .putDataItem("app.yaml", "Class!methodY:\n"
                                    + "  baseScript:\n"
                                    + "    script: base\n"
                                    + "  script: |\n"
                                    + "    boom\n"
-                                   + "  version: 1")
-            .build();
+                                   + "  version: 1");
 
-        final V1ConfigMap modifiedConfigMap = new V1ConfigMapBuilder()
-            .withApiVersion("v1")
-            .withKind("ConfigMap")
-            .withMetadata(new V1ObjectMetaBuilder().withName("james-test").addToLabels("app", "qa-webservice").build())
-            .addToData("app.yaml", "Class!methodX:\n"
+        final V1ConfigMap modifiedConfigMap = new V1ConfigMap()
+            .apiVersion("v1")
+            .kind("ConfigMap")
+            .metadata(new V1ObjectMeta().name("james-test").putLabelsItem("app", "qa-webservice"))
+            .putDataItem("app.yaml", "Class!methodX:\n"
                                    + "  baseScript:\n"
                                    + "    script: base\n"
                                    + "  script: |\n"
                                    + "    boom\n"
-                                   + "  version: 1")
-            .build();
+                                   + "  version: 1");
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         doAnswer(invocationOnMock -> {
