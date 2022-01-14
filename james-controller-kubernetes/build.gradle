@@ -32,7 +32,7 @@ dependencies {
     implementation project(':james-agent-io')
     implementation 'io.kubernetes:client-java:10.0.1'
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.2.0'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.33'
