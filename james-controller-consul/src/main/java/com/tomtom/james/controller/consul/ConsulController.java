@@ -149,7 +149,9 @@ public class ConsulController implements JamesController {
     protected Optional<InformationPoint> eventToInformationPoint(final ConfigurationEvent event) throws IOException {
         String methodReference = readMethodReference(event);
         String informationPointDtoAsJsonString = (String) event.getPropertyValue();
+        informationPointDtoAsJsonString = informationPointDtoAsJsonString.replace("\\\"","'");
         final String properties = methodReference.replaceAll("#","!") + "=" + informationPointDtoAsJsonString.replaceAll("\n","");
+
         try(final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(properties.getBytes())) {
             return configParser.parseConfiguration(infoPointStream, scriptStore).stream()
                                .map(InformationPointDTO::toInformationPoint).findFirst();

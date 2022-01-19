@@ -30,7 +30,9 @@ class ConsulControllerSpec extends Specification{
     "version": 1, 
     "script": [
         "// First line of Information Point script",
-        "// Second line of Information Point script"
+        "// Second line of Information Point script",
+        "println \\"quoted text1 here\\" ",
+        "println 'quoted text2 here' "
     ]
     }'''
 
