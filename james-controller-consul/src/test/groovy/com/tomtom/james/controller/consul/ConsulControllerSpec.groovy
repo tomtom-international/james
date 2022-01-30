@@ -24,13 +24,16 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse original v1 json" () {
         given:
-        def methodRefrence = "foo.bar.className#methodName"
+        def methodRefrence = "foo.bar.className!methodName"
         def json = '''{
     "sampleRate": 3, 
     "version": 1, 
     "script": [
         "// First line of Information Point script",
-        "// Second line of Information Point script"
+        "// Second line of Information Point script",
+        "println \\"quoted text1 here\\"",
+        "println 'quoted text2 here'",
+        "println 'with new \\\\n line'"
     ]
     }'''
 
@@ -42,11 +45,18 @@ class ConsulControllerSpec extends Specification{
         ip.get().className == "foo.bar.className"
         ip.get().methodName == "methodName"
         ip.get().sampleRate == 3
+        ip.get().script.get() == """\
+        // First line of Information Point script
+        // Second line of Information Point script
+        println "quoted text1 here"
+        println 'quoted text2 here'
+        println 'with new \\n line'\
+""".stripIndent()
     }
 
     def "Should parse v1 json with owner and index" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "sampleRate": 6, 
     "version": 1, 
@@ -74,7 +84,7 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse v1 json with old sample rate property" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "sampleRate": 6, 
     "version": 1, 
@@ -104,7 +114,7 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse v1 json with success and error sampleRates" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "successSampleRate": 50, 
     "errorSampleRate": 90, 
@@ -132,7 +142,7 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse v1 json when baseScript is defined" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "version": 1, 
     "baseScript": [
@@ -160,7 +170,7 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse v1 json when successExecutionThreshold is defined" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "version": 1, 
     "successExecutionThreshold": 999,
@@ -181,7 +191,7 @@ class ConsulControllerSpec extends Specification{
 
     def "Should parse v1 json when successExecutionThreshold is not defined" () {
         given:
-        def methodRefrence = "foo.bar.className2#methodName2"
+        def methodRefrence = "foo.bar.className2!methodName2"
         def json = '''{
     "version": 1, 
     "metadata": {
