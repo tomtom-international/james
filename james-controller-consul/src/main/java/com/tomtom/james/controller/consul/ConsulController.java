@@ -36,8 +36,10 @@ import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.event.ConfigurationEvent;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Properties;
 
 @SuppressWarnings("unused")
 public class ConsulController implements JamesController {
@@ -145,16 +147,15 @@ public class ConsulController implements JamesController {
         LOG.trace("All information points removed");
     }
 
-
     protected Optional<InformationPoint> eventToInformationPoint(final ConfigurationEvent event) throws IOException {
-        String methodReference = readMethodReference(event);
-        String informationPointDtoAsJsonString = (String) event.getPropertyValue();
-        final String properties = methodReference.replaceAll("#","!") + "=" + informationPointDtoAsJsonString.replaceAll("\n","");
-        try(final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(properties.getBytes())) {
+        Properties properties = new Properties();
+        properties.setProperty(event.getPropertyName(),  (String) event.getPropertyValue());
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        properties.store(output, null);
+        try(final ByteArrayInputStream infoPointStream = new ByteArrayInputStream(output.toByteArray())) {
             return configParser.parseConfiguration(infoPointStream, scriptStore).stream()
                                .map(InformationPointDTO::toInformationPoint).findFirst();
         }
-
     }
 
     private String readMethodReference(ConfigurationEvent event) {
