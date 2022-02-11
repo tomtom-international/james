@@ -1,17 +1,42 @@
+trigger: none
+pr: none
 
+resources:
+  containers:
+    - container: jdk
+      image: openjdk:8
 
-pool:
-  name: 'Private Cloud'
+parameters:
+  - name: version
+    type: string
 
-steps:
-- task: Gradle@2
-  inputs:
-    workingDirectory: ''
-    gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'
-    tasks: 'build'
+variables:
+  isMasterBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
+  cache-version: cache-v1
+
+jobs:
+  - job: build
+    displayName: Release Job
+    pool: 'Private Cloud'
+    container: jdk
+    steps:
+      - checkout: self
+        clean: true
+        persistCredentials: true
+      - task: Cache@2
+        inputs:
+          key: 'gradle | "$(cache-version)" | "$(Agent.OS)" | **/build.gradle'
+          restoreKeys: |
+            gradle | "$(cache-version)" | "$(Agent.OS)"
+            gradle | "$(cache-version)"
+          path: $(GRADLE_USER_HOME)
+        displayName: Configure gradle caching
+      - task: Gradle@2
+        inputs:
+          options: '--build-cache'
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          publishJUnitResults: true
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
