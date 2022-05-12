@@ -111,6 +111,13 @@ configure(projectList) { Project confPrj ->
                 url = 'http://www.apache.org/licenses/LICENSE-2.0'
               }
             }
+            developers {
+              developer {
+                  id = 'james'
+                  name = 'James'
+                  email = 'james@groups.tomtom.com'
+              }
+            }
           }
         }
       }
