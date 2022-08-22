@@ -36,7 +36,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.7.0'
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.0'
 
     testImplementation "org.assertj:assertj-core:3.23.1"
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.33.2"
