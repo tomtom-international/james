@@ -22,7 +22,7 @@ assemble.dependsOn(shadowJar)
 
 dependencies {
     compileOnly project(':james-agent-common')
-    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.18.0'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.19.0'
 
     testImplementation project(':james-agent-common')
     testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.18.0'
