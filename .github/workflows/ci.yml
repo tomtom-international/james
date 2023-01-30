@@ -34,6 +34,12 @@ jobs:
           ${{ runner.os }}-gradle-      
     - name: Test with Gradle
       run: ./gradlew clean build integrationTest
+    - name: Archive Reports
+      uses: actions/upload-artifact@v3
+      if: ${{ always() }}report
+      with:
+        name: reports
+        path: '**/build/reports'
     - name: Cleanup Gradle Cache
       run: |
         rm -f ~/.gradle/caches/modules-2/modules-2.lock
