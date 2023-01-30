@@ -3,6 +3,7 @@ package com.tomtom.james.publisher
 import com.tomtom.james.common.api.QueueBacked
 import com.tomtom.james.common.api.publisher.Event
 import com.tomtom.james.common.api.publisher.EventPublisher
+import com.tomtom.james.common.log.Logger
 import org.awaitility.Awaitility
 import spock.lang.Specification
 
@@ -22,6 +23,10 @@ class DisruptorAsyncPublisherSpec extends Specification {
     ExecutorService eventCreator = Executors.newFixedThreadPool(PUBLISHER_SIZE)
     CountingPublisher sleepingPublisher = new CountingPublisher( { it-> sleep(10)})
     CountingPublisher immidiatePublisher = new CountingPublisher( null)
+
+    void setup() {
+        Logger.setCurrentLogLevel(Logger.Level.TRACE)
+    }
 
     def "Processes all jobs up to capacity"() {
         given:
