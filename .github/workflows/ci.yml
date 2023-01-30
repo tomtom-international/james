@@ -37,9 +37,9 @@ jobs:
       run: ./gradlew clean build integrationTest
     - name: Archive Reports
       uses: actions/upload-artifact@v3
-      if: ${{ always() }}report
+      if: ${{ always() }}
       with:
-        name: reports
+        name: reports-${{ matrix.java }}
         path: '**/build/reports'
     - name: Cleanup Gradle Cache
       run: |
