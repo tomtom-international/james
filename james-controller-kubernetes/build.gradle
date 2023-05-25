@@ -33,7 +33,7 @@ dependencies {
     implementation "com.google.guava:guava:${versions.guava}"
     implementation 'io.kubernetes:client-java:18.0.0'
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.9.0'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
