@@ -16,8 +16,16 @@
 
 package com.tomtom.james.publisher.kinesis;
 
+import com.amazonaws.services.kinesis.producer.Attempt;
 import com.amazonaws.services.kinesis.producer.KinesisProducer;
 import com.amazonaws.services.kinesis.producer.KinesisProducerConfiguration;
+import com.amazonaws.services.kinesis.producer.UnexpectedMessageException;
+import com.amazonaws.services.kinesis.producer.UserRecordFailedException;
+import com.amazonaws.services.kinesis.producer.UserRecordResult;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.tomtom.james.common.api.configuration.EventPublisherConfiguration;
 import com.tomtom.james.common.api.publisher.Event;
 import com.tomtom.james.common.api.publisher.EventPublisher;
@@ -28,6 +36,9 @@ import com.tomtom.james.publisher.kinesis.configuration.ProducerConfiguration;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
@@ -39,6 +50,16 @@ public class KinesisPublisher implements EventPublisher {
     private String stream;
     private Supplier<String> partitionKeySupplier;
     private KinesisProducer producer;
+    private final ExecutorService executor;
+
+    public KinesisPublisher() {
+        final ThreadFactory
+            threadFactory = new ThreadFactoryBuilder()
+            .setNameFormat(getId() + "-%d")
+            .setDaemon(true)
+            .build();
+        this.executor = Executors.newSingleThreadExecutor(threadFactory);
+    }
 
     @Override
     public String getId() {
@@ -60,6 +81,7 @@ public class KinesisPublisher implements EventPublisher {
             producer.flushSync();
             producer = null;
         }
+        executor.shutdownNow();
     }
 
     @Override
@@ -67,7 +89,9 @@ public class KinesisPublisher implements EventPublisher {
         if (producer != null) {
             try {
                 ByteBuffer buffer = ByteBuffer.wrap(formatter.format(Objects.requireNonNull(evt)).getBytes());
-                producer.addUserRecord(stream, partitionKeySupplier.get(), buffer);
+
+                final ListenableFuture<UserRecordResult> future = producer.addUserRecord(stream, partitionKeySupplier.get(), buffer);
+                Futures.addCallback(future, new UserRecordCallback(), executor);
             } catch (Exception e) {
                 LOG.warn("Failed to publish event to Kinesis", e);
             }
@@ -111,6 +135,33 @@ public class KinesisPublisher implements EventPublisher {
         } catch (Exception e) {
             LOG.error("Failed to initialize " + KinesisPublisher.class.getSimpleName(), e);
             return null;
+        }
+    }
+
+    private static class UserRecordCallback implements FutureCallback<UserRecordResult> {
+
+        @Override
+        public void onFailure(Throwable t) {
+            // If we see any failures, we will log them.
+            if (t instanceof UserRecordFailedException) {
+                int attempts = ((UserRecordFailedException)t).getResult().getAttempts().size() - 1;
+                Attempt last = ((UserRecordFailedException)t).getResult().getAttempts().get(attempts);
+                if (attempts > 1) {
+                    Attempt previous = ((UserRecordFailedException)t).getResult().getAttempts().get(attempts - 1);
+                    LOG.error(String.format("Record failed to put - %s : %s. Previous failure - %s : %s (no. attempts: %d)",
+                                            last.getErrorCode(), last.getErrorMessage(), previous.getErrorCode(),
+                                            previous.getErrorMessage(), attempts));
+                } else {
+                    LOG.error(String.format("Record failed to put - %s : %s.", last.getErrorCode(), last.getErrorMessage()));
+                }
+            } else if (t instanceof UnexpectedMessageException) {
+                LOG.error("Record failed to put due to unexpected message received from native layer", t);
+            }
+            LOG.error("Failed to publish event to Kinesis", t);
+        }
+
+        @Override
+        public void onSuccess(UserRecordResult result) {
         }
     }
 
