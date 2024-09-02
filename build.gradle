@@ -61,7 +61,7 @@ subprojects { prj ->
             groovy      : '3.0.17',
             guava       : '32.1.2-jre',
             jackson     : '2.14.2',
-            snakeyaml   : '1.28',
+            snakeyaml   : '2.0',
             spock       : '2.0-groovy-3.0',
             objenesis   : '3.2',
             awaitility  : '4.1.0',

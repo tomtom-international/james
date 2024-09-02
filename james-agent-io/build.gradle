@@ -25,8 +25,11 @@ sourceCompatibility = 1.8
 
 dependencies {
     api project(':james-agent-common')
+    implementation group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: versions.jackson
+    implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: versions.jackson) {
+        exclude group: 'org.yaml', module: 'snakeyaml'
+    }
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
 }
