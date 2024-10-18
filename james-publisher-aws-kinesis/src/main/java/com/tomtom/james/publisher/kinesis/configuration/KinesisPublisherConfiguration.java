@@ -36,6 +36,12 @@ public class KinesisPublisherConfiguration {
                 .orElse("james-kinesis");
     }
 
+    public Integer getMaxMessageSize() {
+        return configurationProperties.get("maxMessageSize")
+                                      .map(StructuredConfiguration::asInteger)
+                                      .orElse(-1);
+    }
+
     public Optional<String> getPartitionKey() {
         return configurationProperties.get("partitionKey")
                 .map(StructuredConfiguration::asString);

@@ -50,6 +50,7 @@ public class KinesisPublisher implements EventPublisher {
     private String stream;
     private Supplier<String> partitionKeySupplier;
     private KinesisProducer producer;
+    private int maxMessageSize;
     private final ExecutorService executor;
 
     public KinesisPublisher() {
@@ -72,6 +73,7 @@ public class KinesisPublisher implements EventPublisher {
         formatter = new JSONEventFormatter(configuration.getElasticSearch());
         stream = configuration.getStream();
         partitionKeySupplier = () -> configuration.getPartitionKey().orElse(UUID.randomUUID().toString());
+        maxMessageSize = configuration.getMaxMessageSize();
         producer = createKinesisProducer(configuration);
     }
 
@@ -88,7 +90,12 @@ public class KinesisPublisher implements EventPublisher {
     public void publish(Event evt) {
         if (producer != null) {
             try {
-                ByteBuffer buffer = ByteBuffer.wrap(formatter.format(Objects.requireNonNull(evt)).getBytes());
+                final String formattedEvent = formatter.format(Objects.requireNonNull(evt));
+                ByteBuffer buffer = ByteBuffer.wrap(formattedEvent.getBytes());
+                if (maxMessageSize > 0 && buffer.remaining() > maxMessageSize) {
+                    LOG.warn("Event is too large to be published to Kinesis. Skipping ...\n " + formattedEvent);
+                    return;
+                }
 
                 final ListenableFuture<UserRecordResult> future = producer.addUserRecord(stream, partitionKeySupplier.get(), buffer);
                 Futures.addCallback(future, new UserRecordCallback(), executor);
