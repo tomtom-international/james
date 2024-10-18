@@ -1,9 +1,10 @@
 package com.tomtom.james.disruptor;
 
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 import com.tomtom.james.common.log.Logger;
 
-public class JobEventHandler implements EventHandler<JobEvent> {
+public class JobEventHandler implements EventHandler<JobEvent>, WorkHandler<JobEvent> {
 
     private static final Logger LOG = Logger.getLogger(JobEventHandler.class);
 
@@ -16,7 +17,11 @@ public class JobEventHandler implements EventHandler<JobEvent> {
         JobEvent event,
         long sequence,
         boolean endOfBatch) throws Exception {
+        onEvent(event);
+    }
 
+    @Override
+    public void onEvent(final JobEvent event) throws Exception {
         try{
 
             Runnable job = event.getJob();

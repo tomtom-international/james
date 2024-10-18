@@ -62,7 +62,11 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
         disruptor =
                 new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
         // Start the Disruptor, starts all threads running
-        disruptor.handleEventsWith(new JobEventHandler());
+        final JobEventHandler[] workHandlers = new JobEventHandler[numberOfWorkers];
+        for (int i = 0; i < numberOfWorkers; i++) {
+            workHandlers[i] = new JobEventHandler();
+        }
+        disruptor.handleEventsWithWorkerPool(workHandlers);
         disruptor.start();
 
         this.delegate = Objects.requireNonNull(delegate);
@@ -105,6 +109,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                 callStack,
                 returnValue,
                 initialContextProvider)))) {
+            LOG.warn("Dropping success handler execution for " + informationPoint);
             droppedJobsCount.incrementAndGet();
         }
     }
@@ -137,6 +142,7 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
                         errorCause,
                         initialContextProvider)))) {
             droppedJobsCount.incrementAndGet();
+            LOG.warn("Dropping error handler execution for " + informationPoint);
         }
 
     }
