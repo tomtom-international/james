@@ -17,8 +17,6 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-sourceCompatibility = 1.8
-
 jar {
     manifest {
         attributes 'Agent-Class': 'com.tomtom.james.newagent.JVMAgent',
