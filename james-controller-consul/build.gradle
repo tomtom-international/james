@@ -17,8 +17,6 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-sourceCompatibility = 1.8
-
 shadowJar {
     relocate 'com.ecwid', 'com.tomtom.james.controller.consul.repackaged.com.ecwid'
     relocate 'com.netflix', 'com.tomtom.james.controller.consul.repackaged.com.netflix'
@@ -36,5 +34,7 @@ dependencies {
     implementation "com.google.guava:guava:${versions.guava}"
     implementation 'commons-configuration:commons-configuration:1.10'
     implementation 'com.netflix.archaius:archaius-core:0.7.7'
+
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
+    testImplementation group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
 }

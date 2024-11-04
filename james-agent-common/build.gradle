@@ -18,8 +18,6 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 1.8
-
 dependencies {
     api(group: 'co.elastic.logging', name: 'ecs-logging-core', version: versions.ecs_logging)
 }
