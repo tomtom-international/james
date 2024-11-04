@@ -35,6 +35,7 @@ dependencies {
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
+    testImplementation group: 'org.apache.groovy', name: 'groovy', version: versions.groovy
 }
 
 configurations {

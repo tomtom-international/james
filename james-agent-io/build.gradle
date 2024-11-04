@@ -29,5 +29,5 @@ dependencies {
     }
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
-    testImplementation group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
+    testImplementation group: 'org.apache.groovy', name: 'groovy', version: versions.groovy
 }

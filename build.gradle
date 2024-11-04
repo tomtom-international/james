@@ -59,11 +59,11 @@ subprojects { prj ->
         apply plugin: 'com.github.johnrengelman.shadow'
     }
     ext.versions = [
-            groovy         : '3.0.17',
+            groovy         : '4.0.23',
             guava          : '32.1.2-jre',
             jackson        : '2.14.2',
             snakeyaml      : '2.0',
-            spock          : '2.3-groovy-3.0',
+            spock          : '2.3-groovy-4.0',
             objenesis      : '3.2',
             awaitility     : '4.1.0',
             javassist      : '3.28.0-GA',
