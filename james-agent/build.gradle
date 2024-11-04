@@ -53,9 +53,9 @@ dependencies {
     }
     implementation group: 'org.yaml', name: 'snakeyaml', version: versions.snakeyaml
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
-    implementation group: 'org.codehaus.groovy', name: 'groovy', version: versions.groovy
-    implementation group: 'org.codehaus.groovy', name: 'groovy-json', version: versions.groovy
-    implementation group: 'org.codehaus.groovy', name: 'groovy-xml', version: versions.groovy
+    implementation group: 'org.apache.groovy', name: 'groovy', version: versions.groovy
+    implementation group: 'org.apache.groovy', name: 'groovy-json', version: versions.groovy
+    implementation group: 'org.apache.groovy', name: 'groovy-xml', version: versions.groovy
     implementation group: 'org.javassist', name: 'javassist', version: versions.javassist
     implementation group: 'com.lmax', name: 'disruptor', version: versions.disruptor
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.log4j_stackutil
