@@ -60,7 +60,7 @@ subprojects { prj ->
     }
     ext.versions = [
             groovy         : '4.0.23',
-            guava          : '32.1.2-jre',
+            guava          : '33.3.1-jre',
             jackson        : '2.14.2',
             snakeyaml      : '2.0',
             spock          : '2.3-groovy-4.0',
