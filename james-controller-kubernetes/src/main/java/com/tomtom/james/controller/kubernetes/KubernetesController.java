@@ -64,9 +64,8 @@ public class KubernetesController implements JamesController {
 
     private static final Logger LOG = Logger.getLogger(KubernetesController.class);
     private final ExecutorService executor;
-    private final Map<String, Map<String,InformationPointDTO>> informationPointsCache;
+    private final Map<String, Map<String, InformationPointDTO>> informationPointsCache;
     private ApiClient apiClient;
-
 
     @Override
     public String getId() {
@@ -98,8 +97,8 @@ public class KubernetesController implements JamesController {
         apiClient = createApiClient(configuration.getUrl(), configuration.getToken());
         executor.execute(() -> {
             while (!Thread.interrupted()) {
-                try(final Watch<V1ConfigMap> watch =
-                        createConfigMapWatch(apiClient, configuration.getNamespace(), configuration.getLabels())) {
+                try (final Watch<V1ConfigMap> watch =
+                         createConfigMapWatch(apiClient, configuration.getNamespace(), configuration.getLabels())) {
                     watchConfigMapChanges(watch, informationPointService);
                 } catch (final Exception e) {
                     LOG.info("Unable to setup k8s watcher", e);
@@ -149,25 +148,17 @@ public class KubernetesController implements JamesController {
         }
     }
 
-    private Map<String,String> updatePairedMaps(final V1ObjectMeta metadata, final String name) {
+    private Map<String, String> updatePairedMaps(final V1ObjectMeta metadata, final String name) {
         final String mainMapName = getSecondPartOfConfigurationName(name);
 
         try {
             final String fieldSelector = "metadata.name=" + mainMapName;
             final V1ConfigMapList v1ConfigMapList =
-                new CoreV1Api(apiClient).listNamespacedConfigMap(metadata.getNamespace(),
-                                                                 null,
-                                                                 null,
-                                                                 null,
-                                                                 fieldSelector,
-                                                                 null,
-                                                                 null,
-                                                                 null,
-                                                                 null,
-                                                                 null,
-                                                                 false);
+                new CoreV1Api(apiClient).listNamespacedConfigMap(metadata.getNamespace())
+                                        .fieldSelector(fieldSelector)
+                                        .watch(false).execute();
             return v1ConfigMapList.getItems().stream().findFirst().map(V1ConfigMap::getData)
-                                                         .orElse(Collections.emptyMap());
+                                  .orElse(Collections.emptyMap());
         } catch (ApiException e) {
             LOG.warn("Problem while looking for map other map");
             return Collections.emptyMap();
@@ -180,10 +171,10 @@ public class KubernetesController implements JamesController {
         //configuration is stored in to config maps:
         // - configMap with configuration: CONFIG_NAME
         // - configMap with script files: CONFIG_NAME-files
-        if(name.endsWith("-files")) {
+        if (name.endsWith("-files")) {
             toReplace = "-files";
             suffix = "";
-        }else {
+        } else {
             suffix = "-files";
             toReplace = "";
         }
@@ -205,41 +196,30 @@ public class KubernetesController implements JamesController {
                                            .collect(Collectors.joining(","));
         return Watch.createWatch(
             apiClient,
-            api.listNamespacedConfigMapCall(namespace,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            labelSelector,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            true,
-                                            null),
+            api.listNamespacedConfigMap(namespace).labelSelector(labelSelector).watch(true).buildCall(null),
             new TypeToken<Watch.Response<V1ConfigMap>>() {
 
             }.getType());
     }
 
-    private Collection<InformationPointDTO> readAllConfigurations(Map<String,String> configMaps) {
-        Map<ConfigParser,String> configurations = new HashMap<>();
+    private Collection<InformationPointDTO> readAllConfigurations(Map<String, String> configMaps) {
+        Map<ConfigParser, String> configurations = new HashMap<>();
         InMemoryScriptStore scriptStore = new InMemoryScriptStore();
         for (Map.Entry<String, String> configEntry : configMaps.entrySet()) {
             final ConfigParser parser = ConfigIOFactory.getInstance().getParser(configEntry.getKey()).orElse(null);
-            if(parser != null){
+            if (parser != null) {
                 configurations.put(parser, configEntry.getValue());
-            } else if (configEntry.getKey().endsWith(".groovy")){
+            } else if (configEntry.getKey().endsWith(".groovy")) {
                 scriptStore.registerFile(configEntry.getKey(), configEntry.getValue());
             } else {
                 LOG.warn("Unrecognized format:" + configEntry.getKey());
             }
         }
-        return configurations.entrySet().stream().flatMap(entry-> {
-            try (InputStream configStream = new ByteArrayInputStream(entry.getValue().getBytes());){
-                return entry.getKey().parseConfiguration(configStream,scriptStore).stream();
+        return configurations.entrySet().stream().flatMap(entry -> {
+            try (InputStream configStream = new ByteArrayInputStream(entry.getValue().getBytes());) {
+                return entry.getKey().parseConfiguration(configStream, scriptStore).stream();
             } catch (IOException e) {
-                LOG.error("Unable to parse configurations: "+configMaps.keySet(),e);
+                LOG.error("Unable to parse configurations: " + configMaps.keySet(), e);
                 return Stream.empty();
             }
         }).collect(Collectors.toSet());
@@ -247,9 +227,10 @@ public class KubernetesController implements JamesController {
 
     private void processUpdate(final String configName, final Collection<InformationPointDTO> informationPoints,
                                final InformationPointService informationPointService) {
-        final Map<String,InformationPointDTO> cache = informationPointsCache.computeIfAbsent(configName, name -> new LinkedHashMap<>());
+        final Map<String, InformationPointDTO> cache =
+            informationPointsCache.computeIfAbsent(configName, name -> new LinkedHashMap<>());
         final Map<String, InformationPointDTO> informationPointsMap = informationPoints.stream().collect(
-            Collectors.toMap(informationPoint -> informationPoint.getMethodReference(),Function.identity()));
+            Collectors.toMap(informationPoint -> informationPoint.getMethodReference(), Function.identity()));
 
         final MapDifference<String, InformationPointDTO> difference = Maps.difference(informationPointsMap, cache);
 
