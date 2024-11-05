@@ -29,7 +29,7 @@ dependencies {
     implementation project(':james-agent-common')
     implementation project(':james-agent-io')
     implementation "com.google.guava:guava:${versions.guava}"
-    implementation 'io.kubernetes:client-java:18.0.1'
+    implementation 'io.kubernetes:client-java:21.0.2'
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
