@@ -37,5 +37,5 @@ dependencies {
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 
     testImplementation "org.assertj:assertj-core:3.24.2"
-    testImplementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
+    testImplementation "com.github.tomakehurst:wiremock-jre8:3.0.1"
 }
