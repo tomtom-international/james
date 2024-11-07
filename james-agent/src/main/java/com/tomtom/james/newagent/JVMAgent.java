@@ -185,7 +185,7 @@ public class JVMAgent {
         } catch (ConfigurationInitializationException e) {
             e.printStackTrace();
         } finally {
-            SystemErrCapture.unregisterAndReplay(line -> !line.startsWith("SLF4J:"));
+            SystemErrCapture.unregisterAndReplay(line -> !(line.startsWith("SLF4J:") || line.startsWith("SLF4J(")));
         }
     }
 
