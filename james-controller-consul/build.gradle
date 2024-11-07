@@ -33,7 +33,7 @@ dependencies {
     implementation 'com.ecwid.consul:consul-api:1.4.5'
     implementation "com.google.guava:guava:${versions.guava}"
     implementation 'commons-configuration:commons-configuration:1.10'
-    implementation 'com.netflix.archaius:archaius-core:0.7.7'
+    implementation 'com.netflix.archaius:archaius-core:0.7.12'
 
     testImplementation group: 'org.spockframework', name: 'spock-core', version: versions.spock
     testImplementation group: 'org.apache.groovy', name: 'groovy', version: versions.groovy
