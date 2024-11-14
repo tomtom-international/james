@@ -17,7 +17,7 @@
 apply plugin: 'java'
 
 shadowJar {
-    relocate 'com.fasterxml.jackson', 'com.tomtom.james.publisher.file.repackaged.com.fasterxml.jackson'
+    relocate 'com.fasterxml.jackson', 'com.tomtom.james.publisher.kinesis.repackaged.com.fasterxml.jackson'
 }
 assemble.dependsOn(shadowJar)
 
@@ -25,5 +25,6 @@ dependencies {
     implementation project(':james-agent-common')
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
     implementation group: 'com.amazonaws', name: 'amazon-kinesis-producer', version: '0.15.12'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.24.1'
+    implementation 'org.slf4j:jcl-over-slf4j:2.0.16'
+
 }
