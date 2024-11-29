@@ -69,7 +69,7 @@ public final class ContextAwareAdvice {
                 return;
             }
 
-            final String key = MethodExecutionContextHelper.createContextKey();
+            final String key = MethodExecutionContextHelper.createContextKey(ip);
             LOG.trace(() -> "Initializing custom context setup for the call");
             final Object callContext = ScriptEngineSupplier.get().invokePrepareContext(
                     ip,
@@ -101,7 +101,7 @@ public final class ContextAwareAdvice {
             Throwable thrown) {
         Instant eventTime = Instant.now();
         Duration executionTime = Duration.ofNanos(System.nanoTime() - _startTime);
-        boolean requireInitialContextCleanup = false;
+        AutoCloseable closeable = null;
 
         try {
             Optional<InformationPoint> optionalInformationPoint = InformationPointServiceSupplier.get()
@@ -110,19 +110,19 @@ public final class ContextAwareAdvice {
                 LOG.trace(() -> "onExit: skipping because information point is gone");
                 return;
             }
-            final InformationPoint informationPoint = optionalInformationPoint.get();
-            final long successExecutionThreshold = informationPoint.getSuccessExecutionThreshold();
-            final double sampleRate = getSampleRate(thrown, informationPoint);
+            final InformationPoint ip = optionalInformationPoint.get();
+            final long successExecutionThreshold = ip.getSuccessExecutionThreshold();
+            final double sampleRate = getSampleRate(thrown, ip);
 
             LOG.trace(() -> "onExit: START "
                     + "[origin=" + origin
                     + ", informationPointClassName=" + informationPointClassName
                     + ", informationPointMethodName=" + informationPointMethodName
-                    + ", baseScript=" + (informationPoint.getBaseScript().isPresent())
-                    + ", script=" + (informationPoint.getScript().isPresent())
-                    + ", sampleRate=" + informationPoint.getSampleRate()
-                    + ", successSampleRate=" + informationPoint.getSuccessSampleRate()
-                    + ", errorSampleRate=" + informationPoint.getErrorSampleRate()
+                    + ", baseScript=" + (ip.getBaseScript().isPresent())
+                    + ", script=" + (ip.getScript().isPresent())
+                    + ", sampleRate=" + ip.getSampleRate()
+                    + ", successSampleRate=" + ip.getSuccessSampleRate()
+                    + ", errorSampleRate=" + ip.getErrorSampleRate()
                     + ", successExecutionThreshold=" + successExecutionThreshold
                     + ", instance=" + instance
                     + ", arguments=" + Arrays.asList(arguments)
@@ -130,7 +130,10 @@ public final class ContextAwareAdvice {
                     + ", thrown=" + thrown
                     + "]");
 
-            requireInitialContextCleanup = informationPoint.getRequiresInitialContext();
+            boolean requireInitialContextCleanup = ip.getRequiresInitialContext();
+            if (requireInitialContextCleanup) {
+                closeable = () -> MethodExecutionContextHelper.removeContextKey(ip);
+            }
 
             if ((sampleRate < 100) && (sampleRate < ThreadLocalRandom.current().nextDouble() * 100)) {
                 LOG.trace(() -> "onExit: Sample skipped (sampleRate=" + sampleRate + ")");
@@ -138,10 +141,10 @@ public final class ContextAwareAdvice {
             }
 
             final CompletableFuture<Object> initialContextAsyncProvider = requireInitialContextCleanup
-                    ? MethodExecutionContextHelper.getContextAsync(MethodExecutionContextHelper.getKeyForCurrentFrame())
+                    ? MethodExecutionContextHelper.getContextAsync(MethodExecutionContextHelper.getKeyForCurrentFrame(ip))
                     : CompletableFuture.completedFuture(null);
 
-            final String[] callStack = informationPoint.getRequiresCallStack() ? getCallStack() : EMPTY_CALL_STACK;
+            final String[] callStack = ip.getRequiresCallStack() ? getCallStack() : EMPTY_CALL_STACK;
             if (thrown == null) {
                 if (executionTime.toMillis() < successExecutionThreshold) {
                     LOG.trace(() -> "onExit: ExecutionTime skipped (executionTime=" + executionTime.toMillis() + ")");
@@ -149,7 +152,7 @@ public final class ContextAwareAdvice {
                 }
                 LOG.trace(() -> "onExit: Invoking success handler");
                 ScriptEngineSupplier.get().invokeSuccessHandler(
-                        informationPoint,
+                        ip,
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -163,7 +166,7 @@ public final class ContextAwareAdvice {
             } else {
                 LOG.trace(() -> "onExit: Invoking error handler");
                 ScriptEngineSupplier.get().invokeErrorHandler(
-                        informationPoint,
+                        ip,
                         origin,
                         createParameterList(origin, arguments),
                         instance,
@@ -179,8 +182,12 @@ public final class ContextAwareAdvice {
             LOG.error("Error executing onExit advice", t);
             throw t;
         } finally {
-            if (requireInitialContextCleanup) {
-                MethodExecutionContextHelper.removeContextKey();
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (Exception e) {
+                LOG.error("Error executing onExit advice (finally)", e);
             }
             LOG.trace("onExit: END");
         }

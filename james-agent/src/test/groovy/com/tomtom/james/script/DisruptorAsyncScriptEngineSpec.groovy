@@ -124,7 +124,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
 
         when:
         threadData.set("greetings from " + currentThread.getId())
-        def key = MethodExecutionContextHelper.createContextKey()
+        def key = MethodExecutionContextHelper.createContextKey(informationPoint)
         def context = scriptEngine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, key)
         MethodExecutionContextHelper.storeContextAsync(key, context)
         scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread, instant, duration, callStack, returnValue, MethodExecutionContextHelper.getContextAsync(key))

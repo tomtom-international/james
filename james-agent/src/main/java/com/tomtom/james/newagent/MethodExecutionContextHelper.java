@@ -16,6 +16,7 @@
 
 package com.tomtom.james.newagent;
 
+import com.tomtom.james.common.api.informationpoint.InformationPoint;
 import com.tomtom.james.common.log.Logger;
 import com.tomtom.james.util.MoreExecutors;
 
@@ -53,18 +54,26 @@ public class MethodExecutionContextHelper {
         }
     }
 
-    public static String createContextKey() {
-        final String contextKey = UUID.randomUUID().toString();
+    public static String createContextKey(final InformationPoint ip) {
+        final String contextKey = ip.toString() + "-" + UUID.randomUUID();
         keysStack.get().push(contextKey);
         return contextKey;
     }
 
-    public static String getKeyForCurrentFrame() {
-        return keysStack.get().peek();
+    public static String getKeyForCurrentFrame(final InformationPoint informationPoint) {
+        final String key = keysStack.get().peek();
+        if (key != null && key.startsWith(informationPoint.toString())) {
+            return key;
+        }
+        return null;
     }
 
-    public static String removeContextKey() {
-        return keysStack.get().pop();
+    public static String removeContextKey(final InformationPoint informationPoint) {
+        String key = getKeyForCurrentFrame(informationPoint);
+        if (key != null) {
+            return keysStack.get().pop();
+        }
+        return null;
     }
 
     public static CompletableFuture<Object> storeContextAsync(final String key, final Object value) {
@@ -77,6 +86,9 @@ public class MethodExecutionContextHelper {
     }
 
     public static CompletableFuture<Object> getContextAsync(final String key) {
+        if (key == null) {
+            return CompletableFuture.completedFuture(null);
+        }
         final CompletableFuture result = new CompletableFuture();
         contextStoreAccessExecutor.submit(() -> {
             if (contextStore.containsKey(key)) {

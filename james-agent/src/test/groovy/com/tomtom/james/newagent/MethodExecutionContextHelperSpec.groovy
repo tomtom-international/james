@@ -16,6 +16,7 @@
 
 package com.tomtom.james.newagent
 
+import com.tomtom.james.common.api.informationpoint.InformationPoint
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
@@ -23,6 +24,8 @@ import java.util.concurrent.TimeUnit
 import static org.awaitility.Awaitility.await
 
 class MethodExecutionContextHelperSpec extends Specification {
+
+    static InformationPoint IP = InformationPoint.builder().withClassName("class").withMethodName("method").build()
 
     def "Should store context per thread"() {
         given:
@@ -44,9 +47,9 @@ class MethodExecutionContextHelperSpec extends Specification {
     }
 
     static def runOnThread(String[] storage, int index) {
-        String key = MethodExecutionContextHelper.createContextKey()
+        String key = MethodExecutionContextHelper.createContextKey(IP)
         storage[index] = key
         MethodExecutionContextHelper.storeContextAsync(key, Integer.valueOf(100 + index))
-        MethodExecutionContextHelper.removeContextKey()
+        MethodExecutionContextHelper.removeContextKey(IP)
     }
 }
