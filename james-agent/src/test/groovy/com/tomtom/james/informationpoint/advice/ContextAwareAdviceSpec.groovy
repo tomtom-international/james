@@ -73,9 +73,9 @@ class ContextAwareAdviceSpec extends Specification {
         def currentThread = Thread.currentThread()
 
         when:
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
@@ -101,9 +101,9 @@ class ContextAwareAdviceSpec extends Specification {
 
         when:
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
         then:
@@ -129,9 +129,9 @@ class ContextAwareAdviceSpec extends Specification {
 
         when:
         ipService.getInformationPoint(informationPointClassName, informationPointMethodName) >> Optional.of(informationPoint)
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], null, thrown)
 
         then:
@@ -156,9 +156,9 @@ class ContextAwareAdviceSpec extends Specification {
         def currentThread = Thread.currentThread()
 
         when:
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
@@ -186,8 +186,9 @@ class ContextAwareAdviceSpec extends Specification {
         def startTime = System.nanoTime()
 
         def target = new Object()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodNameWithContext, method, target, ["arg0"])
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodNameWithContext,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodNameWithContext, method, target, ["arg0"])
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodNameWithContext,
                 method, target, ["arg0"] as Object[], "returned", null)
 
         then:
@@ -220,9 +221,9 @@ class ContextAwareAdviceSpec extends Specification {
 
         when:
         informationPoint.getSuccessExecutionThreshold() >> 10000
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:
@@ -240,15 +241,15 @@ class ContextAwareAdviceSpec extends Specification {
         )
     }
 
-    def "Should call handler when threshold is not met"() {
+    def "Should call handler when threshold is not set"() {
         given:
         def method = Object.class.getMethod("equals", Object.class)
         def currentThread = Thread.currentThread()
 
         when:
-        def startTime = System.nanoTime()
-        ContextAwareAdvice.onEnter(informationPointClassName, informationPointMethodName)
-        ContextAwareAdvice.onExit(startTime, informationPointClassName, informationPointMethodName,
+        ExecutionContext context = new ExecutionContext()
+        ContextAwareAdvice.onEnter(context, informationPointClassName, informationPointMethodName, null, null, null)
+        ContextAwareAdvice.onExit(context, informationPointClassName, informationPointMethodName,
                 method, new Object(), ["arg0"] as Object[], "returned", null)
 
         then:

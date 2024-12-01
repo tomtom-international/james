@@ -24,7 +24,6 @@ import com.tomtom.james.configuration.AgentConfiguration;
 import com.tomtom.james.configuration.AgentConfigurationFactory;
 import com.tomtom.james.configuration.ConfigurationInitializationException;
 import com.tomtom.james.newagent.JVMAgentCleaner;
-import com.tomtom.james.newagent.MethodExecutionContextHelper;
 import com.tomtom.james.publisher.EventPublisherFactory;
 import com.tomtom.james.script.ScriptEngineFactory;
 import com.tomtom.james.store.informationpoints.io.InformationPointStore;
@@ -63,7 +62,7 @@ class Agent {
             //InformationPointService informationPointService = new InformationPointServiceImpl(store, instrumentation);
             //controllersManager.initializeControllers(informationPointService, engine, publisher);
 
-            JVMAgentCleaner.init(controllersManager, engine, publisher, MethodExecutionContextHelper::shutdown);
+            JVMAgentCleaner.init(controllersManager, engine, publisher);
             if (configuration.isShutdownHookEnabled()) {
                 ShutdownHook shutdownHook = new ShutdownHook(configuration, JVMAgentCleaner::close);
                 Runtime.getRuntime().addShutdownHook(shutdownHook);
