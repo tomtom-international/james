@@ -16,93 +16,27 @@
 
 package com.tomtom.james.newagent;
 
-import com.tomtom.james.common.api.informationpoint.InformationPoint;
-import com.tomtom.james.common.log.Logger;
-import com.tomtom.james.util.MoreExecutors;
-
+import com.tomtom.james.informationpoint.advice.ExecutionContext;
 import java.util.ArrayDeque;
-import java.util.UUID;
-import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Helper class for managing method execution context - used by GroovyJames to inject method entry and exit hooks.
+ */
 public class MethodExecutionContextHelper {
-    private static final Logger LOG = Logger.getLogger(MethodExecutionContextHelper.class);
 
-    public static ThreadLocal<ArrayDeque<String>> keysStack = ThreadLocal.withInitial(() -> new ArrayDeque<>(8));
-    private static WeakHashMap<String, Object> contextStore = new WeakHashMap<>();
+    private static ThreadLocal<ArrayDeque<ExecutionContext>> contextStack = ThreadLocal.withInitial(() -> new ArrayDeque<>(8));
 
-    private static ExecutorService contextStoreAccessExecutor = MoreExecutors
-            .createNamedDaemonExecutorService("james-context-access-%d", 1);
-
-    private static ExecutorService contextCallbackExecutor = MoreExecutors
-            .createNamedDaemonExecutorService("james-context-callback-%d", 5);
-
-    public static void shutdown() {
-        try {
-            contextStoreAccessExecutor.shutdown();
-            contextStoreAccessExecutor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            LOG.warn("Executor contextStoreAccessExecutor shutdown interrupted " + e);
-        }
-        try {
-            contextCallbackExecutor.shutdown();
-            contextCallbackExecutor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            LOG.warn("Executor contextCallbackExecutor shutdown interrupted " + e);
-        }
+    public static ExecutionContext executionStarted() {
+        final ExecutionContext context = new ExecutionContext();
+        contextStack.get().push(context);
+        return context;
     }
 
-    public static String createContextKey(final InformationPoint ip) {
-        final String contextKey = ip.toString() + "-" + UUID.randomUUID();
-        keysStack.get().push(contextKey);
-        return contextKey;
+    public static ExecutionContext getExecutionContext() {
+        return contextStack.get().peek();
     }
 
-    public static String getKeyForCurrentFrame(final InformationPoint informationPoint) {
-        final String key = keysStack.get().peek();
-        if (key != null && key.startsWith(informationPoint.toString())) {
-            return key;
-        }
-        return null;
-    }
-
-    public static String removeContextKey(final InformationPoint informationPoint) {
-        String key = getKeyForCurrentFrame(informationPoint);
-        if (key != null) {
-            return keysStack.get().pop();
-        }
-        return null;
-    }
-
-    public static CompletableFuture<Object> storeContextAsync(final String key, final Object value) {
-        final CompletableFuture result = new CompletableFuture();
-        contextStoreAccessExecutor.submit(() -> {
-            contextStore.put(key, value);
-            CompletableFuture.supplyAsync(() -> result.complete(value), contextCallbackExecutor);
-        });
-        return result;
-    }
-
-    public static CompletableFuture<Object> getContextAsync(final String key) {
-        if (key == null) {
-            return CompletableFuture.completedFuture(null);
-        }
-        final CompletableFuture result = new CompletableFuture();
-        contextStoreAccessExecutor.submit(() -> {
-            if (contextStore.containsKey(key)) {
-                final Object context = contextStore.get(key);
-                CompletableFuture.supplyAsync(() -> result.complete(context), contextCallbackExecutor);
-                return;
-            }
-
-            CompletableFuture.supplyAsync(() -> {
-                final String msg = String.format("Key '%s' not found in context container", key);
-                result.completeExceptionally(new IllegalArgumentException(msg));
-                return null;
-            }, contextCallbackExecutor);
-        });
-        return result;
+    public static ExecutionContext executionFinished() {
+        return contextStack.get().pop();
     }
 }

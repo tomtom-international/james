@@ -19,7 +19,6 @@ package com.tomtom.james.script
 import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
-import com.tomtom.james.newagent.MethodExecutionContextHelper
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -124,10 +123,9 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
 
         when:
         threadData.set("greetings from " + currentThread.getId())
-        def key = MethodExecutionContextHelper.createContextKey(informationPoint)
+        def key = UUID.randomUUID().toString()
         def context = scriptEngine.invokePrepareContext(informationPoint, origin, [param1, param2], instance, currentThread, key)
-        MethodExecutionContextHelper.storeContextAsync(key, context)
-        scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread, instant, duration, callStack, returnValue, MethodExecutionContextHelper.getContextAsync(key))
+        scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(context))
         await().atMost(5, TimeUnit.SECONDS).until{ successCallerThreadNames.size() == 1 }
 
         then:

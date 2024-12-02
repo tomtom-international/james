@@ -17,18 +17,9 @@ public class GroovyJames extends AbstractJames {
         this.setName(getClass().getSimpleName());
     }
 
-    // TODO check double if that is all chars that we need to escape
-    private String escapeScriptString(String script) {
-        return script.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r", "\\r")
-                .replace("\n", "\\n");
-    }
-
     protected void insertBefore(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
         StringBuilder s = new StringBuilder("");
-        s.append(" com.tomtom.james.newagent.MethodExecutionTimeHelper.executionStarted();\n");
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter(");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onEnter( com.tomtom.james.newagent.MethodExecutionContextHelper.executionStarted(), \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
@@ -42,9 +33,8 @@ public class GroovyJames extends AbstractJames {
     }
 
     protected void insertAfter(CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException {
-        String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), \n");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionContextHelper.getExecutionContext(), \n");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
@@ -64,9 +54,8 @@ public class GroovyJames extends AbstractJames {
     }
 
     protected void addCatch(ClassPool pool, CtMethod method, ExtendedInformationPoint informationPoint) throws CannotCompileException, NotFoundException {
-        String script = escapeScriptString(informationPoint.getScript().get());
         StringBuilder s = new StringBuilder();
-        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionTimeHelper.getStartTime(), ");
+        s.append(" com.tomtom.james.informationpoint.advice.ContextAwareAdvice.onExit( com.tomtom.james.newagent.MethodExecutionContextHelper.getExecutionContext(), ");
         s.append("\"" + informationPoint.getClassName() + "\", ");
         s.append("\"" + informationPoint.getMethodName() + "\", ");
         s.append(informationPoint.getMethodBodyClassName() + ".class.getDeclaredMethod(\"" + informationPoint.getMethodName() + "\",$sig), "); // method
@@ -87,7 +76,7 @@ public class GroovyJames extends AbstractJames {
 
         // finally block
         StringBuilder f = new StringBuilder("");
-        f.append(" com.tomtom.james.newagent.MethodExecutionTimeHelper.executionFinished(); \n");
+        f.append(" com.tomtom.james.newagent.MethodExecutionContextHelper.executionFinished(); \n");
         method.insertAfter(f.toString(), true);
     }
 }
