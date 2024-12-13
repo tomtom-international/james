@@ -20,10 +20,10 @@ assemble.dependsOn(shadowJar)
 
 dependencies {
     compileOnly project(':james-agent-common')
-    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.1'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.3'
 
     testImplementation project(':james-agent-common')
-    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.1'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.3'
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
