@@ -19,5 +19,5 @@ apply plugin: 'groovy'
 
 dependencies {
     compileOnly project(':james-agent')
-    compileOnly group: 'org.apache.tomcat', name: 'tomcat-catalina', version: '11.0.2'
+    compileOnly group: 'org.apache.tomcat', name: 'tomcat-catalina', version: '11.0.4'
 }
