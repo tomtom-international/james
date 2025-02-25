@@ -25,6 +25,6 @@ dependencies {
     implementation project(':james-agent-common')
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
     implementation group: 'com.amazonaws', name: 'amazon-kinesis-producer', version: '0.15.12'
-    implementation 'org.slf4j:jcl-over-slf4j:2.0.16'
+    implementation 'org.slf4j:jcl-over-slf4j:2.0.17'
 
 }
