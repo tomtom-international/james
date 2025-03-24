@@ -24,7 +24,7 @@ assemble.dependsOn(shadowJar)
 dependencies {
     implementation project(':james-agent-common')
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
-    implementation group: 'com.amazonaws', name: 'amazon-kinesis-producer', version: '0.15.12'
+    implementation group: 'software.amazon.kinesis', name: 'amazon-kinesis-producer', version: '1.0.0'
     implementation 'org.slf4j:jcl-over-slf4j:2.0.16'
 
 }
