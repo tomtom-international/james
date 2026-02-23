@@ -19,7 +19,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath "com.gradleup.shadow:shadow-gradle-plugin:8.3.5"
+        classpath "com.gradleup.shadow:shadow-gradle-plugin:9.3.1"
         classpath "io.github.gradle-nexus:publish-plugin:2.0.0"
     }
 }
@@ -54,25 +54,33 @@ subprojects { prj ->
         mavenCentral()
     }
     apply plugin: 'java'
-    sourceCompatibility = 17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
     if (!projectDescriptions.containsKey(prj.name)) {
         apply plugin: 'com.gradleup.shadow'
     }
     ext.versions = [
-            groovy         : '4.0.23',
+            groovy         : '4.0.30',
             guava          : '33.3.1-jre',
             jackson        : '2.18.2',
             snakeyaml      : '2.0',
             spock          : '2.3-groovy-4.0',
             objenesis      : '3.2',
             awaitility     : '4.1.0',
-            javassist      : '3.28.0-GA',
-            bytebuddytests : '1.15.9',
+            javassist      : '3.30.2-GA',
+            bytebuddytests : '1.18.5',
             disruptor      : '3.4.2',
             log4j_stackutil: '2.17.1',
             ecs_logging    : '1.1.0'
     ]
     test.useJUnitPlatform()
+    dependencies {
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.9.3'
+    }
 }
 
 def projectList = subprojects.findAll { projectDescriptions.keySet().contains(it.name) }
