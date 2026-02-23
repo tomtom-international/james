@@ -14,49 +14,54 @@
  * limitations under the License.
  */
 
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-
 class JvmRunWithJames extends DefaultTask {
 
     @InputFiles
     FileCollection classpath
+
     @Input
     String appMain
+
     @Input
     String jamesAgentJarPath
+
     @Input
     String jamesConfigurationPath
 
     @TaskAction
     def runJvmWithJames() {
-        def cp = classpath
-        // it need to be resolved before switching context to another thread
-        project.logger.info("[JvmRunWithJames]: Resolved classpath:" + cp.getFiles().join(':'))
+        def classpathString = classpath.files.collect { it.absolutePath }.join(File.pathSeparator)
 
-        ExecutorService es = Executors.newSingleThreadExecutor()
-        es.submit({
-            try {
-                project.logger.info("[JvmRunWithJames] Running ${appMain}")
-                project.javaexec {
-                    classpath = cp
-                    main = appMain
-                    jvmArgs = ["-javaagent:${jamesAgentJarPath}",
-                               "-Djames.configurationPath=${jamesConfigurationPath}"]
-                }
+        def javaExecutable = [System.getProperty('java.home'), 'bin', 'java'].join(File.separator)
+
+        def command = [
+            javaExecutable,
+            "-javaagent:${jamesAgentJarPath}".toString(),
+            "-Djames.configurationPath=${jamesConfigurationPath}".toString(),
+            '-cp', classpathString,
+            appMain
+        ] as List<String>
+
+        logger.info("[JvmRunWithJames] Starting: ${command.join(' ')}")
+
+        def process = new ProcessBuilder(command)
+            .directory(new File(project.projectDir.absolutePath))
+            .redirectErrorStream(true)
+            .start()
+
+        logger.lifecycle("[JvmRunWithJames] Process started with PID ${process.pid()}")
+
+        def taskLogger = logger
+        Thread.startDaemon("james-output-pump") {
+            process.inputStream.eachLine { line ->
+                taskLogger.lifecycle("[james] ${line}")
             }
-            catch (Exception e) {
-                project.logger.info("[JvmRunWithJames] Error: Task 'JvmRunWithJames' interrupted.", e)
-                throw e;
-            }
-        } as Callable)
+        }
     }
 }
