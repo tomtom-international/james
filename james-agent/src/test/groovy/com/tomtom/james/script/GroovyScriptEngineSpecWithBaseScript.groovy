@@ -207,4 +207,61 @@ abstract class CustomInformationPointHandler extends InformationPointHandler {
         })
     }
 
+    def "Should use updated base script when base script changes for same script text"() {
+        given:
+        def baseScriptV1 = """
+import com.tomtom.james.common.api.publisher.Event
+import com.tomtom.james.script.*
+
+abstract class HandlerV1 extends InformationPointHandler {
+    void publishEvent(Event evt) {
+        evt.withEntry("baseVersion", "v1")
+        super.publishEvent(evt)
+    }
+}
+"""
+        def baseScriptV2 = """
+import com.tomtom.james.common.api.publisher.Event
+import com.tomtom.james.script.*
+
+abstract class HandlerV2 extends InformationPointHandler {
+    void publishEvent(Event evt) {
+        evt.withEntry("baseVersion", "v2")
+        super.publishEvent(evt)
+    }
+}
+"""
+        def sharedScript = """
+import com.tomtom.james.script.*
+import com.tomtom.james.common.api.publisher.Event
+
+def onSuccess(SuccessHandlerContext context) {
+    publishEvent(new Event([:]))
+}
+"""
+        def ipV1 = Mock(InformationPoint)
+        ipV1.getClassName() >> informationPointClassName
+        ipV1.getMethodName() >> informationPointMethodName
+        ipV1.getBaseScript() >> Optional.of(baseScriptV1)
+        ipV1.getScript() >> Optional.of(sharedScript)
+        ipV1.getMetadata() >> new Metadata()
+
+        def ipV2 = Mock(InformationPoint)
+        ipV2.getClassName() >> informationPointClassName
+        ipV2.getMethodName() >> informationPointMethodName
+        ipV2.getBaseScript() >> Optional.of(baseScriptV2)
+        ipV2.getScript() >> Optional.of(sharedScript)
+        ipV2.getMetadata() >> new Metadata()
+
+        def engine = new GroovyScriptEngine(eventPublisher, toolkitManager)
+
+        when:
+        engine.invokeSuccessHandler(ipV1, origin, [], instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+        engine.invokeSuccessHandler(ipV2, origin, [], instance, currentThread, instant, duration, callStack, returnValue, CompletableFuture.completedFuture(null))
+
+        then:
+        1 * eventPublisher.publish({ Event evt -> evt.content["baseVersion"] == "v1" })
+        1 * eventPublisher.publish({ Event evt -> evt.content["baseVersion"] == "v2" })
+    }
+
 }
