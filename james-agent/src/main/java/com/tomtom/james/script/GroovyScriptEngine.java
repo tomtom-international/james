@@ -171,8 +171,9 @@ class GroovyScriptEngine implements ScriptEngine {
 
     private InformationPointHandler createOrGetCachedHandler(InformationPoint informationPoint)
             throws CompilationFailedException {
-        InformationPointHandler handlerFromCache = handlersCache.computeIfAbsent(informationPoint.getScript().get(), scriptTextKey -> {
-            InformationPointHandler handler = (InformationPointHandler) getOrCreateShell(informationPoint.getBaseScript()).parse(scriptTextKey);
+        String cacheKey = informationPoint.getBaseScript().orElse("") + "|" + informationPoint.getScript().get();
+        InformationPointHandler handlerFromCache = handlersCache.computeIfAbsent(cacheKey, key -> {
+            InformationPointHandler handler = (InformationPointHandler) getOrCreateShell(informationPoint.getBaseScript()).parse(informationPoint.getScript().get());
             handler.setEventPublisher(publisher);
             handler.setToolkitManager(toolkitManager);
             return handler;

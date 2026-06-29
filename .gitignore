@@ -6,3 +6,6 @@ bin/
 /*/out/
 
 /*.iml
+.settings
+.classpath
+.project
