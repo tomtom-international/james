@@ -36,6 +36,6 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.9.0'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.13'
 
-    testImplementation "org.assertj:assertj-core:3.26.3"
+    testImplementation "org.assertj:assertj-core:3.27.3"
     testImplementation "com.github.tomakehurst:wiremock-jre8:3.0.1"
 }
