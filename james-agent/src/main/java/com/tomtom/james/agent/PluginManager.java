@@ -114,7 +114,7 @@ public class PluginManager {
 
     private Collection<URLClassLoader> createClassLoadersForPluginJars(Collection<URL> pluginURLs) {
         return pluginURLs.stream()
-                .map(url -> new URLClassLoader(new URL[]{url}))
+                .map(url -> new PluginClassLoader(url, PluginManager.class.getClassLoader()))
                 .collect(Collectors.toList());
     }
 
