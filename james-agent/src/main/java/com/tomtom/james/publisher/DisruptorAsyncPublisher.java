@@ -8,7 +8,6 @@
 package com.tomtom.james.publisher;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,7 +35,6 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
     private final AtomicInteger droppedJobsCount = new AtomicInteger();
     private final Disruptor<JobEvent> disruptor;
     private final int bufferSize;
-    private final ExecutorService executor;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     DisruptorAsyncPublisher(
@@ -50,8 +48,8 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
 
 
         // Construct the Disruptor
-        executor = MoreExecutors.createNamedDaemonExecutorService(threadPoolNameFormat, numberOfWorkers);
-        disruptor = new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
+        disruptor = new Disruptor<>(new JobEvent.Factory(), bufferSize,
+                MoreExecutors.createNamedDaemonThreadFactory(threadPoolNameFormat));
         // Start the Disruptor, starts all threads running
         disruptor.handleEventsWith(new JobEventHandler());
         disruptor.start();
@@ -107,10 +105,9 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
         isRunning.set(false);
         try {
             disruptor.shutdown(5, TimeUnit.SECONDS);
-            executor.shutdownNow();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (TimeoutException | InterruptedException e) {
-            LOG.trace("Executor shutdown interrupted", e);
+        } catch (TimeoutException e) {
+            LOG.trace("Disruptor shutdown timed out, halting", e);
+            disruptor.halt();
         } finally {
 
             LOG.trace("Executor shutdown completed.");

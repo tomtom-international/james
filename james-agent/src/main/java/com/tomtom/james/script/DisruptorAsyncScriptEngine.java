@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +46,6 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
 
     private final Disruptor<JobEvent> disruptor;
     private final int bufferSize;
-    private final ExecutorService executor;
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     DisruptorAsyncScriptEngine(ScriptEngine delegate, int numberOfWorkers, int jobQueueSize) {
@@ -57,16 +55,10 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
         bufferSize = nextPowerOf2(jobQueueSize);
 
         // Construct the Disruptor
-        this.executor = MoreExecutors.createNamedDaemonExecutorService(
-                "async-script-engine-thread-pool-%d", numberOfWorkers);
-        disruptor =
-                new Disruptor<>(new JobEvent.Factory(), bufferSize, executor);
+        disruptor = new Disruptor<>(new JobEvent.Factory(), bufferSize,
+                MoreExecutors.createNamedDaemonThreadFactory("async-script-engine-thread-pool-%d"));
         // Start the Disruptor, starts all threads running
-        final JobEventHandler[] workHandlers = new JobEventHandler[numberOfWorkers];
-        for (int i = 0; i < numberOfWorkers; i++) {
-            workHandlers[i] = new JobEventHandler();
-        }
-        disruptor.handleEventsWithWorkerPool(workHandlers);
+        disruptor.handleEventsWith(JobEventHandler.workers(numberOfWorkers));
         disruptor.start();
 
         this.delegate = Objects.requireNonNull(delegate);
@@ -153,10 +145,9 @@ class DisruptorAsyncScriptEngine implements ScriptEngine, QueueBacked {
         isRunning.set(false);
         try {
             disruptor.shutdown(5, TimeUnit.SECONDS);
-            executor.shutdownNow();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (TimeoutException | InterruptedException e) {
-            LOG.trace("Executor shutdown interrupted", e);
+        } catch (TimeoutException e) {
+            LOG.trace("Disruptor shutdown timed out, halting", e);
+            disruptor.halt();
         } finally {
 
             LOG.trace("Executor shutdown completed.");
