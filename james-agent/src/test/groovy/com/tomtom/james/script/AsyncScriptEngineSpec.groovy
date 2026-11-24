@@ -20,18 +20,19 @@ import com.tomtom.james.common.api.informationpoint.InformationPoint
 import com.tomtom.james.common.api.script.RuntimeInformationPointParameter
 import com.tomtom.james.common.api.script.ScriptEngine
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 import static org.awaitility.Awaitility.await
 
-class DisruptorAsyncScriptEngineSpec extends Specification {
+class AsyncScriptEngineSpec extends Specification {
 
     def delegate = Mock(ScriptEngine)
     def informationPointClassName = "informationPointClassName"
@@ -67,7 +68,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
 
     def "Should invoke success handler via the delegate in the background"() {
         given:
-        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
+        def scriptEngine = new AsyncScriptEngine(delegate, 5, 128)
 
         when:
         10.times {
@@ -81,29 +82,58 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
         successCallerThreadNames.findAll({ it.contains("async-script-engine-thread-pool") }).size() == 10
     }
 
-    @Unroll
-    def "Should accept any queue size and make it a power of 2 #queueSize -> #expectedSize"(int queueSize, int expectedSize) {
+    def "Should use the configured queue capacity"() {
+        expect:
+        new AsyncScriptEngine(delegate, 5, 99).getJobQueueRemainingCapacity() == 99
+    }
+
+    def "Should keep running jobs on other workers while one worker is blocked"() {
         given:
-        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, queueSize)
+        def release = new CountDownLatch(1)
+        def ran = new AtomicInteger()
+        // a plain stub: Spock mocks serialize invocations, so a blocking mock would block every worker
+        def blocking = [invokeSuccessHandler: { ip, o, p, i, t, et, d, cs, returned, ctx -> returned == "block" ? release.await() : ran.incrementAndGet() }] as ScriptEngine
+        def scriptEngine = new AsyncScriptEngine(blocking, 2, 16)
 
         when:
-        def actualQueSize =scriptEngine.getJobQueueRemainingCapacity()
-
+        invokeSuccess(scriptEngine, "block")
+        10.times { invokeSuccess(scriptEngine, "run") }
+        await().atMost(5, TimeUnit.SECONDS).until { ran.get() == 10 }
 
         then:
-        actualQueSize == expectedSize
+        scriptEngine.droppedJobsCount == 0
 
-        where:
-        queueSize | expectedSize
-        99        | 128
-        3         | 4
-        255       | 256
-        257       | 512
+        cleanup:
+        release.countDown()
+    }
+
+    def "Should drop and count jobs when the queue is full"() {
+        given:
+        def release = new CountDownLatch(1)
+        def blocking = [invokeSuccessHandler: { Object[] args -> release.await() }] as ScriptEngine
+        def scriptEngine = new AsyncScriptEngine(blocking, 1, 2)
+
+        when:
+        invokeSuccess(scriptEngine, "first")
+        await().atMost(5, TimeUnit.SECONDS).until { scriptEngine.jobQueueSize == 0 }
+        5.times { invokeSuccess(scriptEngine, "next") }
+
+        then:
+        scriptEngine.jobQueueSize == 2
+        scriptEngine.droppedJobsCount == 3
+
+        cleanup:
+        release.countDown()
+    }
+
+    private void invokeSuccess(AsyncScriptEngine scriptEngine, Object returned) {
+        scriptEngine.invokeSuccessHandler(informationPoint, origin, [param1, param2], instance, currentThread,
+                instant, duration, callStack, returned, CompletableFuture.completedFuture(null))
     }
 
     def "Should invoke error handler via the delegate in the background"() {
         given:
-        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
+        def scriptEngine = new AsyncScriptEngine(delegate, 5, 128)
 
         when:
         10.times {
@@ -119,7 +149,7 @@ class DisruptorAsyncScriptEngineSpec extends Specification {
 
     def "Should invoke prepare context in current thread and allow access to it in background thread handler"() {
         given:
-        def scriptEngine = new DisruptorAsyncScriptEngine(delegate, 5, 128)
+        def scriptEngine = new AsyncScriptEngine(delegate, 5, 128)
 
         when:
         threadData.set("greetings from " + currentThread.getId())

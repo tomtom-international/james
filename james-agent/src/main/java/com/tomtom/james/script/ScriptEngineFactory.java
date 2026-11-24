@@ -30,7 +30,7 @@ public class ScriptEngineFactory {
     public static ScriptEngine create(EventPublisher publisher,
                                       AgentConfiguration configuration,
                                       ToolkitManager toolkitManager) {
-        ScriptEngine engine = new DisruptorAsyncScriptEngine(
+        ScriptEngine engine = new AsyncScriptEngine(
                     new GroovyScriptEngine(publisher, toolkitManager),
                     configuration.getScriptEngineConfiguration().getAsyncWorkers(),
                     configuration.getScriptEngineConfiguration().getMaxAsyncJobQueueCapacity());

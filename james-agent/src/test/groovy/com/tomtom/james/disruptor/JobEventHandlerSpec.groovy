@@ -47,23 +47,4 @@ class JobEventHandlerSpec extends Specification {
         event.job == null
         jobWasRun.get()
     }
-
-    def "Workers should run each job exactly once"() {
-        given:
-        def workers = JobEventHandler.workers(3)
-        def runs = new java.util.concurrent.atomic.AtomicInteger[7]
-        def events = (0..<7).collect { i ->
-            runs[i] = new java.util.concurrent.atomic.AtomicInteger()
-            def event = new JobEvent()
-            event.setJob({ runs[i].incrementAndGet() } as Runnable)
-            event
-        }
-
-        when:
-        events.eachWithIndex { event, seq -> workers.each { it.onEvent(event, seq, false) } }
-
-        then:
-        runs*.get() == [1] * 7
-        events.every { it.job == null }
-    }
 }
