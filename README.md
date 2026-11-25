@@ -185,7 +185,7 @@ toolkits:
 
 scriptEngine:
   asyncWorkers: 4                       # Run 4 instances of the Script Engine concurrently (default: # of cpus).
-  maxAsyncJobQueueCapacity: 10000       # Maximum size of job queue for the Script Engine (default: 10000).
+  maxAsyncJobQueueCapacity: 16384       # Maximum size of job queue for the Script Engine (default: 16384).
 
 informationPointStore:
   persistenceEnabled: true                          # Should Information Points be persisted between restarts

@@ -37,7 +37,7 @@ class ScriptEngineConfigurationFacade implements ScriptEngineConfiguration {
     public int getMaxAsyncJobQueueCapacity() {
         return configuration.get("maxAsyncJobQueueCapacity")
                 .map(StructuredConfiguration::asInteger)
-                .orElse(10_000);
+                .orElse(16_384);
     }
 
 }

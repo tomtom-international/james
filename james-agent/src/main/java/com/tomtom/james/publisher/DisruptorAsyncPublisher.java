@@ -101,7 +101,7 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
 
     @Override
     public void close() {
-        LOG.trace("Shutting down executor...");
+        LOG.trace("Shutting down Disruptor...");
         isRunning.set(false);
         try {
             disruptor.shutdown(5, TimeUnit.SECONDS);
@@ -110,7 +110,7 @@ class DisruptorAsyncPublisher implements EventPublisher, QueueBacked {
             disruptor.halt();
         } finally {
 
-            LOG.trace("Executor shutdown completed.");
+            LOG.trace("Disruptor shutdown completed.");
             delegate.close();
         }
     }
